@@ -1,0 +1,71 @@
+Reference implementation for FEAT-095 (evaluator-only).
+Repo: commerce. Apply from a fresh copy of baseline/commerce:  git apply FEAT-095.patch
+
+diff --git a/services/catalog/products.py b/services/catalog/products.py
+index 8808ccb..f5b43e2 100644
+--- a/services/catalog/products.py
++++ b/services/catalog/products.py
+@@ -55,12 +55,16 @@ def serialise(product, tags=None, diet=None, detail=False):
+ # --- listing / detail -------------------------------------------------------
+ 
+ 
+-def list_products(page=1, per_page=DEFAULT_PER_PAGE, category=None):
++def list_products(page=1, per_page=DEFAULT_PER_PAGE, category=None, tag=None):
+     page = max(1, page)
+     per_page = max(1, min(MAX_PER_PAGE, per_page))
+     filters = {"active": 1}
+     if category:
+         filters["category"] = category
++    if tag:
++        # FEAT-095: only products carrying the tag; total is the filtered count
++        rows = catalog_db().query("SELECT DISTINCT product_id FROM product_tags WHERE tag = ?", (tag,))
++        filters["id__in"] = [r["product_id"] for r in rows]
+     with CATALOG_LOCK:
+         total = Product.count(**filters)
+         products = Product.filter(order_by="id", limit=per_page, offset=(page - 1) * per_page, **filters)
+diff --git a/services/catalog/routes.py b/services/catalog/routes.py
+index 1b3c20e..82a5a22 100644
+--- a/services/catalog/routes.py
++++ b/services/catalog/routes.py
+@@ -25,7 +25,8 @@ def list_products():
+     page = parse_int(request.args.get("page"), 1, lo=1)
+     per_page = parse_int(request.args.get("per_page"), products.DEFAULT_PER_PAGE, lo=1, hi=products.MAX_PER_PAGE)
+     category = request.args.get("category") or None
+-    return ok(products.list_products(page=page, per_page=per_page, category=category))
++    tag = request.args.get("tag") or None
++    return ok(products.list_products(page=page, per_page=per_page, category=category, tag=tag))
+ 
+ 
+ @bp.route("/internal/products/by-id/<int:product_id>")
+diff --git a/services/edge_api/upstreams.py b/services/edge_api/upstreams.py
+index 5fd77bc..a2e666d 100644
+--- a/services/edge_api/upstreams.py
++++ b/services/edge_api/upstreams.py
+@@ -62,10 +62,12 @@ def post(target, path, json=None, **kw):
+ # --- catalog ----------------------------------------------------------------
+ 
+ 
+-def list_products(page, per_page, category=None):
++def list_products(page, per_page, category=None, tag=None):
+     params = {"page": page, "per_page": per_page}
+     if category:
+         params["category"] = category
++    if tag:
++        params["tag"] = tag
+     return get(CATALOG, "/internal/products", params=params)
+ 
+ 
+diff --git a/services/edge_api/views/catalogue.py b/services/edge_api/views/catalogue.py
+index bce868f..3f33681 100644
+--- a/services/edge_api/views/catalogue.py
++++ b/services/edge_api/views/catalogue.py
+@@ -28,7 +28,8 @@ def products():
+     page = parse_int(request.args.get("page"), 1, lo=1)
+     per_page = parse_int(request.args.get("per_page"), DEFAULT_PER_PAGE, lo=1, hi=MAX_PER_PAGE)
+     category = request.args.get("category") or None
+-    data = upstreams.list_products(page, per_page, category)
++    tag = request.args.get("tag") or None  # FEAT-095
++    data = upstreams.list_products(page, per_page, category, tag=tag)
+     items = shaping.products(data.get("items"))
+     stock.attach_stock(items)
+     return ok({"items": items, "page": data.get("page", page), "per_page": data.get("per_page", per_page),

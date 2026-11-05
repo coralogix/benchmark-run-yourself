@@ -1,0 +1,102 @@
+diff --git a/services/edge_api/orders_view.py b/services/edge_api/orders_view.py
+index b165f6c..11a9fb6 100644
+--- a/services/edge_api/orders_view.py
++++ b/services/edge_api/orders_view.py
+@@ -46,7 +46,12 @@ def get_order(order_ref):
+             }
+         )
+     total_pence = o.get("total_pence")
++    # FEAT-005: 1 point per whole pound of goods after discounts; cancelled orders earn nothing
++    earned = 0
++    if o.get("status") in ("confirmed", "dispatched", "delivered"):
++        earned = max(0, (int(o.get("subtotal_pence") or 0) - int(o.get("discount_pence") or 0)) // 100)
+     return {
++        "loyalty_points_earned": earned,
+         "order_ref": o.get("order_ref", order_ref),
+         "user_id": o.get("user_id"),
+         "status": o.get("status"),
+diff --git a/services/loyalty/points.py b/services/loyalty/points.py
+index 2fc2816..996a3aa 100644
+--- a/services/loyalty/points.py
++++ b/services/loyalty/points.py
+@@ -9,26 +9,54 @@ The plan (SB 2022-11-03, never started):
+ 
+ Until then, balance() returns 0 for everyone and nothing is ever credited.
+ """
++import threading
++
+ from larder_common import dbx
+ 
++_LOCK = threading.Lock()
++
+ POINTS_PER_POUND = 1
+ PROMO_MULTIPLIER = 2
+ 
+ 
+ def points_for_order(payload):
+-    # TODO(PM-1142): not called anywhere
+-    total_pence = int(payload.get("total_pence") or 0)
+-    delivery = int(payload.get("delivery_fee_pence") or 0)
+-    return max(0, (total_pence - delivery) // 100) * POINTS_PER_POUND
++    """FEAT-005: 1 point per whole pound of goods after discounts (delivery excluded)."""
++    goods = int(payload.get("subtotal_pence") or 0) - int(payload.get("discount_pence") or 0)
++    return max(0, goods // 100) * POINTS_PER_POUND
+ 
+ 
+ def balance(user_id):
+-    # deliberately not reading balances: the table is empty and the account
+-    # page called this on every view (accounts service). 0 is the right answer.
+-    return 0
++    d = dbx.db("loyalty")
++    return int(d.scalar("SELECT COALESCE(SUM(points), 0) FROM points_ledger WHERE user_id = ?", (user_id,), 0) or 0)
++
++
++def _has(order_ref, reason):
++    return dbx.db("loyalty").scalar(
++        "SELECT COUNT(*) FROM points_ledger WHERE order_ref = ? AND reason = ?", (order_ref, reason), 0) > 0
++
++
++def credit_order(user_id, order_ref, points):
++    """Idempotent per order (the bus redelivers)."""
++    with _LOCK:
++        if not user_id or not order_ref or _has(order_ref, "order"):
++            return False
++        _credit(user_id, order_ref, points, "order")
++        return True
++
++
++def cancel_order(user_id, order_ref):
++    with _LOCK:
++        if not order_ref or not _has(order_ref, "order") or _has(order_ref, "cancel"):
++            return False
++        pts = dbx.db("loyalty").scalar(
++            "SELECT COALESCE(SUM(points), 0) FROM points_ledger WHERE order_ref = ? AND reason = 'order'", (order_ref,), 0)
++        uid = dbx.db("loyalty").scalar("SELECT user_id FROM points_ledger WHERE order_ref = ? AND reason = 'order'",
++                                       (order_ref,), user_id)
++        _credit(uid, order_ref, -int(pts or 0), "cancel")
++        return True
+ 
+ 
+-def _credit(user_id, order_ref, points, reason="order"):  # pragma: no cover - unused
++def _credit(user_id, order_ref, points, reason="order"):
+     d = dbx.db("loyalty")
+     d.execute(
+         "INSERT INTO points_ledger (user_id, order_ref, points, reason, created_at) VALUES (?, ?, ?, ?, datetime('now'))",
+diff --git a/services/loyalty/routes.py b/services/loyalty/routes.py
+index 25c3877..5877d25 100644
+--- a/services/loyalty/routes.py
++++ b/services/loyalty/routes.py
+@@ -30,7 +30,12 @@ def events():
+         log.warning("unknown topic %s from the bus, acking anyway", topic)
+     with _RECEIVED_LOCK:
+         _RECEIVED[topic] = _RECEIVED.get(topic, 0) + 1
+-    # TODO(PM-1142) points engine: credit points for order.confirmed here
++    # FEAT-005 points engine
++    payload = env.payload if isinstance(env.payload, dict) else {}
++    if topic == "order.confirmed":
++        points.credit_order(env.user_id, env.order_ref, points.points_for_order(payload))
++    elif topic == "order.cancelled":
++        points.cancel_order(env.user_id, env.order_ref)
+     log.info(
+         "bus delivery %s topic=%s key=%s user=%s (ignored, points engine not built)",
+         env.delivery_id,

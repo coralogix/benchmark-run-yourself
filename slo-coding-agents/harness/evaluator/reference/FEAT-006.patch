@@ -1,0 +1,60 @@
+diff --git a/services/warehouse/dispatch.js b/services/warehouse/dispatch.js
+index 5ffeedb..9a6d674 100644
+--- a/services/warehouse/dispatch.js
++++ b/services/warehouse/dispatch.js
+@@ -105,6 +105,7 @@ function dispatchedPayload(order, pl, at, carrier) {
+     carrier: carrier,
+     hold_id: order.hold_id || null,
+     item_count: pl ? pl.item_count : _.sumBy(order.items || [], 'qty'),
++    items: (order.items || []).map(function (l) { return { sku: l.sku, qty: l.qty }; }),
+     total_pence: order.total_pence,
+     pick_list_id: pl ? pl.pick_list_id : null
+   };
+diff --git a/services/webhooks/dispatcher.js b/services/webhooks/dispatcher.js
+index 26c1276..b5db655 100644
+--- a/services/webhooks/dispatcher.js
++++ b/services/webhooks/dispatcher.js
+@@ -42,6 +42,7 @@ var logger = require('../../lib/logger');
+ var ids = require('../../lib/util/ids');
+ var instruments = require('../../lib/telemetry/instruments');
+ var globals = require('../../lib/globals');
++var signer = require('./signer');
+ 
+ var BATCH_SIZE = 40;
+ var DEFAULT_TICK_MS = 2000;
+@@ -111,7 +112,12 @@ function recordFailure(item, err) {
+ 
+ function send(item) {
+   stats.sent++;
+-  return client.post(targetUrl(), item.payload).then(function (res) {
++  // FEAT-006: sign the exact bytes we send
++  var raw = JSON.stringify(item.payload);
++  var headers = {};
++  var sig = signer.sign(raw);
++  if (sig) headers[signer.HEADER] = sig;
++  return client.post(targetUrl(), raw, { headers: headers, transformRequest: [function (d) { return d; }] }).then(function (res) {
+     return { ok: true, status: res.status };
+   }, function (err) {
+     return { ok: false, err: err };
+diff --git a/services/webhooks/payloads.js b/services/webhooks/payloads.js
+index 4dfc7de..af8bbfb 100644
+--- a/services/webhooks/payloads.js
++++ b/services/webhooks/payloads.js
+@@ -21,7 +21,8 @@
+ 
+ var _ = require('lodash');
+ 
+-var SCHEMA_VERSION = 1;
++// FEAT-006: v2 = signed (X-Larder-Signature) + line items on order.dispatched
++var SCHEMA_VERSION = 2;
+ var SOURCE = 'fulfilment';
+ 
+ function envelope(event, orderRef, data) {
+@@ -90,6 +91,7 @@ function orderDispatched(order, extra) {
+     dispatched_at: order.dispatched_at || null,
+     hold_id: order.hold_id || null,
+     item_count: order.item_count != null ? order.item_count : _.sumBy(order.items || [], 'qty'),
++    items: (order.items || []).map(function (l) { return { sku: l.sku, qty: l.qty }; }),
+     total_pence: order.total_pence,
+     carrier: order.carrier || extra.carrier || 'larder-vans',
+     source: SOURCE

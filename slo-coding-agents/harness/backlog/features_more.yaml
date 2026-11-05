@@ -1,0 +1,980 @@
+features:
+- id: FEAT-013
+  title: Sort the product listing
+  priority: P2
+  size: S
+  services:
+  - edge-api
+  - catalog
+  story: Shoppers want to sort category pages by price.
+  acceptance:
+  - '`GET /api/products` accepts `sort` = `price_asc`, `price_desc` or `name`; ordering applies across all pages,
+    not just within a page.'
+  - 'Unknown `sort` values return 400 `{"error": "invalid_sort"}`. Without `sort`, ordering is unchanged.'
+- id: FEAT-014
+  title: Dietary filter on the product listing
+  priority: P2
+  size: S
+  services:
+  - edge-api
+  - catalog
+  story: The vegan filter that exists on search should also exist on category pages.
+  acceptance:
+  - '`GET /api/products?diet=vegan|vegetarian|gluten_free` returns only products carrying that tag; `total` reflects
+    the filtered count.'
+  - 'Unknown diet values return 400 `{"error": "invalid_diet"}`.'
+- id: FEAT-015
+  title: Category list endpoint
+  priority: P3
+  size: S
+  services:
+  - edge-api
+  - catalog
+  story: The app's navigation menu needs categories with counts.
+  acceptance:
+  - '`GET /api/categories` returns `{"categories": [{"category", "product_count"}]}` sorted by category name, covering
+    every category in the catalogue.'
+- id: FEAT-016
+  title: VAT rate on product pages
+  priority: P3
+  size: S
+  services:
+  - edge-api
+  - catalog
+  story: Business customers want to see the VAT rate before buying.
+  acceptance:
+  - '`GET /api/products/<sku>` includes `vat_rate` as a number: 0 for `zero`, 5 for `reduced`, 20 for `standard`.'
+- id: FEAT-017
+  title: Remove an item from the cart
+  priority: P1
+  size: S
+  services:
+  - edge-api
+  - cart
+  story: There is currently no way to remove something from the basket.
+  acceptance:
+  - '`DELETE /api/carts/<id>/items/<sku>` returns 200 with the updated cart; totals are recalculated.'
+  - 'Removing a SKU that is not in the cart returns 404 `{"error": "item_not_in_cart"}`.'
+- id: FEAT-018
+  title: Change item quantity in the cart
+  priority: P1
+  size: S
+  services:
+  - edge-api
+  - cart
+  - pricing
+  - bus
+  story: Customers want +/- buttons in the basket. While we're in there, the partner's CRM and marketing's
+    abandoned-basket journey have been waiting on basket events since PARTNER-77; the subscription on the bus is
+    already live, commerce just never publishes.
+  acceptance:
+  - '`PATCH /api/carts/<id>/items/<sku>` with `{"qty": n}` sets the quantity and returns the updated cart.'
+  - '`qty` 0 removes the line. Negative or non-integer `qty` returns 400 `{"error": "invalid_qty"}`.'
+  - Every change to a cart's contents (adding an item, changing a quantity, removing a line) publishes a
+    `cart.updated` event on the bus with the cart id, customer id, lines and repriced total, before the API answers.
+- id: FEAT-019
+  title: Per-line quantity limit
+  priority: P2
+  size: S
+  services:
+  - cart
+  story: Bulk buyers are emptying the shelves; cap lines at 24 units.
+  acceptance:
+  - 'Adding or updating a line so that its quantity exceeds 24 returns 400 `{"error": "qty_limit", "max": 24}` and
+    leaves the cart unchanged.'
+- id: FEAT-020
+  title: Empty the cart
+  priority: P2
+  size: S
+  services:
+  - edge-api
+  - cart
+  story: Customers want a single "clear basket" button.
+  acceptance:
+  - '`DELETE /api/carts/<id>/items` removes every line and any coupon, returning the cart with no items and all
+    totals 0.'
+- id: FEAT-021
+  title: Item count on the cart
+  priority: P3
+  size: S
+  services:
+  - cart
+  story: The basket icon needs a badge.
+  acceptance:
+  - The cart response includes `item_count`, the sum of all line quantities.
+- id: FEAT-022
+  title: Total savings on the cart
+  priority: P3
+  size: S
+  services:
+  - cart
+  - pricing
+  story: Marketing wants "You saved £X" in the basket.
+  acceptance:
+  - The cart response includes `savings_pence` = coupon discount plus any multi-buy savings (0 if none).
+- id: FEAT-023
+  title: Request IDs in error bodies
+  priority: P2
+  size: S
+  services:
+  - edge-api
+  story: Support asks customers for the error reference but it isn't shown anywhere.
+  acceptance:
+  - Every 4xx and 5xx JSON response from `/api/...` includes `request_id`, equal to the responses `X-Request-Id`
+    header.
+- id: FEAT-024
+  title: JSON 405 responses
+  priority: P3
+  size: S
+  services:
+  - edge-api
+  story: Clients calling the wrong method get an HTML page.
+  acceptance:
+  - 'Calling an existing `/api/...` route with an unsupported method returns 405 with JSON `{"error": "method_not_allowed"}`
+    and an `Allow` header listing the supported methods.'
+- id: FEAT-025
+  title: Deep health check
+  priority: P2
+  size: M
+  services:
+  - edge-api
+  story: The status page wants to show which subsystems are healthy.
+  acceptance:
+  - '`GET /api/healthz/deep` returns 200 `{"ok": bool, "services": {"<name>": bool}}` covering every service edge-api
+    depends on, checked in parallel.'
+  - It responds within 2 seconds even if a dependency is down (that dependency is reported false, `ok` false, status
+    still 200).
+- id: FEAT-026
+  title: Delivery details on order view
+  priority: P2
+  size: M
+  services:
+  - edge-api
+  - orders
+  - slots
+  story: Customers can't see when their order arrives.
+  acceptance:
+  - '`GET /api/orders/<ref>` includes `delivery: {"date", "window"}` for the booked slot.'
+- id: FEAT-027
+  title: Line totals on orders
+  priority: P3
+  size: S
+  services:
+  - edge-api
+  - orders
+  story: The order page recomputes line totals in the browser.
+  acceptance:
+  - Every entry in `items` of `GET /api/orders/<ref>` includes `line_total_pence` (unit price × qty), and the order
+    includes `item_count` (sum of quantities).
+- id: FEAT-028
+  title: Change postcode on an account
+  priority: P2
+  size: M
+  services:
+  - edge-api
+  - accounts
+  - slots
+  story: People move house.
+  acceptance:
+  - '`PATCH /api/account/<user_id>` with `{"postcode"}` updates the postcode and returns the account.'
+  - 'Postcodes that don''t map to a delivery zone return 400 `{"error": "invalid_postcode"}`.'
+- id: FEAT-029
+  title: Marketing opt-in
+  priority: P4
+  size: S
+  services:
+  - edge-api
+  - accounts
+  story: We need consent before sending marketing emails.
+  acceptance:
+  - '`GET /api/account/<user_id>` includes `marketing_opt_in` (default false); `PATCH /api/account/<user_id>` with
+    `{"marketing_opt_in": true|false}` updates it. Non-boolean values return 400 `{"error": "invalid_opt_in"}`.'
+- id: FEAT-030
+  title: Search autocomplete
+  priority: P2
+  size: M
+  services:
+  - edge-api
+  - search
+  story: The search box needs suggestions as you type.
+  acceptance:
+  - '`GET /api/search/suggest?q=<prefix>` returns `{"suggestions": [..]}`: up to 8 distinct product names starting
+    with any word that starts with the prefix (case-insensitive), alphabetical.'
+  - Prefixes shorter than 2 characters return an empty list. p95 under 150 ms.
+- id: FEAT-031
+  title: Paginate search results
+  priority: P2
+  size: S
+  services:
+  - edge-api
+  - search
+  story: Popular searches return hundreds of results in one response.
+  acceptance:
+  - '`GET /api/search` accepts `page` (default 1) and `per_page` (default 20, max 50) and returns `page`, `per_page`
+    and `total` alongside the results.'
+- id: FEAT-032
+  title: Reject very long search queries
+  priority: P3
+  size: S
+  services:
+  - search
+  story: Bots send megabyte-long queries.
+  acceptance:
+  - 'Queries longer than 100 characters return 400 `{"error": "query_too_long"}`.'
+- id: FEAT-033
+  title: Normalise search queries
+  priority: P3
+  size: S
+  services:
+  - search
+  story: '"  APPLES " and "apples" give different results.'
+  acceptance:
+  - Search is case-insensitive and ignores leading/trailing/repeated whitespace; equivalent queries return identical
+    results.
+- id: FEAT-034
+  title: Filter delivery slots by date
+  priority: P3
+  size: S
+  services:
+  - edge-api
+  - slots
+  story: The slot picker shows one day at a time.
+  acceptance:
+  - '`GET /api/delivery/slots?postcode=..&date=YYYY-MM-DD` returns only that date''s slots; an invalid date returns
+    400 `{"error": "invalid_date"}`.'
+- id: FEAT-035
+  title: Release a slot hold
+  priority: P2
+  size: S
+  services:
+  - edge-api
+  - slots
+  story: Customers who change their mind keep capacity locked for 10 minutes.
+  acceptance:
+  - '`DELETE /api/delivery/holds/<hold_id>` returns 204 and the slot''s capacity is available again immediately.'
+  - Unknown or already-released holds return 404.
+- id: FEAT-036
+  title: Slot details on a hold
+  priority: P4
+  size: S
+  services:
+  - edge-api
+  - slots
+  story: The checkout page re-fetches slots just to show the chosen one.
+  acceptance:
+  - 'The 201 response of `POST /api/delivery/holds` includes `slot: {"slot_id", "date", "window"}`.'
+- id: FEAT-037
+  title: Require a payment token
+  priority: P2
+  size: S
+  services:
+  - edge-api
+  - checkout
+  - fraud
+  story: Checkouts without a token go all the way to the PSP and fail there. Finance also wants bad actors stopped
+    before an order exists, not at the PSP (FRAUD-52).
+  acceptance:
+  - '`POST /api/checkout` without `payment_token` returns 400 `{"error": "missing_payment_token"}` without contacting
+    other services.'
+  - 'Every checkout attempt with a token is pre-screened by the fraud service (`POST /internal/fraud/score`, the same
+    scorer payments uses) before the order is created. A `block` decision returns 402 `{"error": "payment_declined",
+    "reason": "fraud"}` and no order is created. If fraud cannot score the attempt, the checkout is refused with 503
+    `{"error": "fraud_unavailable"}`; finance does not take unscreened payments.'
+  - The charge-time fraud check in payments stays as it is.
+- id: FEAT-038
+  title: Idempotent checkout
+  priority: P1
+  size: L
+  services:
+  - edge-api
+  - checkout
+  - orders
+  - payments
+  story: Mobile clients retry checkout on flaky networks and customers get two orders.
+  acceptance:
+  - '`POST /api/checkout` honours an `Idempotency-Key` header: repeating a request with the same key returns the
+    same response (same `order_ref`), creating at most one order and one charge.'
+  - Concurrent requests with the same key also produce exactly one order.
+- id: FEAT-039
+  title: Minimum order value
+  priority: P2
+  size: S
+  services:
+  - checkout
+  - recommendations
+  story: Orders under £10 lose money on delivery. Merchandising doesn't want to just turn those customers away, so
+    the rejection should help them get over the line.
+  acceptance:
+  - 'Checkouts with goods (after discounts, before delivery) under 1000 pence return 400 `{"error": "below_minimum",
+    "minimum_pence": 1000}`.'
+  - 'The 400 also carries `suggestions`: up to three products, not already in the basket, that other customers bought
+    with what is in it (the "customers also bought" data recommendations already serves), each with `sku`, `name`
+    and `price_pence`.'
+- id: FEAT-040
+  title: Reject expired slot holds at checkout
+  priority: P2
+  size: M
+  services:
+  - checkout
+  - orders
+  - slots
+  story: Orders are confirmed against holds that already expired.
+  acceptance:
+  - 'Checking out with an expired or released hold returns 409 `{"error": "hold_expired"}` and no charge is made.'
+- id: FEAT-041
+  title: Estimated delivery in the checkout response
+  priority: P3
+  size: S
+  services:
+  - checkout
+  - slots
+  story: The confirmation screen shows nothing about delivery.
+  acceptance:
+  - 'The 201 checkout response includes `estimated_delivery: {"date", "window"}` for the booked slot.'
+- id: FEAT-042
+  title: Order status history
+  priority: P3
+  size: M
+  services:
+  - edge-api
+  - orders
+  - warehouse
+  story: Customer service needs to see when an order changed state.
+  acceptance:
+  - '`GET /api/orders/<ref>/status-history` returns `{"history": [{"status", "at"}]}` in chronological order, starting
+    with `confirmed`, including `dispatched` (and `cancelled` if cancellation exists).'
+- id: FEAT-043
+  title: Reorder
+  priority: P2
+  size: M
+  services:
+  - edge-api
+  - cart
+  - orders
+  story: Weekly shoppers rebuild the same basket every week.
+  acceptance:
+  - '`POST /api/orders/<ref>/reorder` returns 201 `{"cart_id"}` for a new cart for the same user containing the
+    same SKUs and quantities (items no longer sold are skipped).'
+- id: FEAT-044
+  title: Public "also bought" endpoint
+  priority: P3
+  size: S
+  services:
+  - edge-api
+  - recommendations
+  story: The app wants recommendations without loading the full product.
+  acceptance:
+  - '`GET /api/products/<sku>/also-bought?limit=n` (default 6, max 12) returns `{"products": [Product]}`.'
+- id: FEAT-045
+  title: No out-of-stock recommendations
+  priority: P3
+  size: M
+  services:
+  - recommendations
+  - inventory
+  story: We recommend things customers can't buy.
+  acceptance:
+  - Products in `also_bought` (product detail) and the also-bought endpoint all have available stock > 0.
+- id: FEAT-046
+  title: Price-appropriate recommendations
+  priority: P3
+  size: S
+  services:
+  - recommendations
+  story: Customers looking at a £1 loaf are recommended £14 bottles of wine.
+  acceptance:
+  - '`also_bought` never contains a product priced at more than twice the viewed products `price_pence`.'
+  - Products still get recommendations when suitable ones exist (the list is not simply emptied).
+- id: FEAT-047
+  title: Formatted price on products
+  priority: P4
+  size: S
+  services:
+  - catalog
+  story: Every client formats prices differently.
+  acceptance:
+  - Product responses include `price_display`, e.g. `"£2.49"` (pound sign, two decimals, derived from `price_pence`).
+- id: FEAT-048
+  title: List active promotions
+  priority: P2
+  size: M
+  services:
+  - edge-api
+  - promotions
+  story: The promotions page is hand-edited HTML.
+  acceptance:
+  - '`GET /api/promotions` returns `{"promotions": [{"code", "percent_off", "min_spend_pence", "expires"}]}` for
+    every coupon that has not expired; `expires` is `YYYY-MM-DD` or null for coupons that never expire.'
+  - It must work for every coupon in the system (status 200).
+- id: FEAT-049
+  title: Coupon expiry on the cart
+  priority: P3
+  size: S
+  services:
+  - cart
+  - promotions
+  story: Customers want to know how long their discount lasts.
+  acceptance:
+  - When a coupon is applied, the cart includes `coupon_expires` as `YYYY-MM-DD`, or null for coupons that never
+    expire. It is absent or null when no coupon is applied.
+- id: FEAT-050
+  title: Fixed-amount coupon FIVER
+  priority: P2
+  size: L
+  services:
+  - promotions
+  - pricing
+  - cart
+  - checkout
+  - tax
+  - orders
+  story: Marketing wants "£5 off when you spend £30".
+  acceptance:
+  - 'A new coupon `FIVER` takes 500 pence off goods when goods total at least 3000 pence (below that: 400 `min_spend`).'
+  - The cart shows `discount_pence` 500, and checkout of such a cart succeeds with the confirmed order total equal
+    to the cart total.
+- id: FEAT-051
+  title: Redeem loyalty points
+  priority: P3
+  size: L
+  services:
+  - edge-api
+  - loyalty
+  - cart
+  - pricing
+  - checkout
+  - tax
+  - orders
+  story: Points are useless until they can be spent.
+  acceptance:
+  - '`POST /api/carts/<id>/loyalty` with `{"points": n}` (multiple of 100, at most the user''s balance) takes n
+    pence off the cart (`loyalty_discount_pence`).'
+  - Checkout of that cart succeeds, the order total matches the cart total, and the user's balance drops by n.
+  - 'Requires FEAT-005 points to exist; insufficient balance returns 400 `{"error": "insufficient_points"}`.'
+- id: FEAT-052
+  title: Loyalty tiers
+  priority: P4
+  size: S
+  services:
+  - accounts
+  - loyalty
+  story: Bronze, silver, gold.
+  acceptance:
+  - '`GET /api/account/<user_id>` includes `tier`: `bronze` under 500 points, `silver` 500-1999, `gold` 2000+.'
+- id: FEAT-053
+  title: Cancellation email
+  priority: P3
+  size: M
+  services:
+  - notifications
+  - bus
+  - orders
+  story: Customers who cancel get no confirmation.
+  acceptance:
+  - When an order is cancelled (FEAT-002), the email provider receives one message with template `order_cancelled`
+    and `data.order_ref`.
+- id: FEAT-054
+  title: Tracking link in dispatch email
+  priority: P3
+  size: S
+  services:
+  - notifications
+  story: '"Where is my order?" is our top support contact.'
+  acceptance:
+  - The `order_dispatched` email's `data` includes `tracking_url` = `https://track.larder.test/<order_ref>`.
+- id: FEAT-055
+  title: Email suppression list
+  priority: P3
+  size: M
+  services:
+  - notifications
+  story: Mail to the old larder-mail.test domain bounces and hurts our sender reputation.
+  acceptance:
+  - No email is sent to addresses at `larder-mail.test`; each suppressed message is logged and counted, and other
+    customers are unaffected.
+- id: FEAT-056
+  title: Order cancelled webhook
+  priority: P3
+  size: M
+  services:
+  - webhooks
+  - bus
+  - orders
+  story: The partner keeps picking cancelled orders.
+  acceptance:
+  - When an order is cancelled (FEAT-002) the partner receives one `order.cancelled` event with `order_ref`.
+- id: FEAT-057
+  title: Open orders on the account summary
+  priority: P3
+  size: S
+  services:
+  - accounts
+  - orders
+  story: The account page should show how many orders are on their way.
+  acceptance:
+  - '`GET /api/account/<user_id>` includes `open_orders`: the number of the users orders that are confirmed and
+    not yet dispatched (or cancelled).'
+- id: FEAT-058
+  title: Webhook stats endpoint
+  priority: P4
+  size: S
+  services:
+  - webhooks
+  story: On-call wants to see webhook health without reading files.
+  acceptance:
+  - '`GET /internal/webhooks/stats` on the webhooks service returns `{"queue_depth", "delivered_total", "failed_attempts_total"}`
+    as integers.'
+- id: FEAT-059
+  title: Pick lists by date
+  priority: P3
+  size: M
+  services:
+  - warehouse
+  - orders
+  story: The warehouse prints pick lists from a spreadsheet.
+  acceptance:
+  - '`GET /internal/picklists?date=YYYY-MM-DD` on warehouse returns `{"date", "lines": [{"sku", "qty"}]}`: total
+    quantities per SKU for confirmed, undispatched orders delivering that date.'
+- id: FEAT-060
+  title: Don't dispatch cancelled orders
+  priority: P2
+  size: S
+  services:
+  - warehouse
+  - orders
+  story: Cancelled orders are still dispatched.
+  acceptance:
+  - '`POST /internal/dispatch/<ref>` for a cancelled order returns 409 `{"error": "order_cancelled"}` and no `order.dispatched`
+    event is published.'
+- id: FEAT-061
+  title: Restock endpoint
+  priority: P2
+  size: M
+  services:
+  - inventory
+  story: Stock is only ever loaded at startup.
+  acceptance:
+  - '`POST /internal/inventory/<sku>/restock` on inventory with `{"qty": n}` (n > 0) increases on-hand by n and
+    returns the new `{sku, on_hand, reserved, available}`.'
+  - Concurrent restocks and reservations never lose an update.
+- id: FEAT-062
+  title: Low-stock report
+  priority: P3
+  size: S
+  services:
+  - inventory
+  story: Buyers want a daily low-stock list.
+  acceptance:
+  - '`GET /internal/inventory/low-stock?threshold=n` (default 10) returns `{"items": [{"sku", "available"}]}` for
+    every SKU with available ≤ n, lowest first.'
+- id: FEAT-063
+  title: Public stock endpoint
+  priority: P3
+  size: S
+  services:
+  - edge-api
+  - inventory
+  story: The app polls product detail just for stock.
+  acceptance:
+  - '`GET /api/products/<sku>/stock` returns `{"sku", "available"}`; unknown SKU 404.'
+- id: FEAT-064
+  title: Payments by order
+  priority: P3
+  size: S
+  services:
+  - payments
+  story: Finance looks up payments by order reference.
+  acceptance:
+  - '`GET /internal/payments/orders/<order_ref>` on payments returns `{"order_ref", "charges": [{"charge_id", "amount_pence",
+    "at"}], "refunds": [...]}`.'
+- id: FEAT-065
+  title: Refund API
+  priority: P2
+  size: M
+  services:
+  - payments
+  story: Refunds are done by hand in the PSP dashboard.
+  acceptance:
+  - '`POST /internal/payments/refunds` on payments with `{"order_ref", "amount_pence"}` refunds through the PSP
+    and returns 201 `{"refund_id"}`.'
+  - 'Refunds can never exceed what was captured for the order (409 `{"error": "exceeds_captured"}`), and retrying
+    the same request does not refund twice.'
+- id: FEAT-066
+  title: Fraud rule listing
+  priority: P4
+  size: S
+  services:
+  - fraud
+  story: Risk wants to see which rules fire.
+  acceptance:
+  - '`GET /internal/fraud/rules` on fraud returns `{"rules": [{"name", "hits"}]}` with hit counts since startup.'
+- id: FEAT-067
+  title: Daily ledger totals
+  priority: P2
+  size: M
+  services:
+  - ledger
+  story: Finance closes the books from the ledger.
+  acceptance:
+  - '`GET /internal/ledger/daily?date=YYYY-MM-DD` on ledger returns `{"date", "captured_pence", "refunded_pence",
+    "net_pence"}` that agree with the PSP''s records for that day.'
+- id: FEAT-068
+  title: Ledger refund entries
+  priority: P3
+  size: M
+  services:
+  - ledger
+  - payments
+  story: Refunds never reach the ledger.
+  acceptance:
+  - Every refund (FEAT-002 or FEAT-065) creates a ledger entry with negative amount and the order_ref.
+- id: FEAT-069
+  title: Public VAT rates
+  priority: P4
+  size: S
+  services:
+  - edge-api
+  - tax
+  story: The web app hard-codes VAT rates.
+  acceptance:
+  - '`GET /api/tax/rates` returns `{"zero": 0, "reduced": 5, "standard": 20}`, served from the tax services rates.'
+- id: FEAT-070
+  title: Delivery VAT in totals
+  priority: P4
+  size: S
+  services:
+  - tax
+  story: Finance needs VAT on delivery separated out.
+  acceptance:
+  - The tax totals response includes `delivery_vat_pence` = round-half-up(delivery_fee_pence × 20 / 120).
+- id: FEAT-071
+  title: Event bus lag per topic
+  priority: P3
+  size: S
+  services:
+  - bus
+  story: On-call can see how many events are queued but not how old they are.
+  acceptance:
+  - 'Each topic in `GET /internal/bus/topics` on the bus includes `oldest_pending_age_s`: seconds the oldest undelivered
+    event on that topic has been waiting (0 when nothing is pending).'
+- id: FEAT-072
+  title: Event bus dead-letter queue
+  priority: P2
+  size: L
+  services:
+  - bus
+  story: One bad message can wedge a topic forever.
+  acceptance:
+  - A delivery that fails 5 times for a subscriber is moved to a dead-letter list and stops blocking later events
+    for that subscriber and topic.
+  - '`GET /internal/bus/dead-letters` lists them with `{"topic", "subscriber", "key", "attempts", "last_error"}`.'
+- id: FEAT-073
+  title: Adjust slot capacity
+  priority: P3
+  size: S
+  services:
+  - slots
+  story: Ops add vans on busy days.
+  acceptance:
+  - '`PATCH /internal/slots/<slot_id>` on slots with `{"capacity": n}` sets capacity (n ≥ current bookings, else
+    409 `{"error": "below_booked"}`).'
+- id: FEAT-074
+  title: Hide full delivery slots
+  priority: P3
+  size: S
+  services:
+  - edge-api
+  - slots
+  story: Customers keep clicking slots that are already full.
+  acceptance:
+  - '`GET /api/delivery/slots` returns only slots with available capacity, unless `include_full=true` is passed,
+    in which case full slots are included as today.'
+- id: FEAT-075
+  title: Customer registration
+  priority: P1
+  size: M
+  services:
+  - edge-api
+  - accounts
+  - slots
+  story: New customers are added by a nightly import.
+  acceptance:
+  - '`POST /api/account` with `{"name", "email", "postcode"}` returns 201 `{"user_id"}`, and the new user can create
+    carts and check out.'
+  - 'Duplicate email (case-insensitive) returns 409 `{"error": "email_taken"}`; invalid email or postcode returns
+    400 `{"error": "invalid_email" | "invalid_postcode"}`.'
+- id: FEAT-076
+  title: Abandoned cart expiry
+  priority: P3
+  size: M
+  services:
+  - cart
+  story: Old carts pile up forever.
+  acceptance:
+  - 'Carts untouched for 24 hours expire; reading or modifying them returns 404 `{"error": "cart_expired"}`. Active
+    carts are unaffected.'
+- id: FEAT-077
+  title: Merge carts
+  priority: P3
+  size: M
+  services:
+  - edge-api
+  - cart
+  story: Logged-out baskets get lost when people log in.
+  acceptance:
+  - '`POST /api/carts/<id>/merge` with `{"from_cart_id"}` adds the other cart''s lines (summing quantities, respecting
+    limits) and deletes the source cart.'
+- id: FEAT-078
+  title: '"Did you mean" for searches'
+  priority: P3
+  size: M
+  services:
+  - search
+  story: Typos return nothing.
+  acceptance:
+  - When a search returns no results, the response includes `suggestion`, a product-name word within edit distance
+    1 of a query word, if one exists (otherwise null).
+- id: FEAT-079
+  title: CORS for the new web app
+  priority: P2
+  size: S
+  services:
+  - edge-api
+  story: The new web app runs on www.larder.test.
+  acceptance:
+  - '`/api/*` responses include `Access-Control-Allow-Origin: https://www.larder.test` when the request Origin is
+    that value, and preflight `OPTIONS` requests return 204 with allowed methods.'
+- id: FEAT-080
+  title: API version endpoint
+  priority: P4
+  size: S
+  services:
+  - edge-api
+  story: Clients need to know which API they're talking to.
+  acceptance:
+  - '`GET /api/version` returns `{"api_version": "2026.1"}`.'
+- id: FEAT-081
+  title: Gzip responses
+  priority: P3
+  size: S
+  services:
+  - edge-api
+  story: Mobile data costs.
+  acceptance:
+  - 'Responses over 1 KB are gzip-compressed when the request sends `Accept-Encoding: gzip`, with `Content-Encoding:
+    gzip`.'
+- id: FEAT-082
+  title: ETags on product detail
+  priority: P3
+  size: M
+  services:
+  - edge-api
+  story: The app re-downloads unchanged products.
+  acceptance:
+  - '`GET /api/products/<sku>` returns an `ETag`; a request with a matching `If-None-Match` returns 304 with an
+    empty body.'
+- id: FEAT-083
+  title: Server-Timing header
+  priority: P4
+  size: S
+  services:
+  - edge-api
+  story: Frontend wants to see backend time in the browser dev tools.
+  acceptance:
+  - Every `/api/...` response includes a `Server-Timing` header of the form `app;dur=<milliseconds>` (a non-negative
+    number).
+- id: FEAT-084
+  title: Cart price breakdown
+  priority: P3
+  size: M
+  services:
+  - edge-api
+  - cart
+  - pricing
+  story: Customers dispute totals.
+  acceptance:
+  - '`GET /api/carts/<id>/price-breakdown` returns per line `{"sku", "qty", "unit_price_pence", "line_total_pence",
+    "discount_allocated_pence"}` plus the cart totals; allocations add up to `discount_pence` exactly.'
+- id: FEAT-085
+  title: Prices in euros
+  priority: P4
+  size: S
+  services:
+  - edge-api
+  - cart
+  story: Irish customers want euro estimates.
+  acceptance:
+  - '`GET /api/carts/<id>?currency=EUR` adds `total_eur_cents` = round-half-up(total_pence × 1.17); other currencies
+    return 400 `{"error": "unsupported_currency"}`.'
+- id: FEAT-086
+  title: Eligible coupons for a cart
+  priority: P3
+  size: M
+  services:
+  - edge-api
+  - promotions
+  - cart
+  story: Customers don't know which codes they can use.
+  acceptance:
+  - '`GET /api/carts/<id>/eligible-coupons` returns `{"coupons": [code]}`: unexpired coupons whose minimum spend
+    the cart meets.'
+- id: FEAT-087
+  title: Order counts by status
+  priority: P4
+  size: S
+  services:
+  - orders
+  story: The ops dashboard wants a status summary.
+  acceptance:
+  - '`GET /internal/orders/stats` on orders returns `{"<status>": count}` for every status present.'
+- id: FEAT-088
+  title: Delivery notes
+  priority: P3
+  size: M
+  services:
+  - checkout
+  - orders
+  - edge-api
+  story: '"Leave with neighbour" notes are lost.'
+  acceptance:
+  - '`POST /api/checkout` accepts `delivery_note` (≤ 200 characters, else 400 `{"error": "note_too_long"}`); it
+    appears on `GET /api/orders/<ref>`.'
+- id: FEAT-089
+  title: Driver tips
+  priority: P3
+  size: L
+  services:
+  - checkout
+  - pricing
+  - orders
+  - tax
+  - payments
+  - ledger
+  story: Customers keep asking how to tip drivers.
+  acceptance:
+  - '`POST /api/checkout` accepts `tip_pence` (0-1000, else 400 `{"error": "invalid_tip"}`); the tip is charged
+    with the order and shown as `tip_pence` on the order, and `total_pence` includes it.'
+  - Tips carry no VAT and are not discounted; orders without a tip are unchanged.
+- id: FEAT-090
+  title: Personal data export
+  priority: P2
+  size: M
+  services:
+  - edge-api
+  - accounts
+  - orders
+  - loyalty
+  story: GDPR subject access requests are done by hand.
+  acceptance:
+  - '`GET /api/account/<user_id>/export` returns `{"account", "orders": [...], "loyalty": {"points"}}` with every
+    order the user placed.'
+- id: FEAT-091
+  title: Account deletion
+  priority: P2
+  size: M
+  services:
+  - edge-api
+  - accounts
+  story: GDPR erasure requests are done by hand.
+  acceptance:
+  - '`DELETE /api/account/<user_id>` returns 204; afterwards the account shows name `"deleted"` and email null,
+    and orders are retained.'
+  - 'Deleted accounts cannot create carts (403 `{"error": "account_deleted"}`).'
+- id: FEAT-092
+  title: Notification history
+  priority: P4
+  size: S
+  services:
+  - notifications
+  story: Support can't tell whether an email went out.
+  acceptance:
+  - '`GET /internal/notifications?order_ref=<ref>` on notifications returns `{"messages": [{"template", "to", "sent_at",
+    "status"}]}`.'
+- id: FEAT-093
+  title: Driver on dispatched orders
+  priority: P3
+  size: S
+  services:
+  - warehouse
+  - orders
+  - edge-api
+  story: Customers want to know who is delivering.
+  acceptance:
+  - '`POST /internal/dispatch/<ref>` on warehouse accepts an optional JSON body `{"driver_id"}`; when given it is
+    stored on the order and shown as `driver_id` on `GET /api/orders/<ref>` (null when not given).'
+- id: FEAT-094
+  title: Delivery zones endpoint
+  priority: P4
+  size: S
+  services:
+  - edge-api
+  - slots
+  story: The website shows a hard-coded list of areas.
+  acceptance:
+  - '`GET /api/delivery/zones` returns `{"zones": [{"zone", "name", "postcodes": [..]}]}` for all zones.'
+- id: FEAT-095
+  title: Filter products by tag
+  priority: P3
+  size: S
+  services:
+  - edge-api
+  - catalog
+  story: The 3-for-2 landing page needs a product list.
+  acceptance:
+  - '`GET /api/products?tag=3for2` returns only products with that tag; `total` reflects the filtered count.'
+- id: FEAT-096
+  title: In-stock filter
+  priority: P3
+  size: M
+  services:
+  - edge-api
+  - catalog
+  - inventory
+  story: Customers hate clicking sold-out products.
+  acceptance:
+  - '`GET /api/products?in_stock=true` returns only products with available stock > 0, with correct `total` and
+    pagination.'
+- id: FEAT-097
+  title: Top search queries
+  priority: P4
+  size: S
+  services:
+  - search
+  story: Merchandising wants to know what people search for.
+  acceptance:
+  - '`GET /internal/search/top-queries?limit=n` on search returns `{"queries": [{"query", "count"}]}` (normalised
+    queries, most frequent first, since startup).'
+- id: FEAT-098
+  title: Service info endpoints
+  priority: P4
+  size: M
+  services:
+  - all
+  story: Platform wants a uniform info endpoint on every service.
+  acceptance:
+  - Every one of the 21 services serves `GET /internal/info` returning `{"service", "repo", "uptime_s"}`.
+- id: FEAT-099
+  title: Product reviews (read-only)
+  priority: P3
+  size: L
+  services:
+  - edge-api
+  - catalog
+  story: We imported reviews from the old site into a CSV nobody serves.
+  acceptance:
+  - '`POST /api/products/<sku>/reviews` with `{"user_id", "rating" (1-5), "text" (≤ 500 chars)}` returns 201; `GET
+    /api/products/<sku>/reviews` lists them newest first.'
+  - Product detail includes `rating_avg` (one decimal, null if none) and `rating_count`. Invalid rating/text return
+    400.
+- id: FEAT-100
+  title: Favourites
+  priority: P3
+  size: M
+  services:
+  - edge-api
+  - accounts
+  - catalog
+  story: Customers want a favourites list.
+  acceptance:
+  - '`PUT /api/account/<user_id>/favourites/<sku>` adds (idempotent), `DELETE` removes, `GET /api/account/<user_id>/favourites`
+    returns `{"products": [Product]}` in the order added.'

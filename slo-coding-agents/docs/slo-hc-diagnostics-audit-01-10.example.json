@@ -1,0 +1,29 @@
+{
+ "records": [
+  {
+   "pair": 1,
+   "condition": "basic",
+   "run_id": "<run-id>",
+   "defect": "HC-1",
+   "diagnosis": {
+    "source": {"file": "runs/<run-id>/agent_transcript.log", "line": 0},
+    "quote": "<the agent's text or task-plan line, copied exactly from that transcript line>"
+   },
+   "repair": {
+    "source": {"file": "runs/<run-id>/agent_transcript.log", "line": 0}
+   },
+   "review": "<what was read to make this selection>",
+   "note": "<why this is the first correct causal explanation or targeted change>"
+  },
+  {
+   "pair": 1,
+   "condition": "slo",
+   "run_id": "<run-id>",
+   "defect": "HC-1",
+   "diagnosis": null,
+   "repair": null,
+   "review": "<what was read>",
+   "note": "No correct cause statement or targeted change found."
+  }
+ ]
+}

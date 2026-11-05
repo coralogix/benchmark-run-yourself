@@ -1,0 +1,9502 @@
+[
+ {
+  "on_hand": 4773,
+  "reserved": 0,
+  "sku": "SKU-0001",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 165,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4405,
+  "reserved": 0,
+  "sku": "SKU-0002",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 249,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4623,
+  "reserved": 0,
+  "sku": "SKU-0003",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 129,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1138,
+  "reserved": 0,
+  "sku": "SKU-0004",
+  "tags": [],
+  "unit_price_pence": 95,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3285,
+  "reserved": 0,
+  "sku": "SKU-0005",
+  "tags": [],
+  "unit_price_pence": 435,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4045,
+  "reserved": 0,
+  "sku": "SKU-0006",
+  "tags": [],
+  "unit_price_pence": 399,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1924,
+  "reserved": 0,
+  "sku": "SKU-0007",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 255,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1055,
+  "reserved": 0,
+  "sku": "SKU-0008",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 319,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1111,
+  "reserved": 0,
+  "sku": "SKU-0009",
+  "tags": [],
+  "unit_price_pence": 185,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1908,
+  "reserved": 0,
+  "sku": "SKU-0010",
+  "tags": [],
+  "unit_price_pence": 285,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2823,
+  "reserved": 0,
+  "sku": "SKU-0011",
+  "tags": [],
+  "unit_price_pence": 135,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4681,
+  "reserved": 0,
+  "sku": "SKU-0012",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 95,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 893,
+  "reserved": 0,
+  "sku": "SKU-0013",
+  "tags": [],
+  "unit_price_pence": 35,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1825,
+  "reserved": 0,
+  "sku": "SKU-0014",
+  "tags": [],
+  "unit_price_pence": 49,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 89,
+  "reserved": 0,
+  "sku": "SKU-0015",
+  "tags": [
+   "3for2",
+   "featured"
+  ],
+  "unit_price_pence": 129,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4646,
+  "reserved": 0,
+  "sku": "SKU-0016",
+  "tags": [],
+  "unit_price_pence": 409,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2660,
+  "reserved": 0,
+  "sku": "SKU-0017",
+  "tags": [],
+  "unit_price_pence": 95,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3974,
+  "reserved": 0,
+  "sku": "SKU-0018",
+  "tags": [],
+  "unit_price_pence": 285,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3859,
+  "reserved": 0,
+  "sku": "SKU-0019",
+  "tags": [],
+  "unit_price_pence": 29,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3006,
+  "reserved": 0,
+  "sku": "SKU-0020",
+  "tags": [],
+  "unit_price_pence": 369,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2361,
+  "reserved": 0,
+  "sku": "SKU-0021",
+  "tags": [],
+  "unit_price_pence": 495,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2633,
+  "reserved": 0,
+  "sku": "SKU-0022",
+  "tags": [],
+  "unit_price_pence": 235,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1250,
+  "reserved": 0,
+  "sku": "SKU-0023",
+  "tags": [],
+  "unit_price_pence": 495,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4607,
+  "reserved": 0,
+  "sku": "SKU-0024",
+  "tags": [],
+  "unit_price_pence": 110,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4492,
+  "reserved": 0,
+  "sku": "SKU-0025",
+  "tags": [],
+  "unit_price_pence": 295,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3216,
+  "reserved": 0,
+  "sku": "SKU-0026",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 439,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2293,
+  "reserved": 0,
+  "sku": "SKU-0027",
+  "tags": [],
+  "unit_price_pence": 320,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2062,
+  "reserved": 0,
+  "sku": "SKU-0028",
+  "tags": [],
+  "unit_price_pence": 49,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1265,
+  "reserved": 0,
+  "sku": "SKU-0029",
+  "tags": [],
+  "unit_price_pence": 229,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3587,
+  "reserved": 0,
+  "sku": "SKU-0030",
+  "tags": [],
+  "unit_price_pence": 369,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2970,
+  "reserved": 0,
+  "sku": "SKU-0031",
+  "tags": [],
+  "unit_price_pence": 235,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4066,
+  "reserved": 0,
+  "sku": "SKU-0032",
+  "tags": [],
+  "unit_price_pence": 149,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3008,
+  "reserved": 0,
+  "sku": "SKU-0033",
+  "tags": [],
+  "unit_price_pence": 409,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2040,
+  "reserved": 0,
+  "sku": "SKU-0034",
+  "tags": [],
+  "unit_price_pence": 35,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3723,
+  "reserved": 0,
+  "sku": "SKU-0035",
+  "tags": [],
+  "unit_price_pence": 49,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 41,
+  "reserved": 0,
+  "sku": "SKU-0036",
+  "tags": [
+   "3for2",
+   "featured"
+  ],
+  "unit_price_pence": 265,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2565,
+  "reserved": 0,
+  "sku": "SKU-0037",
+  "tags": [],
+  "unit_price_pence": 295,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4249,
+  "reserved": 0,
+  "sku": "SKU-0038",
+  "tags": [],
+  "unit_price_pence": 115,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4655,
+  "reserved": 0,
+  "sku": "SKU-0039",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 99,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3271,
+  "reserved": 0,
+  "sku": "SKU-0040",
+  "tags": [],
+  "unit_price_pence": 235,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1885,
+  "reserved": 0,
+  "sku": "SKU-0041",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 415,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2834,
+  "reserved": 0,
+  "sku": "SKU-0042",
+  "tags": [],
+  "unit_price_pence": 299,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4140,
+  "reserved": 0,
+  "sku": "SKU-0043",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 255,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3989,
+  "reserved": 0,
+  "sku": "SKU-0044",
+  "tags": [],
+  "unit_price_pence": 229,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4457,
+  "reserved": 0,
+  "sku": "SKU-0045",
+  "tags": [],
+  "unit_price_pence": 165,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1877,
+  "reserved": 0,
+  "sku": "SKU-0046",
+  "tags": [],
+  "unit_price_pence": 235,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1100,
+  "reserved": 0,
+  "sku": "SKU-0047",
+  "tags": [],
+  "unit_price_pence": 255,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4757,
+  "reserved": 0,
+  "sku": "SKU-0048",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 129,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3947,
+  "reserved": 0,
+  "sku": "SKU-0049",
+  "tags": [],
+  "unit_price_pence": 439,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 807,
+  "reserved": 0,
+  "sku": "SKU-0050",
+  "tags": [],
+  "unit_price_pence": 249,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2230,
+  "reserved": 0,
+  "sku": "SKU-0051",
+  "tags": [],
+  "unit_price_pence": 485,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2117,
+  "reserved": 0,
+  "sku": "SKU-0052",
+  "tags": [],
+  "unit_price_pence": 495,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3806,
+  "reserved": 0,
+  "sku": "SKU-0053",
+  "tags": [],
+  "unit_price_pence": 99,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4530,
+  "reserved": 0,
+  "sku": "SKU-0054",
+  "tags": [],
+  "unit_price_pence": 265,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3728,
+  "reserved": 0,
+  "sku": "SKU-0055",
+  "tags": [],
+  "unit_price_pence": 90,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3562,
+  "reserved": 0,
+  "sku": "SKU-0056",
+  "tags": [],
+  "unit_price_pence": 349,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4557,
+  "reserved": 0,
+  "sku": "SKU-0057",
+  "tags": [],
+  "unit_price_pence": 349,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4314,
+  "reserved": 0,
+  "sku": "SKU-0058",
+  "tags": [],
+  "unit_price_pence": 295,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 55,
+  "reserved": 0,
+  "sku": "SKU-0059",
+  "tags": [
+   "3for2",
+   "featured"
+  ],
+  "unit_price_pence": 435,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2021,
+  "reserved": 0,
+  "sku": "SKU-0060",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 459,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2499,
+  "reserved": 0,
+  "sku": "SKU-0061",
+  "tags": [],
+  "unit_price_pence": 425,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 909,
+  "reserved": 0,
+  "sku": "SKU-0062",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 55,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2122,
+  "reserved": 0,
+  "sku": "SKU-0063",
+  "tags": [],
+  "unit_price_pence": 69,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4683,
+  "reserved": 0,
+  "sku": "SKU-0064",
+  "tags": [],
+  "unit_price_pence": 499,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3986,
+  "reserved": 0,
+  "sku": "SKU-0065",
+  "tags": [],
+  "unit_price_pence": 25,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4959,
+  "reserved": 0,
+  "sku": "SKU-0066",
+  "tags": [],
+  "unit_price_pence": 349,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4636,
+  "reserved": 0,
+  "sku": "SKU-0067",
+  "tags": [],
+  "unit_price_pence": 245,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4692,
+  "reserved": 0,
+  "sku": "SKU-0068",
+  "tags": [],
+  "unit_price_pence": 145,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1677,
+  "reserved": 0,
+  "sku": "SKU-0069",
+  "tags": [],
+  "unit_price_pence": 229,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 854,
+  "reserved": 0,
+  "sku": "SKU-0070",
+  "tags": [],
+  "unit_price_pence": 345,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2071,
+  "reserved": 0,
+  "sku": "SKU-0071",
+  "tags": [],
+  "unit_price_pence": 89,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4521,
+  "reserved": 0,
+  "sku": "SKU-0072",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 385,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4071,
+  "reserved": 0,
+  "sku": "SKU-0073",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 155,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1128,
+  "reserved": 0,
+  "sku": "SKU-0074",
+  "tags": [],
+  "unit_price_pence": 229,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2807,
+  "reserved": 0,
+  "sku": "SKU-0075",
+  "tags": [],
+  "unit_price_pence": 399,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2862,
+  "reserved": 0,
+  "sku": "SKU-0076",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 205,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3575,
+  "reserved": 0,
+  "sku": "SKU-0077",
+  "tags": [],
+  "unit_price_pence": 59,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3275,
+  "reserved": 0,
+  "sku": "SKU-0078",
+  "tags": [],
+  "unit_price_pence": 399,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4728,
+  "reserved": 0,
+  "sku": "SKU-0079",
+  "tags": [],
+  "unit_price_pence": 365,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4437,
+  "reserved": 0,
+  "sku": "SKU-0080",
+  "tags": [],
+  "unit_price_pence": 295,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4410,
+  "reserved": 0,
+  "sku": "SKU-0081",
+  "tags": [],
+  "unit_price_pence": 25,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1984,
+  "reserved": 0,
+  "sku": "SKU-0082",
+  "tags": [],
+  "unit_price_pence": 345,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3297,
+  "reserved": 0,
+  "sku": "SKU-0083",
+  "tags": [],
+  "unit_price_pence": 445,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1552,
+  "reserved": 0,
+  "sku": "SKU-0084",
+  "tags": [],
+  "unit_price_pence": 265,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1881,
+  "reserved": 0,
+  "sku": "SKU-0085",
+  "tags": [],
+  "unit_price_pence": 339,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4586,
+  "reserved": 0,
+  "sku": "SKU-0086",
+  "tags": [],
+  "unit_price_pence": 115,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4422,
+  "reserved": 0,
+  "sku": "SKU-0087",
+  "tags": [],
+  "unit_price_pence": 85,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4013,
+  "reserved": 0,
+  "sku": "SKU-0088",
+  "tags": [],
+  "unit_price_pence": 189,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2300,
+  "reserved": 0,
+  "sku": "SKU-0089",
+  "tags": [],
+  "unit_price_pence": 85,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3807,
+  "reserved": 0,
+  "sku": "SKU-0090",
+  "tags": [],
+  "unit_price_pence": 115,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3272,
+  "reserved": 0,
+  "sku": "SKU-0091",
+  "tags": [],
+  "unit_price_pence": 99,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1932,
+  "reserved": 0,
+  "sku": "SKU-0092",
+  "tags": [],
+  "unit_price_pence": 145,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1321,
+  "reserved": 0,
+  "sku": "SKU-0093",
+  "tags": [],
+  "unit_price_pence": 125,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1210,
+  "reserved": 0,
+  "sku": "SKU-0094",
+  "tags": [],
+  "unit_price_pence": 395,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1853,
+  "reserved": 0,
+  "sku": "SKU-0095",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 135,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1060,
+  "reserved": 0,
+  "sku": "SKU-0096",
+  "tags": [],
+  "unit_price_pence": 99,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3875,
+  "reserved": 0,
+  "sku": "SKU-0097",
+  "tags": [],
+  "unit_price_pence": 35,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3939,
+  "reserved": 0,
+  "sku": "SKU-0098",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 155,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2745,
+  "reserved": 0,
+  "sku": "SKU-0099",
+  "tags": [],
+  "unit_price_pence": 109,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3175,
+  "reserved": 0,
+  "sku": "SKU-0100",
+  "tags": [],
+  "unit_price_pence": 455,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1552,
+  "reserved": 0,
+  "sku": "SKU-0101",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 339,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4273,
+  "reserved": 0,
+  "sku": "SKU-0102",
+  "tags": [],
+  "unit_price_pence": 119,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4730,
+  "reserved": 0,
+  "sku": "SKU-0103",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 145,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4715,
+  "reserved": 0,
+  "sku": "SKU-0104",
+  "tags": [],
+  "unit_price_pence": 335,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4913,
+  "reserved": 0,
+  "sku": "SKU-0105",
+  "tags": [],
+  "unit_price_pence": 285,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3221,
+  "reserved": 0,
+  "sku": "SKU-0106",
+  "tags": [],
+  "unit_price_pence": 495,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3517,
+  "reserved": 0,
+  "sku": "SKU-0107",
+  "tags": [],
+  "unit_price_pence": 240,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3749,
+  "reserved": 0,
+  "sku": "SKU-0108",
+  "tags": [],
+  "unit_price_pence": 149,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1150,
+  "reserved": 0,
+  "sku": "SKU-0109",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 45,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1521,
+  "reserved": 0,
+  "sku": "SKU-0110",
+  "tags": [],
+  "unit_price_pence": 360,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3236,
+  "reserved": 0,
+  "sku": "SKU-0111",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 335,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3687,
+  "reserved": 0,
+  "sku": "SKU-0112",
+  "tags": [],
+  "unit_price_pence": 99,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4589,
+  "reserved": 0,
+  "sku": "SKU-0113",
+  "tags": [],
+  "unit_price_pence": 69,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1807,
+  "reserved": 0,
+  "sku": "SKU-0114",
+  "tags": [],
+  "unit_price_pence": 139,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2682,
+  "reserved": 0,
+  "sku": "SKU-0115",
+  "tags": [],
+  "unit_price_pence": 329,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4243,
+  "reserved": 0,
+  "sku": "SKU-0116",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 365,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4550,
+  "reserved": 0,
+  "sku": "SKU-0117",
+  "tags": [],
+  "unit_price_pence": 449,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4083,
+  "reserved": 0,
+  "sku": "SKU-0118",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 325,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2315,
+  "reserved": 0,
+  "sku": "SKU-0119",
+  "tags": [],
+  "unit_price_pence": 289,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2977,
+  "reserved": 0,
+  "sku": "SKU-0120",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 155,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4088,
+  "reserved": 0,
+  "sku": "SKU-0121",
+  "tags": [],
+  "unit_price_pence": 389,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2529,
+  "reserved": 0,
+  "sku": "SKU-0122",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 229,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3711,
+  "reserved": 0,
+  "sku": "SKU-0123",
+  "tags": [],
+  "unit_price_pence": 199,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3929,
+  "reserved": 0,
+  "sku": "SKU-0124",
+  "tags": [],
+  "unit_price_pence": 255,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4010,
+  "reserved": 0,
+  "sku": "SKU-0125",
+  "tags": [],
+  "unit_price_pence": 465,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1701,
+  "reserved": 0,
+  "sku": "SKU-0126",
+  "tags": [],
+  "unit_price_pence": 340,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3701,
+  "reserved": 0,
+  "sku": "SKU-0127",
+  "tags": [],
+  "unit_price_pence": 85,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2215,
+  "reserved": 0,
+  "sku": "SKU-0128",
+  "tags": [],
+  "unit_price_pence": 435,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3900,
+  "reserved": 0,
+  "sku": "SKU-0129",
+  "tags": [],
+  "unit_price_pence": 235,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2115,
+  "reserved": 0,
+  "sku": "SKU-0130",
+  "tags": [],
+  "unit_price_pence": 285,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1990,
+  "reserved": 0,
+  "sku": "SKU-0131",
+  "tags": [],
+  "unit_price_pence": 249,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1728,
+  "reserved": 0,
+  "sku": "SKU-0132",
+  "tags": [],
+  "unit_price_pence": 170,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1503,
+  "reserved": 0,
+  "sku": "SKU-0133",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 329,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4656,
+  "reserved": 0,
+  "sku": "SKU-0134",
+  "tags": [],
+  "unit_price_pence": 349,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2200,
+  "reserved": 0,
+  "sku": "SKU-0135",
+  "tags": [],
+  "unit_price_pence": 365,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2020,
+  "reserved": 0,
+  "sku": "SKU-0136",
+  "tags": [],
+  "unit_price_pence": 235,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3585,
+  "reserved": 0,
+  "sku": "SKU-0137",
+  "tags": [],
+  "unit_price_pence": 315,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4275,
+  "reserved": 0,
+  "sku": "SKU-0138",
+  "tags": [],
+  "unit_price_pence": 199,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1768,
+  "reserved": 0,
+  "sku": "SKU-0139",
+  "tags": [],
+  "unit_price_pence": 309,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1590,
+  "reserved": 0,
+  "sku": "SKU-0140",
+  "tags": [],
+  "unit_price_pence": 499,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3625,
+  "reserved": 0,
+  "sku": "SKU-0141",
+  "tags": [],
+  "unit_price_pence": 339,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4825,
+  "reserved": 0,
+  "sku": "SKU-0142",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 165,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2015,
+  "reserved": 0,
+  "sku": "SKU-0143",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 115,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4777,
+  "reserved": 0,
+  "sku": "SKU-0144",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 155,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4033,
+  "reserved": 0,
+  "sku": "SKU-0145",
+  "tags": [],
+  "unit_price_pence": 285,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3293,
+  "reserved": 0,
+  "sku": "SKU-0146",
+  "tags": [],
+  "unit_price_pence": 35,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4288,
+  "reserved": 0,
+  "sku": "SKU-0147",
+  "tags": [],
+  "unit_price_pence": 295,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2497,
+  "reserved": 0,
+  "sku": "SKU-0148",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 230,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2633,
+  "reserved": 0,
+  "sku": "SKU-0149",
+  "tags": [],
+  "unit_price_pence": 420,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3763,
+  "reserved": 0,
+  "sku": "SKU-0150",
+  "tags": [],
+  "unit_price_pence": 385,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3393,
+  "reserved": 0,
+  "sku": "SKU-0151",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 399,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1408,
+  "reserved": 0,
+  "sku": "SKU-0152",
+  "tags": [],
+  "unit_price_pence": 419,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3056,
+  "reserved": 0,
+  "sku": "SKU-0153",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 99,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 875,
+  "reserved": 0,
+  "sku": "SKU-0154",
+  "tags": [],
+  "unit_price_pence": 35,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1978,
+  "reserved": 0,
+  "sku": "SKU-0155",
+  "tags": [],
+  "unit_price_pence": 129,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2629,
+  "reserved": 0,
+  "sku": "SKU-0156",
+  "tags": [],
+  "unit_price_pence": 215,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 927,
+  "reserved": 0,
+  "sku": "SKU-0157",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 49,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1803,
+  "reserved": 0,
+  "sku": "SKU-0158",
+  "tags": [],
+  "unit_price_pence": 169,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4193,
+  "reserved": 0,
+  "sku": "SKU-0159",
+  "tags": [],
+  "unit_price_pence": 235,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4362,
+  "reserved": 0,
+  "sku": "SKU-0160",
+  "tags": [],
+  "unit_price_pence": 135,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4734,
+  "reserved": 0,
+  "sku": "SKU-0161",
+  "tags": [],
+  "unit_price_pence": 89,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3078,
+  "reserved": 0,
+  "sku": "SKU-0162",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 155,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1567,
+  "reserved": 0,
+  "sku": "SKU-0163",
+  "tags": [],
+  "unit_price_pence": 399,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4865,
+  "reserved": 0,
+  "sku": "SKU-0164",
+  "tags": [],
+  "unit_price_pence": 349,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3005,
+  "reserved": 0,
+  "sku": "SKU-0165",
+  "tags": [],
+  "unit_price_pence": 35,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4310,
+  "reserved": 0,
+  "sku": "SKU-0166",
+  "tags": [],
+  "unit_price_pence": 415,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2518,
+  "reserved": 0,
+  "sku": "SKU-0167",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 415,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4530,
+  "reserved": 0,
+  "sku": "SKU-0168",
+  "tags": [],
+  "unit_price_pence": 429,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1071,
+  "reserved": 0,
+  "sku": "SKU-0169",
+  "tags": [],
+  "unit_price_pence": 265,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1482,
+  "reserved": 0,
+  "sku": "SKU-0170",
+  "tags": [],
+  "unit_price_pence": 99,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4043,
+  "reserved": 0,
+  "sku": "SKU-0171",
+  "tags": [],
+  "unit_price_pence": 429,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1244,
+  "reserved": 0,
+  "sku": "SKU-0172",
+  "tags": [],
+  "unit_price_pence": 95,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1420,
+  "reserved": 0,
+  "sku": "SKU-0173",
+  "tags": [],
+  "unit_price_pence": 40,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1139,
+  "reserved": 0,
+  "sku": "SKU-0174",
+  "tags": [],
+  "unit_price_pence": 245,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2881,
+  "reserved": 0,
+  "sku": "SKU-0175",
+  "tags": [],
+  "unit_price_pence": 315,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2312,
+  "reserved": 0,
+  "sku": "SKU-0176",
+  "tags": [],
+  "unit_price_pence": 49,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2392,
+  "reserved": 0,
+  "sku": "SKU-0177",
+  "tags": [],
+  "unit_price_pence": 385,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1607,
+  "reserved": 0,
+  "sku": "SKU-0178",
+  "tags": [],
+  "unit_price_pence": 449,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1003,
+  "reserved": 0,
+  "sku": "SKU-0179",
+  "tags": [],
+  "unit_price_pence": 185,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2164,
+  "reserved": 0,
+  "sku": "SKU-0180",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 385,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2044,
+  "reserved": 0,
+  "sku": "SKU-0181",
+  "tags": [],
+  "unit_price_pence": 255,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4250,
+  "reserved": 0,
+  "sku": "SKU-0182",
+  "tags": [],
+  "unit_price_pence": 215,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2671,
+  "reserved": 0,
+  "sku": "SKU-0183",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 199,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1156,
+  "reserved": 0,
+  "sku": "SKU-0184",
+  "tags": [],
+  "unit_price_pence": 399,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3034,
+  "reserved": 0,
+  "sku": "SKU-0185",
+  "tags": [],
+  "unit_price_pence": 345,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3192,
+  "reserved": 0,
+  "sku": "SKU-0186",
+  "tags": [],
+  "unit_price_pence": 195,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2711,
+  "reserved": 0,
+  "sku": "SKU-0187",
+  "tags": [],
+  "unit_price_pence": 349,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1474,
+  "reserved": 0,
+  "sku": "SKU-0188",
+  "tags": [],
+  "unit_price_pence": 229,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2079,
+  "reserved": 0,
+  "sku": "SKU-0189",
+  "tags": [],
+  "unit_price_pence": 59,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1829,
+  "reserved": 0,
+  "sku": "SKU-0190",
+  "tags": [],
+  "unit_price_pence": 315,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4949,
+  "reserved": 0,
+  "sku": "SKU-0191",
+  "tags": [],
+  "unit_price_pence": 149,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3593,
+  "reserved": 0,
+  "sku": "SKU-0192",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 315,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1051,
+  "reserved": 0,
+  "sku": "SKU-0193",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 145,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1030,
+  "reserved": 0,
+  "sku": "SKU-0194",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 139,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1792,
+  "reserved": 0,
+  "sku": "SKU-0195",
+  "tags": [],
+  "unit_price_pence": 379,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2620,
+  "reserved": 0,
+  "sku": "SKU-0196",
+  "tags": [],
+  "unit_price_pence": 389,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4419,
+  "reserved": 0,
+  "sku": "SKU-0197",
+  "tags": [],
+  "unit_price_pence": 279,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 949,
+  "reserved": 0,
+  "sku": "SKU-0198",
+  "tags": [],
+  "unit_price_pence": 365,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2023,
+  "reserved": 0,
+  "sku": "SKU-0199",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 389,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3462,
+  "reserved": 0,
+  "sku": "SKU-0200",
+  "tags": [],
+  "unit_price_pence": 335,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1015,
+  "reserved": 0,
+  "sku": "SKU-0201",
+  "tags": [],
+  "unit_price_pence": 335,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3913,
+  "reserved": 0,
+  "sku": "SKU-0202",
+  "tags": [],
+  "unit_price_pence": 249,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2613,
+  "reserved": 0,
+  "sku": "SKU-0203",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 145,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1629,
+  "reserved": 0,
+  "sku": "SKU-0204",
+  "tags": [],
+  "unit_price_pence": 115,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3773,
+  "reserved": 0,
+  "sku": "SKU-0205",
+  "tags": [],
+  "unit_price_pence": 249,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2536,
+  "reserved": 0,
+  "sku": "SKU-0206",
+  "tags": [],
+  "unit_price_pence": 25,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 838,
+  "reserved": 0,
+  "sku": "SKU-0207",
+  "tags": [],
+  "unit_price_pence": 85,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4752,
+  "reserved": 0,
+  "sku": "SKU-0208",
+  "tags": [],
+  "unit_price_pence": 69,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2927,
+  "reserved": 0,
+  "sku": "SKU-0209",
+  "tags": [],
+  "unit_price_pence": 185,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2372,
+  "reserved": 0,
+  "sku": "SKU-0210",
+  "tags": [],
+  "unit_price_pence": 65,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1467,
+  "reserved": 0,
+  "sku": "SKU-0211",
+  "tags": [],
+  "unit_price_pence": 315,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2128,
+  "reserved": 0,
+  "sku": "SKU-0212",
+  "tags": [],
+  "unit_price_pence": 170,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2651,
+  "reserved": 0,
+  "sku": "SKU-0213",
+  "tags": [],
+  "unit_price_pence": 215,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1383,
+  "reserved": 0,
+  "sku": "SKU-0214",
+  "tags": [],
+  "unit_price_pence": 285,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 854,
+  "reserved": 0,
+  "sku": "SKU-0215",
+  "tags": [],
+  "unit_price_pence": 45,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4802,
+  "reserved": 0,
+  "sku": "SKU-0216",
+  "tags": [],
+  "unit_price_pence": 249,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3216,
+  "reserved": 0,
+  "sku": "SKU-0217",
+  "tags": [],
+  "unit_price_pence": 195,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2667,
+  "reserved": 0,
+  "sku": "SKU-0218",
+  "tags": [],
+  "unit_price_pence": 169,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2144,
+  "reserved": 0,
+  "sku": "SKU-0219",
+  "tags": [],
+  "unit_price_pence": 135,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3309,
+  "reserved": 0,
+  "sku": "SKU-0220",
+  "tags": [],
+  "unit_price_pence": 249,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4898,
+  "reserved": 0,
+  "sku": "SKU-0221",
+  "tags": [],
+  "unit_price_pence": 295,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3178,
+  "reserved": 0,
+  "sku": "SKU-0222",
+  "tags": [],
+  "unit_price_pence": 49,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1949,
+  "reserved": 0,
+  "sku": "SKU-0223",
+  "tags": [],
+  "unit_price_pence": 165,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1304,
+  "reserved": 0,
+  "sku": "SKU-0224",
+  "tags": [],
+  "unit_price_pence": 349,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 927,
+  "reserved": 0,
+  "sku": "SKU-0225",
+  "tags": [],
+  "unit_price_pence": 249,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3741,
+  "reserved": 0,
+  "sku": "SKU-0226",
+  "tags": [],
+  "unit_price_pence": 309,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3111,
+  "reserved": 0,
+  "sku": "SKU-0227",
+  "tags": [],
+  "unit_price_pence": 429,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4925,
+  "reserved": 0,
+  "sku": "SKU-0228",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 339,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3407,
+  "reserved": 0,
+  "sku": "SKU-0229",
+  "tags": [],
+  "unit_price_pence": 345,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3391,
+  "reserved": 0,
+  "sku": "SKU-0230",
+  "tags": [],
+  "unit_price_pence": 185,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2190,
+  "reserved": 0,
+  "sku": "SKU-0231",
+  "tags": [],
+  "unit_price_pence": 129,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4510,
+  "reserved": 0,
+  "sku": "SKU-0232",
+  "tags": [],
+  "unit_price_pence": 355,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2547,
+  "reserved": 0,
+  "sku": "SKU-0233",
+  "tags": [],
+  "unit_price_pence": 129,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1561,
+  "reserved": 0,
+  "sku": "SKU-0234",
+  "tags": [],
+  "unit_price_pence": 35,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2188,
+  "reserved": 0,
+  "sku": "SKU-0235",
+  "tags": [],
+  "unit_price_pence": 149,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3279,
+  "reserved": 0,
+  "sku": "SKU-0236",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 220,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2787,
+  "reserved": 0,
+  "sku": "SKU-0237",
+  "tags": [],
+  "unit_price_pence": 365,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2663,
+  "reserved": 0,
+  "sku": "SKU-0238",
+  "tags": [],
+  "unit_price_pence": 309,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2388,
+  "reserved": 0,
+  "sku": "SKU-0239",
+  "tags": [],
+  "unit_price_pence": 265,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2575,
+  "reserved": 0,
+  "sku": "SKU-0240",
+  "tags": [],
+  "unit_price_pence": 335,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1651,
+  "reserved": 0,
+  "sku": "SKU-0241",
+  "tags": [],
+  "unit_price_pence": 335,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1984,
+  "reserved": 0,
+  "sku": "SKU-0242",
+  "tags": [],
+  "unit_price_pence": 185,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 801,
+  "reserved": 0,
+  "sku": "SKU-0243",
+  "tags": [],
+  "unit_price_pence": 345,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3862,
+  "reserved": 0,
+  "sku": "SKU-0244",
+  "tags": [],
+  "unit_price_pence": 135,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3033,
+  "reserved": 0,
+  "sku": "SKU-0245",
+  "tags": [],
+  "unit_price_pence": 265,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2226,
+  "reserved": 0,
+  "sku": "SKU-0246",
+  "tags": [],
+  "unit_price_pence": 335,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3835,
+  "reserved": 0,
+  "sku": "SKU-0247",
+  "tags": [],
+  "unit_price_pence": 135,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4998,
+  "reserved": 0,
+  "sku": "SKU-0248",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 335,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1272,
+  "reserved": 0,
+  "sku": "SKU-0249",
+  "tags": [],
+  "unit_price_pence": 399,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2694,
+  "reserved": 0,
+  "sku": "SKU-0250",
+  "tags": [],
+  "unit_price_pence": 299,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4682,
+  "reserved": 0,
+  "sku": "SKU-0251",
+  "tags": [],
+  "unit_price_pence": 249,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 829,
+  "reserved": 0,
+  "sku": "SKU-0252",
+  "tags": [],
+  "unit_price_pence": 195,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2100,
+  "reserved": 0,
+  "sku": "SKU-0253",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 315,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1384,
+  "reserved": 0,
+  "sku": "SKU-0254",
+  "tags": [],
+  "unit_price_pence": 225,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4893,
+  "reserved": 0,
+  "sku": "SKU-0255",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 35,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3428,
+  "reserved": 0,
+  "sku": "SKU-0256",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 399,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4779,
+  "reserved": 0,
+  "sku": "SKU-0257",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 255,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3330,
+  "reserved": 0,
+  "sku": "SKU-0258",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 389,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4141,
+  "reserved": 0,
+  "sku": "SKU-0259",
+  "tags": [],
+  "unit_price_pence": 229,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1566,
+  "reserved": 0,
+  "sku": "SKU-0260",
+  "tags": [],
+  "unit_price_pence": 229,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4304,
+  "reserved": 0,
+  "sku": "SKU-0261",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 35,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2997,
+  "reserved": 0,
+  "sku": "SKU-0262",
+  "tags": [],
+  "unit_price_pence": 350,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2275,
+  "reserved": 0,
+  "sku": "SKU-0263",
+  "tags": [],
+  "unit_price_pence": 155,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3746,
+  "reserved": 0,
+  "sku": "SKU-0264",
+  "tags": [],
+  "unit_price_pence": 349,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2960,
+  "reserved": 0,
+  "sku": "SKU-0265",
+  "tags": [],
+  "unit_price_pence": 329,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4321,
+  "reserved": 0,
+  "sku": "SKU-0266",
+  "tags": [],
+  "unit_price_pence": 409,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2597,
+  "reserved": 0,
+  "sku": "SKU-0267",
+  "tags": [],
+  "unit_price_pence": 215,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3280,
+  "reserved": 0,
+  "sku": "SKU-0268",
+  "tags": [],
+  "unit_price_pence": 245,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4729,
+  "reserved": 0,
+  "sku": "SKU-0269",
+  "tags": [],
+  "unit_price_pence": 85,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 891,
+  "reserved": 0,
+  "sku": "SKU-0270",
+  "tags": [],
+  "unit_price_pence": 395,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1670,
+  "reserved": 0,
+  "sku": "SKU-0271",
+  "tags": [],
+  "unit_price_pence": 395,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3769,
+  "reserved": 0,
+  "sku": "SKU-0272",
+  "tags": [],
+  "unit_price_pence": 385,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2181,
+  "reserved": 0,
+  "sku": "SKU-0273",
+  "tags": [],
+  "unit_price_pence": 195,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4674,
+  "reserved": 0,
+  "sku": "SKU-0274",
+  "tags": [],
+  "unit_price_pence": 199,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2494,
+  "reserved": 0,
+  "sku": "SKU-0275",
+  "tags": [],
+  "unit_price_pence": 285,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3907,
+  "reserved": 0,
+  "sku": "SKU-0276",
+  "tags": [],
+  "unit_price_pence": 335,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4539,
+  "reserved": 0,
+  "sku": "SKU-0277",
+  "tags": [],
+  "unit_price_pence": 129,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4034,
+  "reserved": 0,
+  "sku": "SKU-0278",
+  "tags": [],
+  "unit_price_pence": 265,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3399,
+  "reserved": 0,
+  "sku": "SKU-0279",
+  "tags": [],
+  "unit_price_pence": 65,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4837,
+  "reserved": 0,
+  "sku": "SKU-0280",
+  "tags": [],
+  "unit_price_pence": 129,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1724,
+  "reserved": 0,
+  "sku": "SKU-0281",
+  "tags": [],
+  "unit_price_pence": 229,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4802,
+  "reserved": 0,
+  "sku": "SKU-0282",
+  "tags": [],
+  "unit_price_pence": 345,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2095,
+  "reserved": 0,
+  "sku": "SKU-0283",
+  "tags": [],
+  "unit_price_pence": 115,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3265,
+  "reserved": 0,
+  "sku": "SKU-0284",
+  "tags": [],
+  "unit_price_pence": 35,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2890,
+  "reserved": 0,
+  "sku": "SKU-0285",
+  "tags": [],
+  "unit_price_pence": 285,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4303,
+  "reserved": 0,
+  "sku": "SKU-0286",
+  "tags": [],
+  "unit_price_pence": 155,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3818,
+  "reserved": 0,
+  "sku": "SKU-0287",
+  "tags": [],
+  "unit_price_pence": 295,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4238,
+  "reserved": 0,
+  "sku": "SKU-0288",
+  "tags": [],
+  "unit_price_pence": 335,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4574,
+  "reserved": 0,
+  "sku": "SKU-0289",
+  "tags": [],
+  "unit_price_pence": 349,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4991,
+  "reserved": 0,
+  "sku": "SKU-0290",
+  "tags": [],
+  "unit_price_pence": 399,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 901,
+  "reserved": 0,
+  "sku": "SKU-0291",
+  "tags": [],
+  "unit_price_pence": 149,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4036,
+  "reserved": 0,
+  "sku": "SKU-0292",
+  "tags": [],
+  "unit_price_pence": 385,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3518,
+  "reserved": 0,
+  "sku": "SKU-0293",
+  "tags": [],
+  "unit_price_pence": 279,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1113,
+  "reserved": 0,
+  "sku": "SKU-0294",
+  "tags": [],
+  "unit_price_pence": 69,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2209,
+  "reserved": 0,
+  "sku": "SKU-0295",
+  "tags": [],
+  "unit_price_pence": 279,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2172,
+  "reserved": 0,
+  "sku": "SKU-0296",
+  "tags": [],
+  "unit_price_pence": 195,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1406,
+  "reserved": 0,
+  "sku": "SKU-0297",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 135,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3285,
+  "reserved": 0,
+  "sku": "SKU-0298",
+  "tags": [],
+  "unit_price_pence": 289,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1504,
+  "reserved": 0,
+  "sku": "SKU-0299",
+  "tags": [],
+  "unit_price_pence": 289,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4779,
+  "reserved": 0,
+  "sku": "SKU-0300",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 215,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1876,
+  "reserved": 0,
+  "sku": "SKU-0301",
+  "tags": [],
+  "unit_price_pence": 255,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1200,
+  "reserved": 0,
+  "sku": "SKU-0302",
+  "tags": [],
+  "unit_price_pence": 310,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2762,
+  "reserved": 0,
+  "sku": "SKU-0303",
+  "tags": [],
+  "unit_price_pence": 355,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4814,
+  "reserved": 0,
+  "sku": "SKU-0304",
+  "tags": [],
+  "unit_price_pence": 240,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1601,
+  "reserved": 0,
+  "sku": "SKU-0305",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 215,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4227,
+  "reserved": 0,
+  "sku": "SKU-0306",
+  "tags": [],
+  "unit_price_pence": 115,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3659,
+  "reserved": 0,
+  "sku": "SKU-0307",
+  "tags": [],
+  "unit_price_pence": 345,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3460,
+  "reserved": 0,
+  "sku": "SKU-0308",
+  "tags": [],
+  "unit_price_pence": 329,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 901,
+  "reserved": 0,
+  "sku": "SKU-0309",
+  "tags": [],
+  "unit_price_pence": 139,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4634,
+  "reserved": 0,
+  "sku": "SKU-0310",
+  "tags": [],
+  "unit_price_pence": 199,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2583,
+  "reserved": 0,
+  "sku": "SKU-0311",
+  "tags": [],
+  "unit_price_pence": 249,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4116,
+  "reserved": 0,
+  "sku": "SKU-0312",
+  "tags": [],
+  "unit_price_pence": 329,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2053,
+  "reserved": 0,
+  "sku": "SKU-0313",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 49,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4683,
+  "reserved": 0,
+  "sku": "SKU-0314",
+  "tags": [],
+  "unit_price_pence": 215,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3028,
+  "reserved": 0,
+  "sku": "SKU-0315",
+  "tags": [],
+  "unit_price_pence": 149,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4386,
+  "reserved": 0,
+  "sku": "SKU-0316",
+  "tags": [],
+  "unit_price_pence": 309,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4146,
+  "reserved": 0,
+  "sku": "SKU-0317",
+  "tags": [],
+  "unit_price_pence": 365,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2101,
+  "reserved": 0,
+  "sku": "SKU-0318",
+  "tags": [],
+  "unit_price_pence": 160,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1338,
+  "reserved": 0,
+  "sku": "SKU-0319",
+  "tags": [],
+  "unit_price_pence": 219,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3091,
+  "reserved": 0,
+  "sku": "SKU-0320",
+  "tags": [],
+  "unit_price_pence": 195,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4675,
+  "reserved": 0,
+  "sku": "SKU-0321",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 25,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3978,
+  "reserved": 0,
+  "sku": "SKU-0322",
+  "tags": [],
+  "unit_price_pence": 179,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3413,
+  "reserved": 0,
+  "sku": "SKU-0323",
+  "tags": [],
+  "unit_price_pence": 155,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1819,
+  "reserved": 0,
+  "sku": "SKU-0324",
+  "tags": [],
+  "unit_price_pence": 449,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3205,
+  "reserved": 0,
+  "sku": "SKU-0325",
+  "tags": [],
+  "unit_price_pence": 329,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4290,
+  "reserved": 0,
+  "sku": "SKU-0326",
+  "tags": [],
+  "unit_price_pence": 685,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4097,
+  "reserved": 0,
+  "sku": "SKU-0327",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 465,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2189,
+  "reserved": 0,
+  "sku": "SKU-0328",
+  "tags": [],
+  "unit_price_pence": 435,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1756,
+  "reserved": 0,
+  "sku": "SKU-0329",
+  "tags": [],
+  "unit_price_pence": 449,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4519,
+  "reserved": 0,
+  "sku": "SKU-0330",
+  "tags": [],
+  "unit_price_pence": 215,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4244,
+  "reserved": 0,
+  "sku": "SKU-0331",
+  "tags": [],
+  "unit_price_pence": 99,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1822,
+  "reserved": 0,
+  "sku": "SKU-0332",
+  "tags": [],
+  "unit_price_pence": 415,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2760,
+  "reserved": 0,
+  "sku": "SKU-0333",
+  "tags": [],
+  "unit_price_pence": 335,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3906,
+  "reserved": 0,
+  "sku": "SKU-0334",
+  "tags": [],
+  "unit_price_pence": 415,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2240,
+  "reserved": 0,
+  "sku": "SKU-0335",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 549,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 844,
+  "reserved": 0,
+  "sku": "SKU-0336",
+  "tags": [],
+  "unit_price_pence": 45,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 894,
+  "reserved": 0,
+  "sku": "SKU-0337",
+  "tags": [],
+  "unit_price_pence": 429,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4185,
+  "reserved": 0,
+  "sku": "SKU-0338",
+  "tags": [],
+  "unit_price_pence": 185,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3771,
+  "reserved": 0,
+  "sku": "SKU-0339",
+  "tags": [],
+  "unit_price_pence": 99,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3431,
+  "reserved": 0,
+  "sku": "SKU-0340",
+  "tags": [],
+  "unit_price_pence": 355,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1936,
+  "reserved": 0,
+  "sku": "SKU-0341",
+  "tags": [],
+  "unit_price_pence": 355,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2949,
+  "reserved": 0,
+  "sku": "SKU-0342",
+  "tags": [],
+  "unit_price_pence": 49,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1028,
+  "reserved": 0,
+  "sku": "SKU-0343",
+  "tags": [],
+  "unit_price_pence": 219,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4061,
+  "reserved": 0,
+  "sku": "SKU-0344",
+  "tags": [],
+  "unit_price_pence": 695,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1422,
+  "reserved": 0,
+  "sku": "SKU-0345",
+  "tags": [],
+  "unit_price_pence": 55,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1321,
+  "reserved": 0,
+  "sku": "SKU-0346",
+  "tags": [],
+  "unit_price_pence": 550,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1554,
+  "reserved": 0,
+  "sku": "SKU-0347",
+  "tags": [],
+  "unit_price_pence": 130,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1426,
+  "reserved": 0,
+  "sku": "SKU-0348",
+  "tags": [],
+  "unit_price_pence": 615,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4837,
+  "reserved": 0,
+  "sku": "SKU-0349",
+  "tags": [],
+  "unit_price_pence": 349,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1849,
+  "reserved": 0,
+  "sku": "SKU-0350",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 420,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3718,
+  "reserved": 0,
+  "sku": "SKU-0351",
+  "tags": [],
+  "unit_price_pence": 549,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1933,
+  "reserved": 0,
+  "sku": "SKU-0352",
+  "tags": [],
+  "unit_price_pence": 195,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4195,
+  "reserved": 0,
+  "sku": "SKU-0353",
+  "tags": [],
+  "unit_price_pence": 379,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4400,
+  "reserved": 0,
+  "sku": "SKU-0354",
+  "tags": [],
+  "unit_price_pence": 355,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2484,
+  "reserved": 0,
+  "sku": "SKU-0355",
+  "tags": [],
+  "unit_price_pence": 285,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1270,
+  "reserved": 0,
+  "sku": "SKU-0356",
+  "tags": [],
+  "unit_price_pence": 55,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3114,
+  "reserved": 0,
+  "sku": "SKU-0357",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 129,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2256,
+  "reserved": 0,
+  "sku": "SKU-0358",
+  "tags": [],
+  "unit_price_pence": 485,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1244,
+  "reserved": 0,
+  "sku": "SKU-0359",
+  "tags": [],
+  "unit_price_pence": 259,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4945,
+  "reserved": 0,
+  "sku": "SKU-0360",
+  "tags": [],
+  "unit_price_pence": 89,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 967,
+  "reserved": 0,
+  "sku": "SKU-0361",
+  "tags": [],
+  "unit_price_pence": 195,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4388,
+  "reserved": 0,
+  "sku": "SKU-0362",
+  "tags": [],
+  "unit_price_pence": 369,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4328,
+  "reserved": 0,
+  "sku": "SKU-0363",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 149,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2288,
+  "reserved": 0,
+  "sku": "SKU-0364",
+  "tags": [],
+  "unit_price_pence": 455,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4476,
+  "reserved": 0,
+  "sku": "SKU-0365",
+  "tags": [],
+  "unit_price_pence": 199,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4678,
+  "reserved": 0,
+  "sku": "SKU-0366",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 275,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1659,
+  "reserved": 0,
+  "sku": "SKU-0367",
+  "tags": [],
+  "unit_price_pence": 179,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3416,
+  "reserved": 0,
+  "sku": "SKU-0368",
+  "tags": [],
+  "unit_price_pence": 155,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1823,
+  "reserved": 0,
+  "sku": "SKU-0369",
+  "tags": [],
+  "unit_price_pence": 215,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2779,
+  "reserved": 0,
+  "sku": "SKU-0370",
+  "tags": [],
+  "unit_price_pence": 285,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2217,
+  "reserved": 0,
+  "sku": "SKU-0371",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 295,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2076,
+  "reserved": 0,
+  "sku": "SKU-0372",
+  "tags": [],
+  "unit_price_pence": 599,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3880,
+  "reserved": 0,
+  "sku": "SKU-0373",
+  "tags": [],
+  "unit_price_pence": 200,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2592,
+  "reserved": 0,
+  "sku": "SKU-0374",
+  "tags": [],
+  "unit_price_pence": 385,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4444,
+  "reserved": 0,
+  "sku": "SKU-0375",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 655,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3103,
+  "reserved": 0,
+  "sku": "SKU-0376",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 215,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4508,
+  "reserved": 0,
+  "sku": "SKU-0377",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 149,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2528,
+  "reserved": 0,
+  "sku": "SKU-0378",
+  "tags": [],
+  "unit_price_pence": 235,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4246,
+  "reserved": 0,
+  "sku": "SKU-0379",
+  "tags": [],
+  "unit_price_pence": 195,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2307,
+  "reserved": 0,
+  "sku": "SKU-0380",
+  "tags": [],
+  "unit_price_pence": 259,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4336,
+  "reserved": 0,
+  "sku": "SKU-0381",
+  "tags": [],
+  "unit_price_pence": 515,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2715,
+  "reserved": 0,
+  "sku": "SKU-0382",
+  "tags": [],
+  "unit_price_pence": 629,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2444,
+  "reserved": 0,
+  "sku": "SKU-0383",
+  "tags": [],
+  "unit_price_pence": 445,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1259,
+  "reserved": 0,
+  "sku": "SKU-0384",
+  "tags": [],
+  "unit_price_pence": 379,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3573,
+  "reserved": 0,
+  "sku": "SKU-0385",
+  "tags": [],
+  "unit_price_pence": 595,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2856,
+  "reserved": 0,
+  "sku": "SKU-0386",
+  "tags": [],
+  "unit_price_pence": 385,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1054,
+  "reserved": 0,
+  "sku": "SKU-0387",
+  "tags": [],
+  "unit_price_pence": 295,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4535,
+  "reserved": 0,
+  "sku": "SKU-0388",
+  "tags": [],
+  "unit_price_pence": 129,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3626,
+  "reserved": 0,
+  "sku": "SKU-0389",
+  "tags": [],
+  "unit_price_pence": 499,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 57,
+  "reserved": 0,
+  "sku": "SKU-0390",
+  "tags": [
+   "3for2",
+   "featured"
+  ],
+  "unit_price_pence": 45,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3606,
+  "reserved": 0,
+  "sku": "SKU-0391",
+  "tags": [],
+  "unit_price_pence": 489,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 946,
+  "reserved": 0,
+  "sku": "SKU-0392",
+  "tags": [],
+  "unit_price_pence": 365,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1772,
+  "reserved": 0,
+  "sku": "SKU-0393",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 235,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1663,
+  "reserved": 0,
+  "sku": "SKU-0394",
+  "tags": [],
+  "unit_price_pence": 129,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1817,
+  "reserved": 0,
+  "sku": "SKU-0395",
+  "tags": [],
+  "unit_price_pence": 535,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2086,
+  "reserved": 0,
+  "sku": "SKU-0396",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 129,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4717,
+  "reserved": 0,
+  "sku": "SKU-0397",
+  "tags": [],
+  "unit_price_pence": 149,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2340,
+  "reserved": 0,
+  "sku": "SKU-0398",
+  "tags": [],
+  "unit_price_pence": 535,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1511,
+  "reserved": 0,
+  "sku": "SKU-0399",
+  "tags": [],
+  "unit_price_pence": 595,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2587,
+  "reserved": 0,
+  "sku": "SKU-0400",
+  "tags": [],
+  "unit_price_pence": 365,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1147,
+  "reserved": 0,
+  "sku": "SKU-0401",
+  "tags": [],
+  "unit_price_pence": 499,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3758,
+  "reserved": 0,
+  "sku": "SKU-0402",
+  "tags": [],
+  "unit_price_pence": 389,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1892,
+  "reserved": 0,
+  "sku": "SKU-0403",
+  "tags": [],
+  "unit_price_pence": 29,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4613,
+  "reserved": 0,
+  "sku": "SKU-0404",
+  "tags": [],
+  "unit_price_pence": 319,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4046,
+  "reserved": 0,
+  "sku": "SKU-0405",
+  "tags": [],
+  "unit_price_pence": 329,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4919,
+  "reserved": 0,
+  "sku": "SKU-0406",
+  "tags": [],
+  "unit_price_pence": 495,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 915,
+  "reserved": 0,
+  "sku": "SKU-0407",
+  "tags": [],
+  "unit_price_pence": 169,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1696,
+  "reserved": 0,
+  "sku": "SKU-0408",
+  "tags": [],
+  "unit_price_pence": 285,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4680,
+  "reserved": 0,
+  "sku": "SKU-0409",
+  "tags": [],
+  "unit_price_pence": 349,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4591,
+  "reserved": 0,
+  "sku": "SKU-0410",
+  "tags": [],
+  "unit_price_pence": 595,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3001,
+  "reserved": 0,
+  "sku": "SKU-0411",
+  "tags": [],
+  "unit_price_pence": 565,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4911,
+  "reserved": 0,
+  "sku": "SKU-0412",
+  "tags": [],
+  "unit_price_pence": 465,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1276,
+  "reserved": 0,
+  "sku": "SKU-0413",
+  "tags": [],
+  "unit_price_pence": 585,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4718,
+  "reserved": 0,
+  "sku": "SKU-0414",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 595,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2390,
+  "reserved": 0,
+  "sku": "SKU-0415",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 435,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3108,
+  "reserved": 0,
+  "sku": "SKU-0416",
+  "tags": [],
+  "unit_price_pence": 249,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3477,
+  "reserved": 0,
+  "sku": "SKU-0417",
+  "tags": [],
+  "unit_price_pence": 495,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4836,
+  "reserved": 0,
+  "sku": "SKU-0418",
+  "tags": [],
+  "unit_price_pence": 215,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4876,
+  "reserved": 0,
+  "sku": "SKU-0419",
+  "tags": [],
+  "unit_price_pence": 595,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1384,
+  "reserved": 0,
+  "sku": "SKU-0420",
+  "tags": [],
+  "unit_price_pence": 155,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1456,
+  "reserved": 0,
+  "sku": "SKU-0421",
+  "tags": [],
+  "unit_price_pence": 185,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3366,
+  "reserved": 0,
+  "sku": "SKU-0422",
+  "tags": [],
+  "unit_price_pence": 165,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4309,
+  "reserved": 0,
+  "sku": "SKU-0423",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 485,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2301,
+  "reserved": 0,
+  "sku": "SKU-0424",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 585,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3717,
+  "reserved": 0,
+  "sku": "SKU-0425",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 385,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1822,
+  "reserved": 0,
+  "sku": "SKU-0426",
+  "tags": [],
+  "unit_price_pence": 389,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4834,
+  "reserved": 0,
+  "sku": "SKU-0427",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 695,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1282,
+  "reserved": 0,
+  "sku": "SKU-0428",
+  "tags": [],
+  "unit_price_pence": 485,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1220,
+  "reserved": 0,
+  "sku": "SKU-0429",
+  "tags": [],
+  "unit_price_pence": 549,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2299,
+  "reserved": 0,
+  "sku": "SKU-0430",
+  "tags": [],
+  "unit_price_pence": 285,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2957,
+  "reserved": 0,
+  "sku": "SKU-0431",
+  "tags": [],
+  "unit_price_pence": 249,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2449,
+  "reserved": 0,
+  "sku": "SKU-0432",
+  "tags": [],
+  "unit_price_pence": 345,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2963,
+  "reserved": 0,
+  "sku": "SKU-0433",
+  "tags": [],
+  "unit_price_pence": 499,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3900,
+  "reserved": 0,
+  "sku": "SKU-0434",
+  "tags": [],
+  "unit_price_pence": 649,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2500,
+  "reserved": 0,
+  "sku": "SKU-0435",
+  "tags": [],
+  "unit_price_pence": 65,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4235,
+  "reserved": 0,
+  "sku": "SKU-0436",
+  "tags": [],
+  "unit_price_pence": 29,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2616,
+  "reserved": 0,
+  "sku": "SKU-0437",
+  "tags": [],
+  "unit_price_pence": 345,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3687,
+  "reserved": 0,
+  "sku": "SKU-0438",
+  "tags": [],
+  "unit_price_pence": 515,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2347,
+  "reserved": 0,
+  "sku": "SKU-0439",
+  "tags": [],
+  "unit_price_pence": 295,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2747,
+  "reserved": 0,
+  "sku": "SKU-0440",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 595,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2904,
+  "reserved": 0,
+  "sku": "SKU-0441",
+  "tags": [],
+  "unit_price_pence": 155,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 899,
+  "reserved": 0,
+  "sku": "SKU-0442",
+  "tags": [],
+  "unit_price_pence": 665,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2358,
+  "reserved": 0,
+  "sku": "SKU-0443",
+  "tags": [],
+  "unit_price_pence": 645,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3783,
+  "reserved": 0,
+  "sku": "SKU-0444",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 245,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1700,
+  "reserved": 0,
+  "sku": "SKU-0445",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 255,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1796,
+  "reserved": 0,
+  "sku": "SKU-0446",
+  "tags": [],
+  "unit_price_pence": 35,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 79,
+  "reserved": 0,
+  "sku": "SKU-0447",
+  "tags": [
+   "3for2",
+   "featured"
+  ],
+  "unit_price_pence": 49,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2067,
+  "reserved": 0,
+  "sku": "SKU-0448",
+  "tags": [],
+  "unit_price_pence": 495,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4029,
+  "reserved": 0,
+  "sku": "SKU-0449",
+  "tags": [],
+  "unit_price_pence": 365,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4072,
+  "reserved": 0,
+  "sku": "SKU-0450",
+  "tags": [],
+  "unit_price_pence": 585,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1135,
+  "reserved": 0,
+  "sku": "SKU-0451",
+  "tags": [],
+  "unit_price_pence": 155,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3179,
+  "reserved": 0,
+  "sku": "SKU-0452",
+  "tags": [],
+  "unit_price_pence": 665,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1742,
+  "reserved": 0,
+  "sku": "SKU-0453",
+  "tags": [],
+  "unit_price_pence": 235,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4644,
+  "reserved": 0,
+  "sku": "SKU-0454",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 389,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1653,
+  "reserved": 0,
+  "sku": "SKU-0455",
+  "tags": [],
+  "unit_price_pence": 350,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2618,
+  "reserved": 0,
+  "sku": "SKU-0456",
+  "tags": [],
+  "unit_price_pence": 120,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 40,
+  "reserved": 0,
+  "sku": "SKU-0457",
+  "tags": [
+   "3for2",
+   "featured"
+  ],
+  "unit_price_pence": 549,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2085,
+  "reserved": 0,
+  "sku": "SKU-0458",
+  "tags": [],
+  "unit_price_pence": 745,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1451,
+  "reserved": 0,
+  "sku": "SKU-0459",
+  "tags": [],
+  "unit_price_pence": 630,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2664,
+  "reserved": 0,
+  "sku": "SKU-0460",
+  "tags": [],
+  "unit_price_pence": 985,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2374,
+  "reserved": 0,
+  "sku": "SKU-0461",
+  "tags": [],
+  "unit_price_pence": 1199,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4708,
+  "reserved": 0,
+  "sku": "SKU-0462",
+  "tags": [],
+  "unit_price_pence": 1399,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 983,
+  "reserved": 0,
+  "sku": "SKU-0463",
+  "tags": [],
+  "unit_price_pence": 665,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1185,
+  "reserved": 0,
+  "sku": "SKU-0464",
+  "tags": [],
+  "unit_price_pence": 815,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1322,
+  "reserved": 0,
+  "sku": "SKU-0465",
+  "tags": [],
+  "unit_price_pence": 1030,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1366,
+  "reserved": 0,
+  "sku": "SKU-0466",
+  "tags": [],
+  "unit_price_pence": 1365,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4802,
+  "reserved": 0,
+  "sku": "SKU-0467",
+  "tags": [],
+  "unit_price_pence": 1205,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 937,
+  "reserved": 0,
+  "sku": "SKU-0468",
+  "tags": [],
+  "unit_price_pence": 615,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1894,
+  "reserved": 0,
+  "sku": "SKU-0469",
+  "tags": [],
+  "unit_price_pence": 665,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1872,
+  "reserved": 0,
+  "sku": "SKU-0470",
+  "tags": [],
+  "unit_price_pence": 629,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4543,
+  "reserved": 0,
+  "sku": "SKU-0471",
+  "tags": [],
+  "unit_price_pence": 555,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1633,
+  "reserved": 0,
+  "sku": "SKU-0472",
+  "tags": [],
+  "unit_price_pence": 1099,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2885,
+  "reserved": 0,
+  "sku": "SKU-0473",
+  "tags": [],
+  "unit_price_pence": 165,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2896,
+  "reserved": 0,
+  "sku": "SKU-0474",
+  "tags": [],
+  "unit_price_pence": 909,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3258,
+  "reserved": 0,
+  "sku": "SKU-0475",
+  "tags": [],
+  "unit_price_pence": 429,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4974,
+  "reserved": 0,
+  "sku": "SKU-0476",
+  "tags": [],
+  "unit_price_pence": 385,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2982,
+  "reserved": 0,
+  "sku": "SKU-0477",
+  "tags": [],
+  "unit_price_pence": 1449,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1455,
+  "reserved": 0,
+  "sku": "SKU-0478",
+  "tags": [],
+  "unit_price_pence": 155,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2999,
+  "reserved": 0,
+  "sku": "SKU-0479",
+  "tags": [],
+  "unit_price_pence": 689,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1276,
+  "reserved": 0,
+  "sku": "SKU-0480",
+  "tags": [],
+  "unit_price_pence": 899,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1219,
+  "reserved": 0,
+  "sku": "SKU-0481",
+  "tags": [],
+  "unit_price_pence": 255,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2113,
+  "reserved": 0,
+  "sku": "SKU-0482",
+  "tags": [],
+  "unit_price_pence": 325,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3415,
+  "reserved": 0,
+  "sku": "SKU-0483",
+  "tags": [],
+  "unit_price_pence": 1060,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2792,
+  "reserved": 0,
+  "sku": "SKU-0484",
+  "tags": [],
+  "unit_price_pence": 1129,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4297,
+  "reserved": 0,
+  "sku": "SKU-0485",
+  "tags": [],
+  "unit_price_pence": 1335,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2486,
+  "reserved": 0,
+  "sku": "SKU-0486",
+  "tags": [],
+  "unit_price_pence": 955,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2906,
+  "reserved": 0,
+  "sku": "SKU-0487",
+  "tags": [],
+  "unit_price_pence": 840,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3818,
+  "reserved": 0,
+  "sku": "SKU-0488",
+  "tags": [],
+  "unit_price_pence": 1429,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1887,
+  "reserved": 0,
+  "sku": "SKU-0489",
+  "tags": [],
+  "unit_price_pence": 1149,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3793,
+  "reserved": 0,
+  "sku": "SKU-0490",
+  "tags": [],
+  "unit_price_pence": 385,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2730,
+  "reserved": 0,
+  "sku": "SKU-0491",
+  "tags": [],
+  "unit_price_pence": 799,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4628,
+  "reserved": 0,
+  "sku": "SKU-0492",
+  "tags": [],
+  "unit_price_pence": 1039,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2512,
+  "reserved": 0,
+  "sku": "SKU-0493",
+  "tags": [],
+  "unit_price_pence": 599,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2037,
+  "reserved": 0,
+  "sku": "SKU-0494",
+  "tags": [],
+  "unit_price_pence": 295,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2793,
+  "reserved": 0,
+  "sku": "SKU-0495",
+  "tags": [],
+  "unit_price_pence": 855,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4589,
+  "reserved": 0,
+  "sku": "SKU-0496",
+  "tags": [],
+  "unit_price_pence": 269,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3976,
+  "reserved": 0,
+  "sku": "SKU-0497",
+  "tags": [],
+  "unit_price_pence": 485,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1223,
+  "reserved": 0,
+  "sku": "SKU-0498",
+  "tags": [],
+  "unit_price_pence": 1245,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2211,
+  "reserved": 0,
+  "sku": "SKU-0499",
+  "tags": [],
+  "unit_price_pence": 799,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2482,
+  "reserved": 0,
+  "sku": "SKU-0500",
+  "tags": [],
+  "unit_price_pence": 1290,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4321,
+  "reserved": 0,
+  "sku": "SKU-0501",
+  "tags": [],
+  "unit_price_pence": 1299,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2196,
+  "reserved": 0,
+  "sku": "SKU-0502",
+  "tags": [],
+  "unit_price_pence": 249,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4187,
+  "reserved": 0,
+  "sku": "SKU-0503",
+  "tags": [],
+  "unit_price_pence": 1280,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2754,
+  "reserved": 0,
+  "sku": "SKU-0504",
+  "tags": [],
+  "unit_price_pence": 895,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3274,
+  "reserved": 0,
+  "sku": "SKU-0505",
+  "tags": [],
+  "unit_price_pence": 699,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1575,
+  "reserved": 0,
+  "sku": "SKU-0506",
+  "tags": [],
+  "unit_price_pence": 699,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4515,
+  "reserved": 0,
+  "sku": "SKU-0507",
+  "tags": [],
+  "unit_price_pence": 520,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1059,
+  "reserved": 0,
+  "sku": "SKU-0508",
+  "tags": [],
+  "unit_price_pence": 465,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3670,
+  "reserved": 0,
+  "sku": "SKU-0509",
+  "tags": [],
+  "unit_price_pence": 1000,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2440,
+  "reserved": 0,
+  "sku": "SKU-0510",
+  "tags": [],
+  "unit_price_pence": 245,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3230,
+  "reserved": 0,
+  "sku": "SKU-0511",
+  "tags": [],
+  "unit_price_pence": 1385,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3489,
+  "reserved": 0,
+  "sku": "SKU-0512",
+  "tags": [],
+  "unit_price_pence": 1239,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3199,
+  "reserved": 0,
+  "sku": "SKU-0513",
+  "tags": [],
+  "unit_price_pence": 1135,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3390,
+  "reserved": 0,
+  "sku": "SKU-0514",
+  "tags": [],
+  "unit_price_pence": 1305,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1617,
+  "reserved": 0,
+  "sku": "SKU-0515",
+  "tags": [],
+  "unit_price_pence": 655,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 926,
+  "reserved": 0,
+  "sku": "SKU-0516",
+  "tags": [],
+  "unit_price_pence": 595,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3705,
+  "reserved": 0,
+  "sku": "SKU-0517",
+  "tags": [],
+  "unit_price_pence": 629,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4117,
+  "reserved": 0,
+  "sku": "SKU-0518",
+  "tags": [],
+  "unit_price_pence": 485,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3604,
+  "reserved": 0,
+  "sku": "SKU-0519",
+  "tags": [],
+  "unit_price_pence": 395,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1597,
+  "reserved": 0,
+  "sku": "SKU-0520",
+  "tags": [],
+  "unit_price_pence": 1315,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2248,
+  "reserved": 0,
+  "sku": "SKU-0521",
+  "tags": [],
+  "unit_price_pence": 185,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1055,
+  "reserved": 0,
+  "sku": "SKU-0522",
+  "tags": [],
+  "unit_price_pence": 459,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1154,
+  "reserved": 0,
+  "sku": "SKU-0523",
+  "tags": [],
+  "unit_price_pence": 720,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4973,
+  "reserved": 0,
+  "sku": "SKU-0524",
+  "tags": [],
+  "unit_price_pence": 765,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2153,
+  "reserved": 0,
+  "sku": "SKU-0525",
+  "tags": [],
+  "unit_price_pence": 829,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3797,
+  "reserved": 0,
+  "sku": "SKU-0526",
+  "tags": [],
+  "unit_price_pence": 1185,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4227,
+  "reserved": 0,
+  "sku": "SKU-0527",
+  "tags": [],
+  "unit_price_pence": 529,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2591,
+  "reserved": 0,
+  "sku": "SKU-0528",
+  "tags": [],
+  "unit_price_pence": 1035,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1745,
+  "reserved": 0,
+  "sku": "SKU-0529",
+  "tags": [],
+  "unit_price_pence": 1185,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1438,
+  "reserved": 0,
+  "sku": "SKU-0530",
+  "tags": [],
+  "unit_price_pence": 329,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3913,
+  "reserved": 0,
+  "sku": "SKU-0531",
+  "tags": [],
+  "unit_price_pence": 965,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 806,
+  "reserved": 0,
+  "sku": "SKU-0532",
+  "tags": [],
+  "unit_price_pence": 215,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4595,
+  "reserved": 0,
+  "sku": "SKU-0533",
+  "tags": [],
+  "unit_price_pence": 795,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1524,
+  "reserved": 0,
+  "sku": "SKU-0534",
+  "tags": [],
+  "unit_price_pence": 465,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4976,
+  "reserved": 0,
+  "sku": "SKU-0535",
+  "tags": [],
+  "unit_price_pence": 215,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4144,
+  "reserved": 0,
+  "sku": "SKU-0536",
+  "tags": [],
+  "unit_price_pence": 499,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1030,
+  "reserved": 0,
+  "sku": "SKU-0537",
+  "tags": [],
+  "unit_price_pence": 1095,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3331,
+  "reserved": 0,
+  "sku": "SKU-0538",
+  "tags": [],
+  "unit_price_pence": 1415,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3007,
+  "reserved": 0,
+  "sku": "SKU-0539",
+  "tags": [],
+  "unit_price_pence": 835,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4719,
+  "reserved": 0,
+  "sku": "SKU-0540",
+  "tags": [],
+  "unit_price_pence": 385,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3545,
+  "reserved": 0,
+  "sku": "SKU-0541",
+  "tags": [],
+  "unit_price_pence": 1219,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4494,
+  "reserved": 0,
+  "sku": "SKU-0542",
+  "tags": [],
+  "unit_price_pence": 515,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4524,
+  "reserved": 0,
+  "sku": "SKU-0543",
+  "tags": [],
+  "unit_price_pence": 515,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4693,
+  "reserved": 0,
+  "sku": "SKU-0544",
+  "tags": [],
+  "unit_price_pence": 1289,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3778,
+  "reserved": 0,
+  "sku": "SKU-0545",
+  "tags": [],
+  "unit_price_pence": 845,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2043,
+  "reserved": 0,
+  "sku": "SKU-0546",
+  "tags": [],
+  "unit_price_pence": 349,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3911,
+  "reserved": 0,
+  "sku": "SKU-0547",
+  "tags": [],
+  "unit_price_pence": 435,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2768,
+  "reserved": 0,
+  "sku": "SKU-0548",
+  "tags": [],
+  "unit_price_pence": 1049,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2042,
+  "reserved": 0,
+  "sku": "SKU-0549",
+  "tags": [],
+  "unit_price_pence": 669,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4736,
+  "reserved": 0,
+  "sku": "SKU-0550",
+  "tags": [],
+  "unit_price_pence": 1265,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3130,
+  "reserved": 0,
+  "sku": "SKU-0551",
+  "tags": [],
+  "unit_price_pence": 595,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3630,
+  "reserved": 0,
+  "sku": "SKU-0552",
+  "tags": [],
+  "unit_price_pence": 629,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1596,
+  "reserved": 0,
+  "sku": "SKU-0553",
+  "tags": [],
+  "unit_price_pence": 385,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4697,
+  "reserved": 0,
+  "sku": "SKU-0554",
+  "tags": [],
+  "unit_price_pence": 385,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2400,
+  "reserved": 0,
+  "sku": "SKU-0555",
+  "tags": [],
+  "unit_price_pence": 1045,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4517,
+  "reserved": 0,
+  "sku": "SKU-0556",
+  "tags": [],
+  "unit_price_pence": 149,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2558,
+  "reserved": 0,
+  "sku": "SKU-0557",
+  "tags": [],
+  "unit_price_pence": 890,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2782,
+  "reserved": 0,
+  "sku": "SKU-0558",
+  "tags": [],
+  "unit_price_pence": 695,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4539,
+  "reserved": 0,
+  "sku": "SKU-0559",
+  "tags": [],
+  "unit_price_pence": 1149,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4856,
+  "reserved": 0,
+  "sku": "SKU-0560",
+  "tags": [],
+  "unit_price_pence": 565,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1875,
+  "reserved": 0,
+  "sku": "SKU-0561",
+  "tags": [],
+  "unit_price_pence": 669,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4413,
+  "reserved": 0,
+  "sku": "SKU-0562",
+  "tags": [],
+  "unit_price_pence": 440,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4356,
+  "reserved": 0,
+  "sku": "SKU-0563",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 755,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3337,
+  "reserved": 0,
+  "sku": "SKU-0564",
+  "tags": [],
+  "unit_price_pence": 529,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3879,
+  "reserved": 0,
+  "sku": "SKU-0565",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 329,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4663,
+  "reserved": 0,
+  "sku": "SKU-0566",
+  "tags": [],
+  "unit_price_pence": 409,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1372,
+  "reserved": 0,
+  "sku": "SKU-0567",
+  "tags": [],
+  "unit_price_pence": 749,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1374,
+  "reserved": 0,
+  "sku": "SKU-0568",
+  "tags": [],
+  "unit_price_pence": 639,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2009,
+  "reserved": 0,
+  "sku": "SKU-0569",
+  "tags": [],
+  "unit_price_pence": 555,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3545,
+  "reserved": 0,
+  "sku": "SKU-0570",
+  "tags": [],
+  "unit_price_pence": 839,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 976,
+  "reserved": 0,
+  "sku": "SKU-0571",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 555,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4010,
+  "reserved": 0,
+  "sku": "SKU-0572",
+  "tags": [],
+  "unit_price_pence": 45,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2587,
+  "reserved": 0,
+  "sku": "SKU-0573",
+  "tags": [],
+  "unit_price_pence": 110,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1065,
+  "reserved": 0,
+  "sku": "SKU-0574",
+  "tags": [],
+  "unit_price_pence": 489,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1203,
+  "reserved": 0,
+  "sku": "SKU-0575",
+  "tags": [],
+  "unit_price_pence": 549,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1114,
+  "reserved": 0,
+  "sku": "SKU-0576",
+  "tags": [],
+  "unit_price_pence": 709,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2572,
+  "reserved": 0,
+  "sku": "SKU-0577",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 600,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3301,
+  "reserved": 0,
+  "sku": "SKU-0578",
+  "tags": [],
+  "unit_price_pence": 729,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1870,
+  "reserved": 0,
+  "sku": "SKU-0579",
+  "tags": [],
+  "unit_price_pence": 749,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4155,
+  "reserved": 0,
+  "sku": "SKU-0580",
+  "tags": [],
+  "unit_price_pence": 529,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4760,
+  "reserved": 0,
+  "sku": "SKU-0581",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 799,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4752,
+  "reserved": 0,
+  "sku": "SKU-0582",
+  "tags": [],
+  "unit_price_pence": 269,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1854,
+  "reserved": 0,
+  "sku": "SKU-0583",
+  "tags": [],
+  "unit_price_pence": 129,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2251,
+  "reserved": 0,
+  "sku": "SKU-0584",
+  "tags": [],
+  "unit_price_pence": 249,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4320,
+  "reserved": 0,
+  "sku": "SKU-0585",
+  "tags": [],
+  "unit_price_pence": 410,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2315,
+  "reserved": 0,
+  "sku": "SKU-0586",
+  "tags": [],
+  "unit_price_pence": 495,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1697,
+  "reserved": 0,
+  "sku": "SKU-0587",
+  "tags": [],
+  "unit_price_pence": 165,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1041,
+  "reserved": 0,
+  "sku": "SKU-0588",
+  "tags": [],
+  "unit_price_pence": 329,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2752,
+  "reserved": 0,
+  "sku": "SKU-0589",
+  "tags": [],
+  "unit_price_pence": 35,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1534,
+  "reserved": 0,
+  "sku": "SKU-0590",
+  "tags": [],
+  "unit_price_pence": 115,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4301,
+  "reserved": 0,
+  "sku": "SKU-0591",
+  "tags": [],
+  "unit_price_pence": 779,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2782,
+  "reserved": 0,
+  "sku": "SKU-0592",
+  "tags": [],
+  "unit_price_pence": 199,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4308,
+  "reserved": 0,
+  "sku": "SKU-0593",
+  "tags": [],
+  "unit_price_pence": 529,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4852,
+  "reserved": 0,
+  "sku": "SKU-0594",
+  "tags": [],
+  "unit_price_pence": 545,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1219,
+  "reserved": 0,
+  "sku": "SKU-0595",
+  "tags": [],
+  "unit_price_pence": 229,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3865,
+  "reserved": 0,
+  "sku": "SKU-0596",
+  "tags": [],
+  "unit_price_pence": 885,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1508,
+  "reserved": 0,
+  "sku": "SKU-0597",
+  "tags": [],
+  "unit_price_pence": 259,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3991,
+  "reserved": 0,
+  "sku": "SKU-0598",
+  "tags": [],
+  "unit_price_pence": 359,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2201,
+  "reserved": 0,
+  "sku": "SKU-0599",
+  "tags": [],
+  "unit_price_pence": 689,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4597,
+  "reserved": 0,
+  "sku": "SKU-0600",
+  "tags": [],
+  "unit_price_pence": 199,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 971,
+  "reserved": 0,
+  "sku": "SKU-0601",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 315,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 955,
+  "reserved": 0,
+  "sku": "SKU-0602",
+  "tags": [],
+  "unit_price_pence": 659,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2099,
+  "reserved": 0,
+  "sku": "SKU-0603",
+  "tags": [],
+  "unit_price_pence": 899,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4883,
+  "reserved": 0,
+  "sku": "SKU-0604",
+  "tags": [],
+  "unit_price_pence": 809,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2253,
+  "reserved": 0,
+  "sku": "SKU-0605",
+  "tags": [],
+  "unit_price_pence": 565,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 857,
+  "reserved": 0,
+  "sku": "SKU-0606",
+  "tags": [],
+  "unit_price_pence": 365,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1043,
+  "reserved": 0,
+  "sku": "SKU-0607",
+  "tags": [],
+  "unit_price_pence": 865,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1799,
+  "reserved": 0,
+  "sku": "SKU-0608",
+  "tags": [],
+  "unit_price_pence": 445,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2568,
+  "reserved": 0,
+  "sku": "SKU-0609",
+  "tags": [],
+  "unit_price_pence": 765,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1975,
+  "reserved": 0,
+  "sku": "SKU-0610",
+  "tags": [],
+  "unit_price_pence": 745,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4103,
+  "reserved": 0,
+  "sku": "SKU-0611",
+  "tags": [],
+  "unit_price_pence": 265,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4880,
+  "reserved": 0,
+  "sku": "SKU-0612",
+  "tags": [],
+  "unit_price_pence": 149,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3451,
+  "reserved": 0,
+  "sku": "SKU-0613",
+  "tags": [],
+  "unit_price_pence": 849,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1600,
+  "reserved": 0,
+  "sku": "SKU-0614",
+  "tags": [],
+  "unit_price_pence": 160,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 55,
+  "reserved": 0,
+  "sku": "SKU-0615",
+  "tags": [
+   "3for2",
+   "featured"
+  ],
+  "unit_price_pence": 45,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1726,
+  "reserved": 0,
+  "sku": "SKU-0616",
+  "tags": [],
+  "unit_price_pence": 465,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4758,
+  "reserved": 0,
+  "sku": "SKU-0617",
+  "tags": [],
+  "unit_price_pence": 185,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4115,
+  "reserved": 0,
+  "sku": "SKU-0618",
+  "tags": [],
+  "unit_price_pence": 635,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1030,
+  "reserved": 0,
+  "sku": "SKU-0619",
+  "tags": [],
+  "unit_price_pence": 145,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3503,
+  "reserved": 0,
+  "sku": "SKU-0620",
+  "tags": [],
+  "unit_price_pence": 149,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2807,
+  "reserved": 0,
+  "sku": "SKU-0621",
+  "tags": [],
+  "unit_price_pence": 245,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2733,
+  "reserved": 0,
+  "sku": "SKU-0622",
+  "tags": [],
+  "unit_price_pence": 609,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1862,
+  "reserved": 0,
+  "sku": "SKU-0623",
+  "tags": [],
+  "unit_price_pence": 755,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2077,
+  "reserved": 0,
+  "sku": "SKU-0624",
+  "tags": [],
+  "unit_price_pence": 49,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3261,
+  "reserved": 0,
+  "sku": "SKU-0625",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 619,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4434,
+  "reserved": 0,
+  "sku": "SKU-0626",
+  "tags": [],
+  "unit_price_pence": 765,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2043,
+  "reserved": 0,
+  "sku": "SKU-0627",
+  "tags": [],
+  "unit_price_pence": 855,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4535,
+  "reserved": 0,
+  "sku": "SKU-0628",
+  "tags": [],
+  "unit_price_pence": 785,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3086,
+  "reserved": 0,
+  "sku": "SKU-0629",
+  "tags": [],
+  "unit_price_pence": 215,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1370,
+  "reserved": 0,
+  "sku": "SKU-0630",
+  "tags": [],
+  "unit_price_pence": 855,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3243,
+  "reserved": 0,
+  "sku": "SKU-0631",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 149,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 907,
+  "reserved": 0,
+  "sku": "SKU-0632",
+  "tags": [],
+  "unit_price_pence": 629,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1546,
+  "reserved": 0,
+  "sku": "SKU-0633",
+  "tags": [],
+  "unit_price_pence": 699,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2809,
+  "reserved": 0,
+  "sku": "SKU-0634",
+  "tags": [],
+  "unit_price_pence": 609,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2582,
+  "reserved": 0,
+  "sku": "SKU-0635",
+  "tags": [],
+  "unit_price_pence": 559,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2808,
+  "reserved": 0,
+  "sku": "SKU-0636",
+  "tags": [],
+  "unit_price_pence": 700,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4177,
+  "reserved": 0,
+  "sku": "SKU-0637",
+  "tags": [],
+  "unit_price_pence": 639,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2662,
+  "reserved": 0,
+  "sku": "SKU-0638",
+  "tags": [],
+  "unit_price_pence": 285,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3752,
+  "reserved": 0,
+  "sku": "SKU-0639",
+  "tags": [],
+  "unit_price_pence": 539,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1357,
+  "reserved": 0,
+  "sku": "SKU-0640",
+  "tags": [],
+  "unit_price_pence": 385,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3111,
+  "reserved": 0,
+  "sku": "SKU-0641",
+  "tags": [],
+  "unit_price_pence": 65,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4752,
+  "reserved": 0,
+  "sku": "SKU-0642",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 549,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1329,
+  "reserved": 0,
+  "sku": "SKU-0643",
+  "tags": [],
+  "unit_price_pence": 25,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2048,
+  "reserved": 0,
+  "sku": "SKU-0644",
+  "tags": [],
+  "unit_price_pence": 895,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3005,
+  "reserved": 0,
+  "sku": "SKU-0645",
+  "tags": [],
+  "unit_price_pence": 635,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2791,
+  "reserved": 0,
+  "sku": "SKU-0646",
+  "tags": [],
+  "unit_price_pence": 765,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4816,
+  "reserved": 0,
+  "sku": "SKU-0647",
+  "tags": [],
+  "unit_price_pence": 529,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2339,
+  "reserved": 0,
+  "sku": "SKU-0648",
+  "tags": [],
+  "unit_price_pence": 499,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3620,
+  "reserved": 0,
+  "sku": "SKU-0649",
+  "tags": [],
+  "unit_price_pence": 259,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2373,
+  "reserved": 0,
+  "sku": "SKU-0650",
+  "tags": [],
+  "unit_price_pence": 259,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4720,
+  "reserved": 0,
+  "sku": "SKU-0651",
+  "tags": [],
+  "unit_price_pence": 429,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1607,
+  "reserved": 0,
+  "sku": "SKU-0652",
+  "tags": [],
+  "unit_price_pence": 899,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1247,
+  "reserved": 0,
+  "sku": "SKU-0653",
+  "tags": [],
+  "unit_price_pence": 309,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4242,
+  "reserved": 0,
+  "sku": "SKU-0654",
+  "tags": [],
+  "unit_price_pence": 365,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1966,
+  "reserved": 0,
+  "sku": "SKU-0655",
+  "tags": [],
+  "unit_price_pence": 249,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4295,
+  "reserved": 0,
+  "sku": "SKU-0656",
+  "tags": [],
+  "unit_price_pence": 485,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3670,
+  "reserved": 0,
+  "sku": "SKU-0657",
+  "tags": [],
+  "unit_price_pence": 795,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2858,
+  "reserved": 0,
+  "sku": "SKU-0658",
+  "tags": [],
+  "unit_price_pence": 299,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1361,
+  "reserved": 0,
+  "sku": "SKU-0659",
+  "tags": [],
+  "unit_price_pence": 765,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4657,
+  "reserved": 0,
+  "sku": "SKU-0660",
+  "tags": [],
+  "unit_price_pence": 745,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2704,
+  "reserved": 0,
+  "sku": "SKU-0661",
+  "tags": [],
+  "unit_price_pence": 249,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1261,
+  "reserved": 0,
+  "sku": "SKU-0662",
+  "tags": [],
+  "unit_price_pence": 555,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4513,
+  "reserved": 0,
+  "sku": "SKU-0663",
+  "tags": [],
+  "unit_price_pence": 545,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4514,
+  "reserved": 0,
+  "sku": "SKU-0664",
+  "tags": [],
+  "unit_price_pence": 549,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1455,
+  "reserved": 0,
+  "sku": "SKU-0665",
+  "tags": [],
+  "unit_price_pence": 145,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4533,
+  "reserved": 0,
+  "sku": "SKU-0666",
+  "tags": [],
+  "unit_price_pence": 290,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3554,
+  "reserved": 0,
+  "sku": "SKU-0667",
+  "tags": [],
+  "unit_price_pence": 215,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2841,
+  "reserved": 0,
+  "sku": "SKU-0668",
+  "tags": [],
+  "unit_price_pence": 520,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2394,
+  "reserved": 0,
+  "sku": "SKU-0669",
+  "tags": [],
+  "unit_price_pence": 85,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3410,
+  "reserved": 0,
+  "sku": "SKU-0670",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 195,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3219,
+  "reserved": 0,
+  "sku": "SKU-0671",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 599,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1639,
+  "reserved": 0,
+  "sku": "SKU-0672",
+  "tags": [],
+  "unit_price_pence": 345,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 74,
+  "reserved": 0,
+  "sku": "SKU-0673",
+  "tags": [
+   "3for2",
+   "featured"
+  ],
+  "unit_price_pence": 495,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3059,
+  "reserved": 0,
+  "sku": "SKU-0674",
+  "tags": [],
+  "unit_price_pence": 815,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1243,
+  "reserved": 0,
+  "sku": "SKU-0675",
+  "tags": [],
+  "unit_price_pence": 495,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4183,
+  "reserved": 0,
+  "sku": "SKU-0676",
+  "tags": [],
+  "unit_price_pence": 185,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2472,
+  "reserved": 0,
+  "sku": "SKU-0677",
+  "tags": [],
+  "unit_price_pence": 65,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3838,
+  "reserved": 0,
+  "sku": "SKU-0678",
+  "tags": [],
+  "unit_price_pence": 615,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1427,
+  "reserved": 0,
+  "sku": "SKU-0679",
+  "tags": [],
+  "unit_price_pence": 115,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3343,
+  "reserved": 0,
+  "sku": "SKU-0680",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 145,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2164,
+  "reserved": 0,
+  "sku": "SKU-0681",
+  "tags": [],
+  "unit_price_pence": 835,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3418,
+  "reserved": 0,
+  "sku": "SKU-0682",
+  "tags": [],
+  "unit_price_pence": 155,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2026,
+  "reserved": 0,
+  "sku": "SKU-0683",
+  "tags": [],
+  "unit_price_pence": 785,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4649,
+  "reserved": 0,
+  "sku": "SKU-0684",
+  "tags": [],
+  "unit_price_pence": 749,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1132,
+  "reserved": 0,
+  "sku": "SKU-0685",
+  "tags": [],
+  "unit_price_pence": 345,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4935,
+  "reserved": 0,
+  "sku": "SKU-0686",
+  "tags": [],
+  "unit_price_pence": 199,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4864,
+  "reserved": 0,
+  "sku": "SKU-0687",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 620,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4255,
+  "reserved": 0,
+  "sku": "SKU-0688",
+  "tags": [],
+  "unit_price_pence": 349,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3691,
+  "reserved": 0,
+  "sku": "SKU-0689",
+  "tags": [],
+  "unit_price_pence": 850,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4928,
+  "reserved": 0,
+  "sku": "SKU-0690",
+  "tags": [],
+  "unit_price_pence": 555,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4081,
+  "reserved": 0,
+  "sku": "SKU-0691",
+  "tags": [],
+  "unit_price_pence": 795,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2149,
+  "reserved": 0,
+  "sku": "SKU-0692",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 29,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3124,
+  "reserved": 0,
+  "sku": "SKU-0693",
+  "tags": [],
+  "unit_price_pence": 899,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1897,
+  "reserved": 0,
+  "sku": "SKU-0694",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 129,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2301,
+  "reserved": 0,
+  "sku": "SKU-0695",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 715,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2529,
+  "reserved": 0,
+  "sku": "SKU-0696",
+  "tags": [],
+  "unit_price_pence": 189,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4343,
+  "reserved": 0,
+  "sku": "SKU-0697",
+  "tags": [],
+  "unit_price_pence": 579,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3244,
+  "reserved": 0,
+  "sku": "SKU-0698",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 189,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4735,
+  "reserved": 0,
+  "sku": "SKU-0699",
+  "tags": [],
+  "unit_price_pence": 245,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4844,
+  "reserved": 0,
+  "sku": "SKU-0700",
+  "tags": [],
+  "unit_price_pence": 859,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1374,
+  "reserved": 0,
+  "sku": "SKU-0701",
+  "tags": [],
+  "unit_price_pence": 59,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4539,
+  "reserved": 0,
+  "sku": "SKU-0702",
+  "tags": [],
+  "unit_price_pence": 95,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1271,
+  "reserved": 0,
+  "sku": "SKU-0703",
+  "tags": [],
+  "unit_price_pence": 265,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1328,
+  "reserved": 0,
+  "sku": "SKU-0704",
+  "tags": [],
+  "unit_price_pence": 29,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2016,
+  "reserved": 0,
+  "sku": "SKU-0705",
+  "tags": [],
+  "unit_price_pence": 349,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2243,
+  "reserved": 0,
+  "sku": "SKU-0706",
+  "tags": [],
+  "unit_price_pence": 885,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2270,
+  "reserved": 0,
+  "sku": "SKU-0707",
+  "tags": [],
+  "unit_price_pence": 349,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4567,
+  "reserved": 0,
+  "sku": "SKU-0708",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 885,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2920,
+  "reserved": 0,
+  "sku": "SKU-0709",
+  "tags": [],
+  "unit_price_pence": 655,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3605,
+  "reserved": 0,
+  "sku": "SKU-0710",
+  "tags": [],
+  "unit_price_pence": 425,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2589,
+  "reserved": 0,
+  "sku": "SKU-0711",
+  "tags": [],
+  "unit_price_pence": 165,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2850,
+  "reserved": 0,
+  "sku": "SKU-0712",
+  "tags": [],
+  "unit_price_pence": 729,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3863,
+  "reserved": 0,
+  "sku": "SKU-0713",
+  "tags": [],
+  "unit_price_pence": 149,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 905,
+  "reserved": 0,
+  "sku": "SKU-0714",
+  "tags": [],
+  "unit_price_pence": 315,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4234,
+  "reserved": 0,
+  "sku": "SKU-0715",
+  "tags": [],
+  "unit_price_pence": 835,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2277,
+  "reserved": 0,
+  "sku": "SKU-0716",
+  "tags": [],
+  "unit_price_pence": 349,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1833,
+  "reserved": 0,
+  "sku": "SKU-0717",
+  "tags": [],
+  "unit_price_pence": 365,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1548,
+  "reserved": 0,
+  "sku": "SKU-0718",
+  "tags": [],
+  "unit_price_pence": 585,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1549,
+  "reserved": 0,
+  "sku": "SKU-0719",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 229,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2297,
+  "reserved": 0,
+  "sku": "SKU-0720",
+  "tags": [],
+  "unit_price_pence": 599,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1703,
+  "reserved": 0,
+  "sku": "SKU-0721",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 255,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4006,
+  "reserved": 0,
+  "sku": "SKU-0722",
+  "tags": [],
+  "unit_price_pence": 149,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4533,
+  "reserved": 0,
+  "sku": "SKU-0723",
+  "tags": [],
+  "unit_price_pence": 449,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2150,
+  "reserved": 0,
+  "sku": "SKU-0724",
+  "tags": [],
+  "unit_price_pence": 295,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2658,
+  "reserved": 0,
+  "sku": "SKU-0725",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 629,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2952,
+  "reserved": 0,
+  "sku": "SKU-0726",
+  "tags": [],
+  "unit_price_pence": 315,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4171,
+  "reserved": 0,
+  "sku": "SKU-0727",
+  "tags": [],
+  "unit_price_pence": 215,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3753,
+  "reserved": 0,
+  "sku": "SKU-0728",
+  "tags": [],
+  "unit_price_pence": 399,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1990,
+  "reserved": 0,
+  "sku": "SKU-0729",
+  "tags": [],
+  "unit_price_pence": 239,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4281,
+  "reserved": 0,
+  "sku": "SKU-0730",
+  "tags": [],
+  "unit_price_pence": 569,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2415,
+  "reserved": 0,
+  "sku": "SKU-0731",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 449,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2821,
+  "reserved": 0,
+  "sku": "SKU-0732",
+  "tags": [],
+  "unit_price_pence": 475,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2159,
+  "reserved": 0,
+  "sku": "SKU-0733",
+  "tags": [],
+  "unit_price_pence": 485,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4708,
+  "reserved": 0,
+  "sku": "SKU-0734",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 265,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2869,
+  "reserved": 0,
+  "sku": "SKU-0735",
+  "tags": [],
+  "unit_price_pence": 385,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4803,
+  "reserved": 0,
+  "sku": "SKU-0736",
+  "tags": [],
+  "unit_price_pence": 510,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4249,
+  "reserved": 0,
+  "sku": "SKU-0737",
+  "tags": [],
+  "unit_price_pence": 315,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4979,
+  "reserved": 0,
+  "sku": "SKU-0738",
+  "tags": [],
+  "unit_price_pence": 579,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1518,
+  "reserved": 0,
+  "sku": "SKU-0739",
+  "tags": [],
+  "unit_price_pence": 565,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1394,
+  "reserved": 0,
+  "sku": "SKU-0740",
+  "tags": [],
+  "unit_price_pence": 735,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4310,
+  "reserved": 0,
+  "sku": "SKU-0741",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 349,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1044,
+  "reserved": 0,
+  "sku": "SKU-0742",
+  "tags": [],
+  "unit_price_pence": 655,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4083,
+  "reserved": 0,
+  "sku": "SKU-0743",
+  "tags": [],
+  "unit_price_pence": 515,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1995,
+  "reserved": 0,
+  "sku": "SKU-0744",
+  "tags": [],
+  "unit_price_pence": 289,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3645,
+  "reserved": 0,
+  "sku": "SKU-0745",
+  "tags": [],
+  "unit_price_pence": 129,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3815,
+  "reserved": 0,
+  "sku": "SKU-0746",
+  "tags": [],
+  "unit_price_pence": 265,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4926,
+  "reserved": 0,
+  "sku": "SKU-0747",
+  "tags": [],
+  "unit_price_pence": 595,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2791,
+  "reserved": 0,
+  "sku": "SKU-0748",
+  "tags": [],
+  "unit_price_pence": 149,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4813,
+  "reserved": 0,
+  "sku": "SKU-0749",
+  "tags": [],
+  "unit_price_pence": 745,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3618,
+  "reserved": 0,
+  "sku": "SKU-0750",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 465,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3205,
+  "reserved": 0,
+  "sku": "SKU-0751",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 579,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2024,
+  "reserved": 0,
+  "sku": "SKU-0752",
+  "tags": [],
+  "unit_price_pence": 629,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2597,
+  "reserved": 0,
+  "sku": "SKU-0753",
+  "tags": [],
+  "unit_price_pence": 615,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2567,
+  "reserved": 0,
+  "sku": "SKU-0754",
+  "tags": [],
+  "unit_price_pence": 545,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3245,
+  "reserved": 0,
+  "sku": "SKU-0755",
+  "tags": [],
+  "unit_price_pence": 145,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4832,
+  "reserved": 0,
+  "sku": "SKU-0756",
+  "tags": [],
+  "unit_price_pence": 499,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2344,
+  "reserved": 0,
+  "sku": "SKU-0757",
+  "tags": [],
+  "unit_price_pence": 679,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2727,
+  "reserved": 0,
+  "sku": "SKU-0758",
+  "tags": [],
+  "unit_price_pence": 559,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2324,
+  "reserved": 0,
+  "sku": "SKU-0759",
+  "tags": [],
+  "unit_price_pence": 645,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4420,
+  "reserved": 0,
+  "sku": "SKU-0760",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 295,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 929,
+  "reserved": 0,
+  "sku": "SKU-0761",
+  "tags": [],
+  "unit_price_pence": 685,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3884,
+  "reserved": 0,
+  "sku": "SKU-0762",
+  "tags": [],
+  "unit_price_pence": 799,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4129,
+  "reserved": 0,
+  "sku": "SKU-0763",
+  "tags": [],
+  "unit_price_pence": 300,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2916,
+  "reserved": 0,
+  "sku": "SKU-0764",
+  "tags": [],
+  "unit_price_pence": 535,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3843,
+  "reserved": 0,
+  "sku": "SKU-0765",
+  "tags": [],
+  "unit_price_pence": 329,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4376,
+  "reserved": 0,
+  "sku": "SKU-0766",
+  "tags": [],
+  "unit_price_pence": 199,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3362,
+  "reserved": 0,
+  "sku": "SKU-0767",
+  "tags": [],
+  "unit_price_pence": 499,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3540,
+  "reserved": 0,
+  "sku": "SKU-0768",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 455,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3985,
+  "reserved": 0,
+  "sku": "SKU-0769",
+  "tags": [],
+  "unit_price_pence": 665,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1412,
+  "reserved": 0,
+  "sku": "SKU-0770",
+  "tags": [],
+  "unit_price_pence": 329,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 981,
+  "reserved": 0,
+  "sku": "SKU-0771",
+  "tags": [],
+  "unit_price_pence": 545,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3140,
+  "reserved": 0,
+  "sku": "SKU-0772",
+  "tags": [],
+  "unit_price_pence": 485,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3546,
+  "reserved": 0,
+  "sku": "SKU-0773",
+  "tags": [],
+  "unit_price_pence": 615,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1710,
+  "reserved": 0,
+  "sku": "SKU-0774",
+  "tags": [],
+  "unit_price_pence": 455,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2027,
+  "reserved": 0,
+  "sku": "SKU-0775",
+  "tags": [],
+  "unit_price_pence": 585,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4932,
+  "reserved": 0,
+  "sku": "SKU-0776",
+  "tags": [],
+  "unit_price_pence": 485,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2843,
+  "reserved": 0,
+  "sku": "SKU-0777",
+  "tags": [],
+  "unit_price_pence": 345,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4689,
+  "reserved": 0,
+  "sku": "SKU-0778",
+  "tags": [],
+  "unit_price_pence": 400,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4536,
+  "reserved": 0,
+  "sku": "SKU-0779",
+  "tags": [],
+  "unit_price_pence": 565,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1973,
+  "reserved": 0,
+  "sku": "SKU-0780",
+  "tags": [],
+  "unit_price_pence": 380,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4807,
+  "reserved": 0,
+  "sku": "SKU-0781",
+  "tags": [],
+  "unit_price_pence": 559,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2857,
+  "reserved": 0,
+  "sku": "SKU-0782",
+  "tags": [],
+  "unit_price_pence": 715,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 73,
+  "reserved": 0,
+  "sku": "SKU-0783",
+  "tags": [
+   "3for2",
+   "featured"
+  ],
+  "unit_price_pence": 725,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 64,
+  "reserved": 0,
+  "sku": "SKU-0784",
+  "tags": [
+   "3for2",
+   "featured"
+  ],
+  "unit_price_pence": 699,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4674,
+  "reserved": 0,
+  "sku": "SKU-0785",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 515,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2440,
+  "reserved": 0,
+  "sku": "SKU-0786",
+  "tags": [],
+  "unit_price_pence": 485,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3620,
+  "reserved": 0,
+  "sku": "SKU-0787",
+  "tags": [],
+  "unit_price_pence": 635,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3276,
+  "reserved": 0,
+  "sku": "SKU-0788",
+  "tags": [],
+  "unit_price_pence": 300,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1749,
+  "reserved": 0,
+  "sku": "SKU-0789",
+  "tags": [],
+  "unit_price_pence": 665,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3950,
+  "reserved": 0,
+  "sku": "SKU-0790",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 655,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4197,
+  "reserved": 0,
+  "sku": "SKU-0791",
+  "tags": [],
+  "unit_price_pence": 649,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3034,
+  "reserved": 0,
+  "sku": "SKU-0792",
+  "tags": [],
+  "unit_price_pence": 145,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1621,
+  "reserved": 0,
+  "sku": "SKU-0793",
+  "tags": [],
+  "unit_price_pence": 655,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3193,
+  "reserved": 0,
+  "sku": "SKU-0794",
+  "tags": [],
+  "unit_price_pence": 729,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1874,
+  "reserved": 0,
+  "sku": "SKU-0795",
+  "tags": [],
+  "unit_price_pence": 449,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2982,
+  "reserved": 0,
+  "sku": "SKU-0796",
+  "tags": [],
+  "unit_price_pence": 645,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 854,
+  "reserved": 0,
+  "sku": "SKU-0797",
+  "tags": [],
+  "unit_price_pence": 185,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 942,
+  "reserved": 0,
+  "sku": "SKU-0798",
+  "tags": [],
+  "unit_price_pence": 245,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3565,
+  "reserved": 0,
+  "sku": "SKU-0799",
+  "tags": [],
+  "unit_price_pence": 635,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2199,
+  "reserved": 0,
+  "sku": "SKU-0800",
+  "tags": [],
+  "unit_price_pence": 239,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1063,
+  "reserved": 0,
+  "sku": "SKU-0801",
+  "tags": [],
+  "unit_price_pence": 265,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2614,
+  "reserved": 0,
+  "sku": "SKU-0802",
+  "tags": [],
+  "unit_price_pence": 589,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1169,
+  "reserved": 0,
+  "sku": "SKU-0803",
+  "tags": [],
+  "unit_price_pence": 455,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4570,
+  "reserved": 0,
+  "sku": "SKU-0804",
+  "tags": [],
+  "unit_price_pence": 515,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2331,
+  "reserved": 0,
+  "sku": "SKU-0805",
+  "tags": [],
+  "unit_price_pence": 495,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2329,
+  "reserved": 0,
+  "sku": "SKU-0806",
+  "tags": [],
+  "unit_price_pence": 479,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4801,
+  "reserved": 0,
+  "sku": "SKU-0807",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 715,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1003,
+  "reserved": 0,
+  "sku": "SKU-0808",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 485,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1314,
+  "reserved": 0,
+  "sku": "SKU-0809",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 419,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3327,
+  "reserved": 0,
+  "sku": "SKU-0810",
+  "tags": [],
+  "unit_price_pence": 670,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3000,
+  "reserved": 0,
+  "sku": "SKU-0811",
+  "tags": [],
+  "unit_price_pence": 155,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2111,
+  "reserved": 0,
+  "sku": "SKU-0812",
+  "tags": [],
+  "unit_price_pence": 515,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 819,
+  "reserved": 0,
+  "sku": "SKU-0813",
+  "tags": [],
+  "unit_price_pence": 365,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2268,
+  "reserved": 0,
+  "sku": "SKU-0814",
+  "tags": [],
+  "unit_price_pence": 265,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4345,
+  "reserved": 0,
+  "sku": "SKU-0815",
+  "tags": [],
+  "unit_price_pence": 400,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 941,
+  "reserved": 0,
+  "sku": "SKU-0816",
+  "tags": [],
+  "unit_price_pence": 219,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 948,
+  "reserved": 0,
+  "sku": "SKU-0817",
+  "tags": [],
+  "unit_price_pence": 449,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4533,
+  "reserved": 0,
+  "sku": "SKU-0818",
+  "tags": [],
+  "unit_price_pence": 649,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2385,
+  "reserved": 0,
+  "sku": "SKU-0819",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 300,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 1050,
+  "reserved": 0,
+  "sku": "SKU-0820",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 349,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3216,
+  "reserved": 0,
+  "sku": "SKU-0821",
+  "tags": [],
+  "unit_price_pence": 345,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 3744,
+  "reserved": 0,
+  "sku": "SKU-0822",
+  "tags": [],
+  "unit_price_pence": 229,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4744,
+  "reserved": 0,
+  "sku": "SKU-0823",
+  "tags": [],
+  "unit_price_pence": 635,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 2077,
+  "reserved": 0,
+  "sku": "SKU-0824",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 409,
+  "vat_band": "zero"
+ },
+ {
+  "on_hand": 4239,
+  "reserved": 0,
+  "sku": "SKU-0825",
+  "tags": [],
+  "unit_price_pence": 189,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 1870,
+  "reserved": 0,
+  "sku": "SKU-0826",
+  "tags": [],
+  "unit_price_pence": 759,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 50,
+  "reserved": 0,
+  "sku": "SKU-0827",
+  "tags": [
+   "3for2",
+   "featured"
+  ],
+  "unit_price_pence": 219,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 3328,
+  "reserved": 0,
+  "sku": "SKU-0828",
+  "tags": [],
+  "unit_price_pence": 940,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 3457,
+  "reserved": 0,
+  "sku": "SKU-0829",
+  "tags": [],
+  "unit_price_pence": 749,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 3019,
+  "reserved": 0,
+  "sku": "SKU-0830",
+  "tags": [],
+  "unit_price_pence": 285,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 1446,
+  "reserved": 0,
+  "sku": "SKU-0831",
+  "tags": [],
+  "unit_price_pence": 335,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 4888,
+  "reserved": 0,
+  "sku": "SKU-0832",
+  "tags": [],
+  "unit_price_pence": 1065,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 2389,
+  "reserved": 0,
+  "sku": "SKU-0833",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 405,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 1156,
+  "reserved": 0,
+  "sku": "SKU-0834",
+  "tags": [],
+  "unit_price_pence": 499,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 1519,
+  "reserved": 0,
+  "sku": "SKU-0835",
+  "tags": [],
+  "unit_price_pence": 699,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 3385,
+  "reserved": 0,
+  "sku": "SKU-0836",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 1035,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 3949,
+  "reserved": 0,
+  "sku": "SKU-0837",
+  "tags": [],
+  "unit_price_pence": 395,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 2315,
+  "reserved": 0,
+  "sku": "SKU-0838",
+  "tags": [],
+  "unit_price_pence": 1185,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 3495,
+  "reserved": 0,
+  "sku": "SKU-0839",
+  "tags": [],
+  "unit_price_pence": 449,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 2932,
+  "reserved": 0,
+  "sku": "SKU-0840",
+  "tags": [],
+  "unit_price_pence": 409,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 4307,
+  "reserved": 0,
+  "sku": "SKU-0841",
+  "tags": [],
+  "unit_price_pence": 815,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 1702,
+  "reserved": 0,
+  "sku": "SKU-0842",
+  "tags": [],
+  "unit_price_pence": 445,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 2291,
+  "reserved": 0,
+  "sku": "SKU-0843",
+  "tags": [],
+  "unit_price_pence": 355,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 4602,
+  "reserved": 0,
+  "sku": "SKU-0844",
+  "tags": [],
+  "unit_price_pence": 1049,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 4276,
+  "reserved": 0,
+  "sku": "SKU-0845",
+  "tags": [],
+  "unit_price_pence": 1259,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 4742,
+  "reserved": 0,
+  "sku": "SKU-0846",
+  "tags": [],
+  "unit_price_pence": 309,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 917,
+  "reserved": 0,
+  "sku": "SKU-0847",
+  "tags": [],
+  "unit_price_pence": 1059,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 44,
+  "reserved": 0,
+  "sku": "SKU-0848",
+  "tags": [
+   "3for2",
+   "featured"
+  ],
+  "unit_price_pence": 245,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 2277,
+  "reserved": 0,
+  "sku": "SKU-0849",
+  "tags": [],
+  "unit_price_pence": 349,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 2000,
+  "reserved": 0,
+  "sku": "SKU-0850",
+  "tags": [],
+  "unit_price_pence": 1209,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 1356,
+  "reserved": 0,
+  "sku": "SKU-0851",
+  "tags": [],
+  "unit_price_pence": 445,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 982,
+  "reserved": 0,
+  "sku": "SKU-0852",
+  "tags": [],
+  "unit_price_pence": 360,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 2968,
+  "reserved": 0,
+  "sku": "SKU-0853",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 25,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 1326,
+  "reserved": 0,
+  "sku": "SKU-0854",
+  "tags": [],
+  "unit_price_pence": 1129,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 4644,
+  "reserved": 0,
+  "sku": "SKU-0855",
+  "tags": [],
+  "unit_price_pence": 945,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 826,
+  "reserved": 0,
+  "sku": "SKU-0856",
+  "tags": [],
+  "unit_price_pence": 799,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 2753,
+  "reserved": 0,
+  "sku": "SKU-0857",
+  "tags": [],
+  "unit_price_pence": 1195,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 2960,
+  "reserved": 0,
+  "sku": "SKU-0858",
+  "tags": [],
+  "unit_price_pence": 889,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 3227,
+  "reserved": 0,
+  "sku": "SKU-0859",
+  "tags": [],
+  "unit_price_pence": 335,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 4651,
+  "reserved": 0,
+  "sku": "SKU-0860",
+  "tags": [],
+  "unit_price_pence": 915,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 2404,
+  "reserved": 0,
+  "sku": "SKU-0861",
+  "tags": [],
+  "unit_price_pence": 839,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 2797,
+  "reserved": 0,
+  "sku": "SKU-0862",
+  "tags": [],
+  "unit_price_pence": 255,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 2668,
+  "reserved": 0,
+  "sku": "SKU-0863",
+  "tags": [],
+  "unit_price_pence": 635,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 2909,
+  "reserved": 0,
+  "sku": "SKU-0864",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 369,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 4539,
+  "reserved": 0,
+  "sku": "SKU-0865",
+  "tags": [],
+  "unit_price_pence": 1165,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 2952,
+  "reserved": 0,
+  "sku": "SKU-0866",
+  "tags": [],
+  "unit_price_pence": 129,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 3809,
+  "reserved": 0,
+  "sku": "SKU-0867",
+  "tags": [],
+  "unit_price_pence": 1129,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 4960,
+  "reserved": 0,
+  "sku": "SKU-0868",
+  "tags": [],
+  "unit_price_pence": 735,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 4184,
+  "reserved": 0,
+  "sku": "SKU-0869",
+  "tags": [],
+  "unit_price_pence": 855,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 2344,
+  "reserved": 0,
+  "sku": "SKU-0870",
+  "tags": [],
+  "unit_price_pence": 619,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 1049,
+  "reserved": 0,
+  "sku": "SKU-0871",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 475,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 2647,
+  "reserved": 0,
+  "sku": "SKU-0872",
+  "tags": [],
+  "unit_price_pence": 795,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 1423,
+  "reserved": 0,
+  "sku": "SKU-0873",
+  "tags": [],
+  "unit_price_pence": 370,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 2812,
+  "reserved": 0,
+  "sku": "SKU-0874",
+  "tags": [],
+  "unit_price_pence": 255,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 1037,
+  "reserved": 0,
+  "sku": "SKU-0875",
+  "tags": [],
+  "unit_price_pence": 595,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 4039,
+  "reserved": 0,
+  "sku": "SKU-0876",
+  "tags": [],
+  "unit_price_pence": 1249,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 2884,
+  "reserved": 0,
+  "sku": "SKU-0877",
+  "tags": [],
+  "unit_price_pence": 855,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 1074,
+  "reserved": 0,
+  "sku": "SKU-0878",
+  "tags": [],
+  "unit_price_pence": 649,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 974,
+  "reserved": 0,
+  "sku": "SKU-0879",
+  "tags": [],
+  "unit_price_pence": 1119,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 1337,
+  "reserved": 0,
+  "sku": "SKU-0880",
+  "tags": [],
+  "unit_price_pence": 315,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 3061,
+  "reserved": 0,
+  "sku": "SKU-0881",
+  "tags": [],
+  "unit_price_pence": 755,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 3432,
+  "reserved": 0,
+  "sku": "SKU-0882",
+  "tags": [],
+  "unit_price_pence": 885,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 2638,
+  "reserved": 0,
+  "sku": "SKU-0883",
+  "tags": [],
+  "unit_price_pence": 929,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 1675,
+  "reserved": 0,
+  "sku": "SKU-0884",
+  "tags": [],
+  "unit_price_pence": 239,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 2207,
+  "reserved": 0,
+  "sku": "SKU-0885",
+  "tags": [],
+  "unit_price_pence": 399,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 1774,
+  "reserved": 0,
+  "sku": "SKU-0886",
+  "tags": [],
+  "unit_price_pence": 345,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 3320,
+  "reserved": 0,
+  "sku": "SKU-0887",
+  "tags": [],
+  "unit_price_pence": 29,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 940,
+  "reserved": 0,
+  "sku": "SKU-0888",
+  "tags": [],
+  "unit_price_pence": 599,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 3747,
+  "reserved": 0,
+  "sku": "SKU-0889",
+  "tags": [],
+  "unit_price_pence": 799,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 1247,
+  "reserved": 0,
+  "sku": "SKU-0890",
+  "tags": [],
+  "unit_price_pence": 329,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 3055,
+  "reserved": 0,
+  "sku": "SKU-0891",
+  "tags": [],
+  "unit_price_pence": 565,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 3621,
+  "reserved": 0,
+  "sku": "SKU-0892",
+  "tags": [],
+  "unit_price_pence": 849,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 1673,
+  "reserved": 0,
+  "sku": "SKU-0893",
+  "tags": [],
+  "unit_price_pence": 1205,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 1005,
+  "reserved": 0,
+  "sku": "SKU-0894",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 245,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 2909,
+  "reserved": 0,
+  "sku": "SKU-0895",
+  "tags": [],
+  "unit_price_pence": 199,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 3047,
+  "reserved": 0,
+  "sku": "SKU-0896",
+  "tags": [],
+  "unit_price_pence": 99,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 1295,
+  "reserved": 0,
+  "sku": "SKU-0897",
+  "tags": [],
+  "unit_price_pence": 229,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 2078,
+  "reserved": 0,
+  "sku": "SKU-0898",
+  "tags": [],
+  "unit_price_pence": 855,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 2962,
+  "reserved": 0,
+  "sku": "SKU-0899",
+  "tags": [],
+  "unit_price_pence": 629,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 3644,
+  "reserved": 0,
+  "sku": "SKU-0900",
+  "tags": [],
+  "unit_price_pence": 665,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 1411,
+  "reserved": 0,
+  "sku": "SKU-0901",
+  "tags": [],
+  "unit_price_pence": 550,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 2630,
+  "reserved": 0,
+  "sku": "SKU-0902",
+  "tags": [],
+  "unit_price_pence": 1285,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 1790,
+  "reserved": 0,
+  "sku": "SKU-0903",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 815,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 3551,
+  "reserved": 0,
+  "sku": "SKU-0904",
+  "tags": [],
+  "unit_price_pence": 185,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 2966,
+  "reserved": 0,
+  "sku": "SKU-0905",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 365,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 4100,
+  "reserved": 0,
+  "sku": "SKU-0906",
+  "tags": [],
+  "unit_price_pence": 90,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 3530,
+  "reserved": 0,
+  "sku": "SKU-0907",
+  "tags": [],
+  "unit_price_pence": 339,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 3774,
+  "reserved": 0,
+  "sku": "SKU-0908",
+  "tags": [],
+  "unit_price_pence": 1109,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 3549,
+  "reserved": 0,
+  "sku": "SKU-0909",
+  "tags": [],
+  "unit_price_pence": 1099,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 3640,
+  "reserved": 0,
+  "sku": "SKU-0910",
+  "tags": [],
+  "unit_price_pence": 85,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 856,
+  "reserved": 0,
+  "sku": "SKU-0911",
+  "tags": [],
+  "unit_price_pence": 1255,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 3433,
+  "reserved": 0,
+  "sku": "SKU-0912",
+  "tags": [],
+  "unit_price_pence": 195,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 3535,
+  "reserved": 0,
+  "sku": "SKU-0913",
+  "tags": [],
+  "unit_price_pence": 739,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 1779,
+  "reserved": 0,
+  "sku": "SKU-0914",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 935,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 1205,
+  "reserved": 0,
+  "sku": "SKU-0915",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 1149,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 2831,
+  "reserved": 0,
+  "sku": "SKU-0916",
+  "tags": [],
+  "unit_price_pence": 485,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 4576,
+  "reserved": 0,
+  "sku": "SKU-0917",
+  "tags": [],
+  "unit_price_pence": 665,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 4443,
+  "reserved": 0,
+  "sku": "SKU-0918",
+  "tags": [],
+  "unit_price_pence": 469,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 4653,
+  "reserved": 0,
+  "sku": "SKU-0919",
+  "tags": [],
+  "unit_price_pence": 809,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 2581,
+  "reserved": 0,
+  "sku": "SKU-0920",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 49,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 971,
+  "reserved": 0,
+  "sku": "SKU-0921",
+  "tags": [],
+  "unit_price_pence": 799,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 2410,
+  "reserved": 0,
+  "sku": "SKU-0922",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 299,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 1735,
+  "reserved": 0,
+  "sku": "SKU-0923",
+  "tags": [],
+  "unit_price_pence": 1015,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 3682,
+  "reserved": 0,
+  "sku": "SKU-0924",
+  "tags": [],
+  "unit_price_pence": 499,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 2572,
+  "reserved": 0,
+  "sku": "SKU-0925",
+  "tags": [],
+  "unit_price_pence": 1115,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 4160,
+  "reserved": 0,
+  "sku": "SKU-0926",
+  "tags": [],
+  "unit_price_pence": 929,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 4422,
+  "reserved": 0,
+  "sku": "SKU-0927",
+  "tags": [],
+  "unit_price_pence": 1025,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 1477,
+  "reserved": 0,
+  "sku": "SKU-0928",
+  "tags": [],
+  "unit_price_pence": 445,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 3323,
+  "reserved": 0,
+  "sku": "SKU-0929",
+  "tags": [],
+  "unit_price_pence": 349,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 2668,
+  "reserved": 0,
+  "sku": "SKU-0930",
+  "tags": [],
+  "unit_price_pence": 229,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 2867,
+  "reserved": 0,
+  "sku": "SKU-0931",
+  "tags": [],
+  "unit_price_pence": 365,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 2792,
+  "reserved": 0,
+  "sku": "SKU-0932",
+  "tags": [],
+  "unit_price_pence": 1129,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 1684,
+  "reserved": 0,
+  "sku": "SKU-0933",
+  "tags": [],
+  "unit_price_pence": 265,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 1618,
+  "reserved": 0,
+  "sku": "SKU-0934",
+  "tags": [],
+  "unit_price_pence": 415,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 2237,
+  "reserved": 0,
+  "sku": "SKU-0935",
+  "tags": [
+   "3for2"
+  ],
+  "unit_price_pence": 1065,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 4756,
+  "reserved": 0,
+  "sku": "SKU-0936",
+  "tags": [],
+  "unit_price_pence": 229,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 3382,
+  "reserved": 0,
+  "sku": "SKU-0937",
+  "tags": [],
+  "unit_price_pence": 595,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 3475,
+  "reserved": 0,
+  "sku": "SKU-0938",
+  "tags": [],
+  "unit_price_pence": 465,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 2314,
+  "reserved": 0,
+  "sku": "SKU-0939",
+  "tags": [],
+  "unit_price_pence": 770,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 4202,
+  "reserved": 0,
+  "sku": "SKU-0940",
+  "tags": [],
+  "unit_price_pence": 1115,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 2890,
+  "reserved": 0,
+  "sku": "SKU-0941",
+  "tags": [],
+  "unit_price_pence": 959,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 4477,
+  "reserved": 0,
+  "sku": "SKU-0942",
+  "tags": [],
+  "unit_price_pence": 735,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 4706,
+  "reserved": 0,
+  "sku": "SKU-0943",
+  "tags": [],
+  "unit_price_pence": 935,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 1344,
+  "reserved": 0,
+  "sku": "SKU-0944",
+  "tags": [],
+  "unit_price_pence": 649,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 2219,
+  "reserved": 0,
+  "sku": "SKU-0945",
+  "tags": [],
+  "unit_price_pence": 735,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 4737,
+  "reserved": 0,
+  "sku": "SKU-0946",
+  "tags": [],
+  "unit_price_pence": 549,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 4696,
+  "reserved": 0,
+  "sku": "SKU-0947",
+  "tags": [],
+  "unit_price_pence": 1179,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 1323,
+  "reserved": 0,
+  "sku": "SKU-0948",
+  "tags": [],
+  "unit_price_pence": 565,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 2676,
+  "reserved": 0,
+  "sku": "SKU-0949",
+  "tags": [],
+  "unit_price_pence": 545,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 3351,
+  "reserved": 0,
+  "sku": "SKU-0950",
+  "tags": [],
+  "unit_price_pence": 485,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 2129,
+  "reserved": 0,
+  "sku": "SKU-0951",
+  "tags": [],
+  "unit_price_pence": 145,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 3895,
+  "reserved": 0,
+  "sku": "SKU-0952",
+  "tags": [],
+  "unit_price_pence": 1149,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 2679,
+  "reserved": 0,
+  "sku": "SKU-0953",
+  "tags": [],
+  "unit_price_pence": 1145,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 4775,
+  "reserved": 0,
+  "sku": "SKU-0954",
+  "tags": [],
+  "unit_price_pence": 619,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 1255,
+  "reserved": 0,
+  "sku": "SKU-0955",
+  "tags": [],
+  "unit_price_pence": 955,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 4042,
+  "reserved": 0,
+  "sku": "SKU-0956",
+  "tags": [],
+  "unit_price_pence": 215,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 3087,
+  "reserved": 0,
+  "sku": "SKU-0957",
+  "tags": [],
+  "unit_price_pence": 685,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 2219,
+  "reserved": 0,
+  "sku": "SKU-0958",
+  "tags": [],
+  "unit_price_pence": 949,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 4849,
+  "reserved": 0,
+  "sku": "SKU-0959",
+  "tags": [],
+  "unit_price_pence": 1135,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 1997,
+  "reserved": 0,
+  "sku": "SKU-0960",
+  "tags": [],
+  "unit_price_pence": 455,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 3334,
+  "reserved": 0,
+  "sku": "SKU-0961",
+  "tags": [],
+  "unit_price_pence": 635,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 1151,
+  "reserved": 0,
+  "sku": "SKU-0962",
+  "tags": [],
+  "unit_price_pence": 749,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 1532,
+  "reserved": 0,
+  "sku": "SKU-0963",
+  "tags": [],
+  "unit_price_pence": 415,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 2942,
+  "reserved": 0,
+  "sku": "SKU-0964",
+  "tags": [],
+  "unit_price_pence": 835,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 3717,
+  "reserved": 0,
+  "sku": "SKU-0965",
+  "tags": [],
+  "unit_price_pence": 1185,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 2627,
+  "reserved": 0,
+  "sku": "SKU-0966",
+  "tags": [],
+  "unit_price_pence": 1015,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 1190,
+  "reserved": 0,
+  "sku": "SKU-0967",
+  "tags": [],
+  "unit_price_pence": 315,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 1807,
+  "reserved": 0,
+  "sku": "SKU-0968",
+  "tags": [],
+  "unit_price_pence": 935,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 1973,
+  "reserved": 0,
+  "sku": "SKU-0969",
+  "tags": [],
+  "unit_price_pence": 195,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 985,
+  "reserved": 0,
+  "sku": "SKU-0970",
+  "tags": [],
+  "unit_price_pence": 719,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 1658,
+  "reserved": 0,
+  "sku": "SKU-0971",
+  "tags": [],
+  "unit_price_pence": 139,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 3397,
+  "reserved": 0,
+  "sku": "SKU-0972",
+  "tags": [],
+  "unit_price_pence": 335,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 3736,
+  "reserved": 0,
+  "sku": "SKU-0973",
+  "tags": [],
+  "unit_price_pence": 809,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 4333,
+  "reserved": 0,
+  "sku": "SKU-0974",
+  "tags": [],
+  "unit_price_pence": 195,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 3701,
+  "reserved": 0,
+  "sku": "SKU-0975",
+  "tags": [],
+  "unit_price_pence": 829,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 4654,
+  "reserved": 0,
+  "sku": "SKU-0976",
+  "tags": [],
+  "unit_price_pence": 949,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 4136,
+  "reserved": 0,
+  "sku": "SKU-0977",
+  "tags": [],
+  "unit_price_pence": 169,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 2567,
+  "reserved": 0,
+  "sku": "SKU-0978",
+  "tags": [],
+  "unit_price_pence": 219,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 2515,
+  "reserved": 0,
+  "sku": "SKU-0979",
+  "tags": [],
+  "unit_price_pence": 85,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 2008,
+  "reserved": 0,
+  "sku": "SKU-0980",
+  "tags": [],
+  "unit_price_pence": 855,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 1621,
+  "reserved": 0,
+  "sku": "SKU-0981",
+  "tags": [],
+  "unit_price_pence": 955,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 3564,
+  "reserved": 0,
+  "sku": "SKU-0982",
+  "tags": [],
+  "unit_price_pence": 195,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 1849,
+  "reserved": 0,
+  "sku": "SKU-0983",
+  "tags": [],
+  "unit_price_pence": 239,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 3523,
+  "reserved": 0,
+  "sku": "SKU-0984",
+  "tags": [],
+  "unit_price_pence": 449,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 4344,
+  "reserved": 0,
+  "sku": "SKU-0985",
+  "tags": [],
+  "unit_price_pence": 945,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 1487,
+  "reserved": 0,
+  "sku": "SKU-0986",
+  "tags": [],
+  "unit_price_pence": 985,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 4673,
+  "reserved": 0,
+  "sku": "SKU-0987",
+  "tags": [],
+  "unit_price_pence": 635,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 3467,
+  "reserved": 0,
+  "sku": "SKU-0988",
+  "tags": [],
+  "unit_price_pence": 529,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 2986,
+  "reserved": 0,
+  "sku": "SKU-0989",
+  "tags": [],
+  "unit_price_pence": 849,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 1957,
+  "reserved": 0,
+  "sku": "SKU-0990",
+  "tags": [],
+  "unit_price_pence": 149,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 4263,
+  "reserved": 0,
+  "sku": "SKU-0991",
+  "tags": [],
+  "unit_price_pence": 1095,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 2759,
+  "reserved": 0,
+  "sku": "SKU-0992",
+  "tags": [],
+  "unit_price_pence": 545,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 3380,
+  "reserved": 0,
+  "sku": "SKU-0993",
+  "tags": [],
+  "unit_price_pence": 235,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 2401,
+  "reserved": 0,
+  "sku": "SKU-0994",
+  "tags": [],
+  "unit_price_pence": 1145,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 1924,
+  "reserved": 0,
+  "sku": "SKU-0995",
+  "tags": [],
+  "unit_price_pence": 455,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 4819,
+  "reserved": 0,
+  "sku": "SKU-0996",
+  "tags": [],
+  "unit_price_pence": 555,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 3062,
+  "reserved": 0,
+  "sku": "SKU-0997",
+  "tags": [],
+  "unit_price_pence": 1015,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 2888,
+  "reserved": 0,
+  "sku": "SKU-0998",
+  "tags": [],
+  "unit_price_pence": 415,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 2964,
+  "reserved": 0,
+  "sku": "SKU-0999",
+  "tags": [],
+  "unit_price_pence": 829,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 3426,
+  "reserved": 0,
+  "sku": "SKU-1000",
+  "tags": [],
+  "unit_price_pence": 815,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 1496,
+  "reserved": 0,
+  "sku": "SKU-1001",
+  "tags": [],
+  "unit_price_pence": 399,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 1566,
+  "reserved": 0,
+  "sku": "SKU-1002",
+  "tags": [],
+  "unit_price_pence": 329,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 1230,
+  "reserved": 0,
+  "sku": "SKU-1003",
+  "tags": [],
+  "unit_price_pence": 925,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 1553,
+  "reserved": 0,
+  "sku": "SKU-1004",
+  "tags": [],
+  "unit_price_pence": 655,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 3987,
+  "reserved": 0,
+  "sku": "SKU-1005",
+  "tags": [],
+  "unit_price_pence": 689,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 1158,
+  "reserved": 0,
+  "sku": "SKU-1006",
+  "tags": [],
+  "unit_price_pence": 275,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 879,
+  "reserved": 0,
+  "sku": "SKU-1007",
+  "tags": [],
+  "unit_price_pence": 1045,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 4310,
+  "reserved": 0,
+  "sku": "SKU-1008",
+  "tags": [],
+  "unit_price_pence": 1000,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 4000,
+  "reserved": 0,
+  "sku": "SKU-1009",
+  "tags": [],
+  "unit_price_pence": 579,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 4620,
+  "reserved": 0,
+  "sku": "SKU-1010",
+  "tags": [],
+  "unit_price_pence": 485,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 3142,
+  "reserved": 0,
+  "sku": "SKU-1011",
+  "tags": [],
+  "unit_price_pence": 955,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 901,
+  "reserved": 0,
+  "sku": "SKU-1012",
+  "tags": [],
+  "unit_price_pence": 565,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 2141,
+  "reserved": 0,
+  "sku": "SKU-1013",
+  "tags": [],
+  "unit_price_pence": 1149,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 3061,
+  "reserved": 0,
+  "sku": "SKU-1014",
+  "tags": [],
+  "unit_price_pence": 1135,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 2693,
+  "reserved": 0,
+  "sku": "SKU-1015",
+  "tags": [],
+  "unit_price_pence": 580,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 4782,
+  "reserved": 0,
+  "sku": "SKU-1016",
+  "tags": [],
+  "unit_price_pence": 415,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 1171,
+  "reserved": 0,
+  "sku": "SKU-1017",
+  "tags": [],
+  "unit_price_pence": 749,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 986,
+  "reserved": 0,
+  "sku": "SKU-1018",
+  "tags": [],
+  "unit_price_pence": 930,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 4610,
+  "reserved": 0,
+  "sku": "SKU-1019",
+  "tags": [],
+  "unit_price_pence": 215,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 835,
+  "reserved": 0,
+  "sku": "SKU-1020",
+  "tags": [],
+  "unit_price_pence": 499,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 967,
+  "reserved": 0,
+  "sku": "SKU-1021",
+  "tags": [],
+  "unit_price_pence": 749,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 3476,
+  "reserved": 0,
+  "sku": "SKU-1022",
+  "tags": [],
+  "unit_price_pence": 1065,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 2717,
+  "reserved": 0,
+  "sku": "SKU-1023",
+  "tags": [],
+  "unit_price_pence": 529,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 4629,
+  "reserved": 0,
+  "sku": "SKU-1024",
+  "tags": [],
+  "unit_price_pence": 215,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 3618,
+  "reserved": 0,
+  "sku": "SKU-1025",
+  "tags": [],
+  "unit_price_pence": 1135,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 3917,
+  "reserved": 0,
+  "sku": "SKU-1026",
+  "tags": [],
+  "unit_price_pence": 999,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 4036,
+  "reserved": 0,
+  "sku": "SKU-1027",
+  "tags": [],
+  "unit_price_pence": 395,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 1315,
+  "reserved": 0,
+  "sku": "SKU-1028",
+  "tags": [],
+  "unit_price_pence": 499,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 3741,
+  "reserved": 0,
+  "sku": "SKU-1029",
+  "tags": [],
+  "unit_price_pence": 1419,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 2971,
+  "reserved": 0,
+  "sku": "SKU-1030",
+  "tags": [],
+  "unit_price_pence": 520,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 3002,
+  "reserved": 0,
+  "sku": "SKU-1031",
+  "tags": [],
+  "unit_price_pence": 805,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 920,
+  "reserved": 0,
+  "sku": "SKU-1032",
+  "tags": [],
+  "unit_price_pence": 1055,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 3309,
+  "reserved": 0,
+  "sku": "SKU-1033",
+  "tags": [],
+  "unit_price_pence": 965,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 1678,
+  "reserved": 0,
+  "sku": "SKU-1034",
+  "tags": [],
+  "unit_price_pence": 485,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 2097,
+  "reserved": 0,
+  "sku": "SKU-1035",
+  "tags": [],
+  "unit_price_pence": 1130,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 2684,
+  "reserved": 0,
+  "sku": "SKU-1036",
+  "tags": [],
+  "unit_price_pence": 799,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 2472,
+  "reserved": 0,
+  "sku": "SKU-1037",
+  "tags": [],
+  "unit_price_pence": 1215,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 4857,
+  "reserved": 0,
+  "sku": "SKU-1038",
+  "tags": [],
+  "unit_price_pence": 635,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 4741,
+  "reserved": 0,
+  "sku": "SKU-1039",
+  "tags": [],
+  "unit_price_pence": 965,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 2521,
+  "reserved": 0,
+  "sku": "SKU-1040",
+  "tags": [],
+  "unit_price_pence": 129,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 2445,
+  "reserved": 0,
+  "sku": "SKU-1041",
+  "tags": [],
+  "unit_price_pence": 199,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 2943,
+  "reserved": 0,
+  "sku": "SKU-1042",
+  "tags": [],
+  "unit_price_pence": 1499,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 1498,
+  "reserved": 0,
+  "sku": "SKU-1043",
+  "tags": [],
+  "unit_price_pence": 935,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 3545,
+  "reserved": 0,
+  "sku": "SKU-1044",
+  "tags": [],
+  "unit_price_pence": 1155,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 4542,
+  "reserved": 0,
+  "sku": "SKU-1045",
+  "tags": [],
+  "unit_price_pence": 1499,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 1105,
+  "reserved": 0,
+  "sku": "SKU-1046",
+  "tags": [],
+  "unit_price_pence": 465,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 4752,
+  "reserved": 0,
+  "sku": "SKU-1047",
+  "tags": [],
+  "unit_price_pence": 329,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 4133,
+  "reserved": 0,
+  "sku": "SKU-1048",
+  "tags": [],
+  "unit_price_pence": 1179,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 2663,
+  "reserved": 0,
+  "sku": "SKU-1049",
+  "tags": [],
+  "unit_price_pence": 929,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 4708,
+  "reserved": 0,
+  "sku": "SKU-1050",
+  "tags": [],
+  "unit_price_pence": 839,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 994,
+  "reserved": 0,
+  "sku": "SKU-1051",
+  "tags": [],
+  "unit_price_pence": 1485,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 4815,
+  "reserved": 0,
+  "sku": "SKU-1052",
+  "tags": [],
+  "unit_price_pence": 1249,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 1043,
+  "reserved": 0,
+  "sku": "SKU-1053",
+  "tags": [],
+  "unit_price_pence": 265,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 1063,
+  "reserved": 0,
+  "sku": "SKU-1054",
+  "tags": [],
+  "unit_price_pence": 215,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 2334,
+  "reserved": 0,
+  "sku": "SKU-1055",
+  "tags": [],
+  "unit_price_pence": 355,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 4180,
+  "reserved": 0,
+  "sku": "SKU-1056",
+  "tags": [],
+  "unit_price_pence": 1299,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 1707,
+  "reserved": 0,
+  "sku": "SKU-1057",
+  "tags": [],
+  "unit_price_pence": 1359,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 3476,
+  "reserved": 0,
+  "sku": "SKU-1058",
+  "tags": [],
+  "unit_price_pence": 685,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 1245,
+  "reserved": 0,
+  "sku": "SKU-1059",
+  "tags": [],
+  "unit_price_pence": 1279,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 1404,
+  "reserved": 0,
+  "sku": "SKU-1060",
+  "tags": [],
+  "unit_price_pence": 1355,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 4951,
+  "reserved": 0,
+  "sku": "SKU-1061",
+  "tags": [],
+  "unit_price_pence": 1375,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 2106,
+  "reserved": 0,
+  "sku": "SKU-1062",
+  "tags": [],
+  "unit_price_pence": 949,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 4053,
+  "reserved": 0,
+  "sku": "SKU-1063",
+  "tags": [],
+  "unit_price_pence": 1265,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 2896,
+  "reserved": 0,
+  "sku": "SKU-1064",
+  "tags": [],
+  "unit_price_pence": 799,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 1228,
+  "reserved": 0,
+  "sku": "SKU-1065",
+  "tags": [],
+  "unit_price_pence": 1255,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 4990,
+  "reserved": 0,
+  "sku": "SKU-1066",
+  "tags": [],
+  "unit_price_pence": 835,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 1760,
+  "reserved": 0,
+  "sku": "SKU-1067",
+  "tags": [],
+  "unit_price_pence": 719,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 4001,
+  "reserved": 0,
+  "sku": "SKU-1068",
+  "tags": [],
+  "unit_price_pence": 895,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 2083,
+  "reserved": 0,
+  "sku": "SKU-1069",
+  "tags": [],
+  "unit_price_pence": 1215,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 4968,
+  "reserved": 0,
+  "sku": "SKU-1070",
+  "tags": [],
+  "unit_price_pence": 829,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 3573,
+  "reserved": 0,
+  "sku": "SKU-1071",
+  "tags": [],
+  "unit_price_pence": 1229,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 2288,
+  "reserved": 0,
+  "sku": "SKU-1072",
+  "tags": [],
+  "unit_price_pence": 569,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 3068,
+  "reserved": 0,
+  "sku": "SKU-1073",
+  "tags": [],
+  "unit_price_pence": 1229,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 884,
+  "reserved": 0,
+  "sku": "SKU-1074",
+  "tags": [],
+  "unit_price_pence": 1179,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 4237,
+  "reserved": 0,
+  "sku": "SKU-1075",
+  "tags": [],
+  "unit_price_pence": 509,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 4535,
+  "reserved": 0,
+  "sku": "SKU-1076",
+  "tags": [],
+  "unit_price_pence": 1499,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 1259,
+  "reserved": 0,
+  "sku": "SKU-1077",
+  "tags": [],
+  "unit_price_pence": 1415,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 1781,
+  "reserved": 0,
+  "sku": "SKU-1078",
+  "tags": [],
+  "unit_price_pence": 385,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 3181,
+  "reserved": 0,
+  "sku": "SKU-1079",
+  "tags": [],
+  "unit_price_pence": 595,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 2861,
+  "reserved": 0,
+  "sku": "SKU-1080",
+  "tags": [],
+  "unit_price_pence": 629,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 4020,
+  "reserved": 0,
+  "sku": "SKU-1081",
+  "tags": [],
+  "unit_price_pence": 1129,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 2855,
+  "reserved": 0,
+  "sku": "SKU-1082",
+  "tags": [],
+  "unit_price_pence": 659,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 898,
+  "reserved": 0,
+  "sku": "SKU-1083",
+  "tags": [],
+  "unit_price_pence": 209,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 4602,
+  "reserved": 0,
+  "sku": "SKU-1084",
+  "tags": [],
+  "unit_price_pence": 1365,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 2138,
+  "reserved": 0,
+  "sku": "SKU-1085",
+  "tags": [],
+  "unit_price_pence": 985,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 824,
+  "reserved": 0,
+  "sku": "SKU-1086",
+  "tags": [],
+  "unit_price_pence": 480,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 4933,
+  "reserved": 0,
+  "sku": "SKU-1087",
+  "tags": [],
+  "unit_price_pence": 1089,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 4341,
+  "reserved": 0,
+  "sku": "SKU-1088",
+  "tags": [],
+  "unit_price_pence": 515,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 4312,
+  "reserved": 0,
+  "sku": "SKU-1089",
+  "tags": [],
+  "unit_price_pence": 615,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 1516,
+  "reserved": 0,
+  "sku": "SKU-1090",
+  "tags": [],
+  "unit_price_pence": 395,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 1266,
+  "reserved": 0,
+  "sku": "SKU-1091",
+  "tags": [],
+  "unit_price_pence": 1269,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 3137,
+  "reserved": 0,
+  "sku": "SKU-1092",
+  "tags": [],
+  "unit_price_pence": 1269,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 1494,
+  "reserved": 0,
+  "sku": "SKU-1093",
+  "tags": [],
+  "unit_price_pence": 1455,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 4907,
+  "reserved": 0,
+  "sku": "SKU-1094",
+  "tags": [],
+  "unit_price_pence": 735,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 1115,
+  "reserved": 0,
+  "sku": "SKU-1095",
+  "tags": [],
+  "unit_price_pence": 450,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 4455,
+  "reserved": 0,
+  "sku": "SKU-1096",
+  "tags": [],
+  "unit_price_pence": 949,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 2684,
+  "reserved": 0,
+  "sku": "SKU-1097",
+  "tags": [],
+  "unit_price_pence": 1335,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 2951,
+  "reserved": 0,
+  "sku": "SKU-1098",
+  "tags": [],
+  "unit_price_pence": 1329,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 4740,
+  "reserved": 0,
+  "sku": "SKU-1099",
+  "tags": [],
+  "unit_price_pence": 449,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 917,
+  "reserved": 0,
+  "sku": "SKU-1100",
+  "tags": [],
+  "unit_price_pence": 195,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 3273,
+  "reserved": 0,
+  "sku": "SKU-1101",
+  "tags": [],
+  "unit_price_pence": 1235,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 3361,
+  "reserved": 0,
+  "sku": "SKU-1102",
+  "tags": [],
+  "unit_price_pence": 230,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 3611,
+  "reserved": 0,
+  "sku": "SKU-1103",
+  "tags": [],
+  "unit_price_pence": 749,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 1392,
+  "reserved": 0,
+  "sku": "SKU-1104",
+  "tags": [],
+  "unit_price_pence": 1079,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 872,
+  "reserved": 0,
+  "sku": "SKU-1105",
+  "tags": [],
+  "unit_price_pence": 285,
+  "vat_band": "standard"
+ },
+ {
+  "on_hand": 2589,
+  "reserved": 0,
+  "sku": "SKU-1106",
+  "tags": [],
+  "unit_price_pence": 1165,
+  "vat_band": "reduced"
+ },
+ {
+  "on_hand": 4443,
+  "reserved": 0,
+  "sku": "SKU-1107",
+  "tags": [],
+  "unit_price_pence": 1599,
+  "vat_band": "reduced"
+ },
+ {
+  "on_hand": 1664,
+  "reserved": 0,
+  "sku": "SKU-1108",
+  "tags": [],
+  "unit_price_pence": 2465,
+  "vat_band": "reduced"
+ },
+ {
+  "on_hand": 860,
+  "reserved": 0,
+  "sku": "SKU-1109",
+  "tags": [],
+  "unit_price_pence": 1649,
+  "vat_band": "reduced"
+ },
+ {
+  "on_hand": 2487,
+  "reserved": 0,
+  "sku": "SKU-1110",
+  "tags": [],
+  "unit_price_pence": 1569,
+  "vat_band": "reduced"
+ },
+ {
+  "on_hand": 1560,
+  "reserved": 0,
+  "sku": "SKU-1111",
+  "tags": [],
+  "unit_price_pence": 1365,
+  "vat_band": "reduced"
+ },
+ {
+  "on_hand": 4212,
+  "reserved": 0,
+  "sku": "SKU-1112",
+  "tags": [],
+  "unit_price_pence": 695,
+  "vat_band": "reduced"
+ },
+ {
+  "on_hand": 3403,
+  "reserved": 0,
+  "sku": "SKU-1113",
+  "tags": [],
+  "unit_price_pence": 285,
+  "vat_band": "reduced"
+ },
+ {
+  "on_hand": 2033,
+  "reserved": 0,
+  "sku": "SKU-1114",
+  "tags": [],
+  "unit_price_pence": 2055,
+  "vat_band": "reduced"
+ },
+ {
+  "on_hand": 1311,
+  "reserved": 0,
+  "sku": "SKU-1115",
+  "tags": [],
+  "unit_price_pence": 1835,
+  "vat_band": "reduced"
+ },
+ {
+  "on_hand": 3111,
+  "reserved": 0,
+  "sku": "SKU-1116",
+  "tags": [],
+  "unit_price_pence": 840,
+  "vat_band": "reduced"
+ },
+ {
+  "on_hand": 2539,
+  "reserved": 0,
+  "sku": "SKU-1117",
+  "tags": [],
+  "unit_price_pence": 2449,
+  "vat_band": "reduced"
+ },
+ {
+  "on_hand": 3852,
+  "reserved": 0,
+  "sku": "SKU-1118",
+  "tags": [],
+  "unit_price_pence": 765,
+  "vat_band": "reduced"
+ },
+ {
+  "on_hand": 1520,
+  "reserved": 0,
+  "sku": "SKU-1119",
+  "tags": [],
+  "unit_price_pence": 2185,
+  "vat_band": "reduced"
+ },
+ {
+  "on_hand": 1734,
+  "reserved": 0,
+  "sku": "SKU-1120",
+  "tags": [],
+  "unit_price_pence": 1835,
+  "vat_band": "reduced"
+ },
+ {
+  "on_hand": 3090,
+  "reserved": 0,
+  "sku": "SKU-1121",
+  "tags": [],
+  "unit_price_pence": 279,
+  "vat_band": "reduced"
+ },
+ {
+  "on_hand": 1973,
+  "reserved": 0,
+  "sku": "SKU-1122",
+  "tags": [],
+  "unit_price_pence": 1515,
+  "vat_band": "reduced"
+ },
+ {
+  "on_hand": 4507,
+  "reserved": 0,
+  "sku": "SKU-1123",
+  "tags": [],
+  "unit_price_pence": 1285,
+  "vat_band": "reduced"
+ },
+ {
+  "on_hand": 4553,
+  "reserved": 0,
+  "sku": "SKU-1124",
+  "tags": [],
+  "unit_price_pence": 2455,
+  "vat_band": "reduced"
+ },
+ {
+  "on_hand": 2083,
+  "reserved": 0,
+  "sku": "SKU-1125",
+  "tags": [],
+  "unit_price_pence": 2200,
+  "vat_band": "reduced"
+ },
+ {
+  "on_hand": 2755,
+  "reserved": 0,
+  "sku": "SKU-1126",
+  "tags": [],
+  "unit_price_pence": 1499,
+  "vat_band": "reduced"
+ },
+ {
+  "on_hand": 4919,
+  "reserved": 0,
+  "sku": "SKU-1127",
+  "tags": [],
+  "unit_price_pence": 2265,
+  "vat_band": "reduced"
+ },
+ {
+  "on_hand": 1574,
+  "reserved": 0,
+  "sku": "SKU-1128",
+  "tags": [],
+  "unit_price_pence": 1219,
+  "vat_band": "reduced"
+ },
+ {
+  "on_hand": 3038,
+  "reserved": 0,
+  "sku": "SKU-1129",
+  "tags": [],
+  "unit_price_pence": 1049,
+  "vat_band": "reduced"
+ },
+ {
+  "on_hand": 3842,
+  "reserved": 0,
+  "sku": "SKU-1130",
+  "tags": [],
+  "unit_price_pence": 1969,
+  "vat_band": "reduced"
+ },
+ {
+  "on_hand": 1348,
+  "reserved": 0,
+  "sku": "SKU-1131",
+  "tags": [],
+  "unit_price_pence": 979,
+  "vat_band": "reduced"
+ },
+ {
+  "on_hand": 4315,
+  "reserved": 0,
+  "sku": "SKU-1132",
+  "tags": [],
+  "unit_price_pence": 2299,
+  "vat_band": "reduced"
+ },
+ {
+  "on_hand": 4415,
+  "reserved": 0,
+  "sku": "SKU-1133",
+  "tags": [],
+  "unit_price_pence": 1949,
+  "vat_band": "reduced"
+ },
+ {
+  "on_hand": 2949,
+  "reserved": 0,
+  "sku": "SKU-1134",
+  "tags": [],
+  "unit_price_pence": 1479,
+  "vat_band": "reduced"
+ },
+ {
+  "on_hand": 2982,
+  "reserved": 0,
+  "sku": "SKU-1135",
+  "tags": [],
+  "unit_price_pence": 1785,
+  "vat_band": "reduced"
+ },
+ {
+  "on_hand": 4246,
+  "reserved": 0,
+  "sku": "SKU-1136",
+  "tags": [],
+  "unit_price_pence": 1129,
+  "vat_band": "reduced"
+ },
+ {
+  "on_hand": 1732,
+  "reserved": 0,
+  "sku": "SKU-1137",
+  "tags": [],
+  "unit_price_pence": 445,
+  "vat_band": "reduced"
+ },
+ {
+  "on_hand": 1863,
+  "reserved": 0,
+  "sku": "SKU-1138",
+  "tags": [],
+  "unit_price_pence": 489,
+  "vat_band": "reduced"
+ },
+ {
+  "on_hand": 1314,
+  "reserved": 0,
+  "sku": "SKU-1139",
+  "tags": [],
+  "unit_price_pence": 1589,
+  "vat_band": "reduced"
+ },
+ {
+  "on_hand": 1129,
+  "reserved": 0,
+  "sku": "SKU-1140",
+  "tags": [],
+  "unit_price_pence": 1495,
+  "vat_band": "reduced"
+ },
+ {
+  "on_hand": 1130,
+  "reserved": 0,
+  "sku": "SKU-1141",
+  "tags": [],
+  "unit_price_pence": 1215,
+  "vat_band": "reduced"
+ },
+ {
+  "on_hand": 2878,
+  "reserved": 0,
+  "sku": "SKU-1142",
+  "tags": [],
+  "unit_price_pence": 1559,
+  "vat_band": "reduced"
+ },
+ {
+  "on_hand": 1459,
+  "reserved": 0,
+  "sku": "SKU-1143",
+  "tags": [],
+  "unit_price_pence": 2045,
+  "vat_band": "reduced"
+ },
+ {
+  "on_hand": 4580,
+  "reserved": 0,
+  "sku": "SKU-1144",
+  "tags": [],
+  "unit_price_pence": 849,
+  "vat_band": "reduced"
+ },
+ {
+  "on_hand": 2991,
+  "reserved": 0,
+  "sku": "SKU-1145",
+  "tags": [],
+  "unit_price_pence": 1759,
+  "vat_band": "reduced"
+ },
+ {
+  "on_hand": 4190,
+  "reserved": 0,
+  "sku": "SKU-1146",
+  "tags": [],
+  "unit_price_pence": 285,
+  "vat_band": "reduced"
+ },
+ {
+  "on_hand": 4215,
+  "reserved": 0,
+  "sku": "SKU-1147",
+  "tags": [],
+  "unit_price_pence": 2099,
+  "vat_band": "reduced"
+ },
+ {
+  "on_hand": 3295,
+  "reserved": 0,
+  "sku": "SKU-1148",
+  "tags": [],
+  "unit_price_pence": 1245,
+  "vat_band": "reduced"
+ },
+ {
+  "on_hand": 1730,
+  "reserved": 0,
+  "sku": "SKU-1149",
+  "tags": [],
+  "unit_price_pence": 155,
+  "vat_band": "reduced"
+ },
+ {
+  "on_hand": 3042,
+  "reserved": 0,
+  "sku": "SKU-1150",
+  "tags": [],
+  "unit_price_pence": 1969,
+  "vat_band": "reduced"
+ },
+ {
+  "on_hand": 2338,
+  "reserved": 0,
+  "sku": "SKU-1151",
+  "tags": [],
+  "unit_price_pence": 1685,
+  "vat_band": "reduced"
+ }
+]

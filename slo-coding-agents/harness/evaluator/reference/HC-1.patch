@@ -1,0 +1,12 @@
+# HC-1 reference fix. Repo: commerce (apply inside the commerce/ directory: git apply HC-1.patch)
+diff --git a/services/edge_api/shaping.py b/services/edge_api/shaping.py
+index a9781de..7fc8173 100644
+--- a/services/edge_api/shaping.py
++++ b/services/edge_api/shaping.py
+@@ -50,4 +50,5 @@ META_SUFFIX = " | %s | Larder"
+ def meta_description(p):
+     text = (p.get("description") or p.get("name") or "").strip()
+     room = META_DESCRIPTION_MAX - len(META_SUFFIX) - 16  # 16 ~ longest category name
+-    return (truncate(text, room) + META_SUFFIX) % humanise_category(p.get("category"))
++    # HC-1: format the suffix only; the description may itself contain '%' ("100% British")
++    return truncate(text, room) + META_SUFFIX % humanise_category(p.get("category"))

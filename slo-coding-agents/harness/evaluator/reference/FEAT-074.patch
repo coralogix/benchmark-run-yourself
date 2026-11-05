@@ -1,0 +1,39 @@
+Reference implementation for FEAT-074 (evaluator-only).
+Repo: commerce. Apply from a fresh copy of baseline/commerce:  git apply FEAT-074.patch
+
+diff --git a/services/edge_api/delivery.py b/services/edge_api/delivery.py
+index 18b686d..4b455a9 100644
+--- a/services/edge_api/delivery.py
++++ b/services/edge_api/delivery.py
+@@ -62,7 +62,7 @@ def resolve_zone(postcode):
+     return zone
+ 
+ 
+-def list_slots(postcode):
++def list_slots(postcode, include_full=False):
+     zone = resolve_zone(postcode)
+     try:
+         raw = upstreams.slots(zone)
+@@ -73,6 +73,8 @@ def list_slots(postcode):
+     for s in raw:
+         capacity = s.get("capacity") or 0
+         booked = s.get("booked") or 0
++        if not include_full and capacity - booked <= 0:
++            continue  # FEAT-074: full slots only on request
+         slots.append(
+             {
+                 "slot_id": s.get("slot_id"),
+diff --git a/services/edge_api/views/delivery.py b/services/edge_api/views/delivery.py
+index bf2f976..be06c1c 100644
+--- a/services/edge_api/views/delivery.py
++++ b/services/edge_api/views/delivery.py
+@@ -8,7 +8,8 @@ bp = Blueprint("delivery", __name__)
+ 
+ @bp.route("/api/delivery/slots")
+ def slots():
+-    return ok(delivery.list_slots(request.args.get("postcode", "")))
++    include_full = (request.args.get("include_full") or "").lower() in ("true", "1", "yes")
++    return ok(delivery.list_slots(request.args.get("postcode", ""), include_full=include_full))
+ 
+ 
+ @bp.route("/api/delivery/holds", methods=["POST"])

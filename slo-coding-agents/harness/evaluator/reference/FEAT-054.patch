@@ -1,0 +1,17 @@
+Reference implementation for FEAT-054 (evaluator-only).
+Repo: ops. Apply from a fresh copy of baseline/ops:  git apply FEAT-054.patch
+
+diff --git a/services/notifications/templates.js b/services/notifications/templates.js
+index f2c318b..43a86e8 100644
+--- a/services/notifications/templates.js
++++ b/services/notifications/templates.js
+@@ -29,7 +29,8 @@ var BUILDERS = {
+     return { order_ref: p.order_ref };
+   },
+   order_dispatched: function (p) {
+-    return { order_ref: p.order_ref };
++    // FEAT-054: tracking link
++    return { order_ref: p.order_ref, tracking_url: 'https://track.larder.test/' + p.order_ref };
+   }
+ };
+ 

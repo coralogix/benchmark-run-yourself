@@ -1,0 +1,66 @@
+diff --git a/services/accounts/routes.py b/services/accounts/routes.py
+index 574c3ae..7ce39bf 100644
+--- a/services/accounts/routes.py
++++ b/services/accounts/routes.py
+@@ -29,3 +29,19 @@ def get_user_masked(user_id):
+ @bp.route("/internal/accounts/<user_id>")
+ def account(user_id):
+     return ok(summary.account_summary(user_id))
++
++
++@bp.route("/internal/accounts/<user_id>/marketing", methods=["PUT"])
++def set_marketing(user_id):
++    """FEAT-029 {opt_in: bool}"""
++    from larder_common.errors import BadRequest
++    from larder_common.web import body
++
++    from services.accounts import preferences
++
++    value = body().get("opt_in")
++    if not isinstance(value, bool):
++        raise BadRequest("invalid_opt_in")
++    user = users.get_user(user_id)
++    preferences.set_preferences(user.user_id, email_opt_in=value)
++    return ok(summary.account_summary(user.user_id))
+diff --git a/services/accounts/summary.py b/services/accounts/summary.py
+index 0fb93bf..0687097 100644
+--- a/services/accounts/summary.py
++++ b/services/accounts/summary.py
+@@ -80,7 +80,7 @@ def loyalty_points(user_id):
+ def account_summary(user_id):
+     user = users.get_user(user_id)
+     orders_count, last_ref = order_stats(user.user_id)
+-    preferences.get_preferences(user.user_id)  # see preferences.py docstring
++    prefs = preferences.get_preferences(user.user_id)
+     return {
+         "user_id": user.user_id,
+         "name": user.name,
+@@ -90,4 +90,6 @@ def account_summary(user_id):
+         "last_order_ref": last_ref,
+         "member_since": user.created,
+         "loyalty_points": loyalty_points(user.user_id),
++        # FEAT-029: consent for marketing email
++        "marketing_opt_in": bool(prefs.get("email_opt_in")),
+     }
+diff --git a/services/edge_api/views/account.py b/services/edge_api/views/account.py
+index bed22e6..ba86ba7 100644
+--- a/services/edge_api/views/account.py
++++ b/services/edge_api/views/account.py
+@@ -13,3 +13,17 @@ ACCOUNT_FIELDS = ("user_id", "name", "email", "postcode", "orders_count", "last_
+ @bp.route("/api/account/<user_id>")
+ def account(user_id):
+     return ok(upstreams.account(user_id))
++
++
++@bp.route("/api/account/<user_id>", methods=["PATCH"])
++def update_account(user_id):
++    """FEAT-029: marketing opt-in."""
++    from larder_common.errors import BadRequest
++    from larder_common.web import body
++
++    data = body()
++    value = data.get("marketing_opt_in")
++    if not isinstance(value, bool):
++        raise BadRequest("invalid_opt_in")
++    res = upstreams.call(upstreams.ACCOUNTS, "PUT", "/internal/accounts/%s/marketing" % user_id, json={"opt_in": value})
++    return ok(res.body)

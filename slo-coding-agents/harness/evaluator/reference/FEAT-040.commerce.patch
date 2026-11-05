@@ -1,0 +1,13 @@
+diff --git a/services/checkout/outcomes.py b/services/checkout/outcomes.py
+index 23e5515..a8f19c3 100644
+--- a/services/checkout/outcomes.py
++++ b/services/checkout/outcomes.py
+@@ -11,6 +11,8 @@ ERROR_MAP = {
+     (409, "out_of_stock"): (409, "out_of_stock", "out_of_stock"),
+     (402, "payment_declined"): (402, "declined", "payment_declined"),
+     (502, "payment_error"): (502, "payment_error", "payment_error"),
++    # FEAT-040: expired or released slot hold (nothing was charged)
++    (409, "hold_expired"): (409, "hold_expired", "hold_expired"),
+ }
+ 
+ CONFIRMED = "created"

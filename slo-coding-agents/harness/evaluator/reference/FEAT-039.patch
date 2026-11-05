@@ -1,0 +1,57 @@
+diff --git a/services/checkout/checkout.py b/services/checkout/checkout.py
+index 3c39e3c..6b72901 100644
+--- a/services/checkout/checkout.py
++++ b/services/checkout/checkout.py
+@@ -25,6 +25,9 @@ log = get_logger("checkout")
+ # never cleaned up if the thread dies mid-request (it doesn't, usually).
+ INFLIGHT = {}
+ 
++# FEAT-039: goods after discounts (before delivery) must reach this
++MINIMUM_ORDER_PENCE = 1000
++
+ # log a warning when the orders call takes longer than this (seconds)
+ SLOW_ORDERS_CALL = 5.0
+ 
+@@ -64,6 +67,31 @@ def _fail(record, status, outcome, code, extra=None):
+     raise CheckoutError(code, status=status, **(extra or {}))
+ 
+ 
++def _basket_suggestions(lines, limit=3):
++    """FEAT-039: "complete your basket" ideas for a basket under the minimum,
++    from what other customers bought with what's already in it."""
++    from larder_common.http import client
++
++    in_cart = {l.get("sku") for l in lines}
++    out = []
++    for line in lines:
++        try:
++            res = client("recommendations").get("/internal/recommendations/%s" % line.get("sku"),
++                                                 params={"limit": limit + len(in_cart)})
++        except Exception as e:  # noqa - suggestions are optional
++            log.info("no suggestions for %s: %s", line.get("sku"), e)
++            continue
++        if not res.ok:
++            continue
++        for p in (res.body or {}).get("also_bought") or []:
++            if p.get("sku") in in_cart or any(o["sku"] == p.get("sku") for o in out):
++                continue
++            out.append({"sku": p.get("sku"), "name": p.get("name"), "price_pence": p.get("price_pence")})
++            if len(out) >= limit:
++                return out
++    return out
++
++
+ def _validate_request(cart_id, payment_token):
+     if not cart_id:
+         raise BadRequest("cart_id_required")
+@@ -90,6 +118,10 @@ def checkout(cart_id, hold_id, payment_token):
+     breakdown = peers.price(lines, cart.get("coupon"))
+     if not breakdown.get("lines"):
+         raise BadRequest("empty_cart")
++    goods = int(breakdown.get("subtotal_pence") or 0) - int(breakdown.get("discount_pence") or 0)
++    if goods < MINIMUM_ORDER_PENCE:
++        raise BadRequest("below_minimum", minimum_pence=MINIMUM_ORDER_PENCE,
++                         suggestions=_basket_suggestions(lines))
+ 
+     email = peers.user_email(cart.get("user_id"))
+     order_ref = new_order_ref()

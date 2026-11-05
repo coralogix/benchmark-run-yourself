@@ -1,0 +1,67 @@
+diff --git a/services/cart/carts.py b/services/cart/carts.py
+index e28452d..39c8dd9 100644
+--- a/services/cart/carts.py
++++ b/services/cart/carts.py
+@@ -76,6 +76,18 @@ def remove_item(st, sku):
+     return st
+ 
+ 
++def clear(st):
++    """FEAT-020: empty the basket (every line and the coupon)."""
++    for sku in list(st.lines):
++        store.delete_line(st.cart_id, sku)
++    st.lines.clear()
++    st.added_at.clear()
++    st.coupon_code = None
++    st.touch()
++    store.save_cart(st)
++    return st
++
++
+ def apply_coupon(st, code):
+     code = (code or "").strip()
+     if not code:
+@@ -164,6 +176,9 @@ def serialise(st, breakdown=None):
+                 "line_total_pence": line["line_total_pence"],
+             }
+         )
++    if not items:
++        # FEAT-020: an empty basket costs nothing (no delivery fee on nothing)
++        breakdown = dict(breakdown, subtotal_pence=0, discount_pence=0, delivery_fee_pence=0, total_pence=0, total=0)
+     return {
+         "cart_id": st.cart_id,
+         "user_id": st.user_id,
+diff --git a/services/cart/routes.py b/services/cart/routes.py
+index f6fcf68..35666ee 100644
+--- a/services/cart/routes.py
++++ b/services/cart/routes.py
+@@ -51,6 +51,13 @@ def add_item(cart_id):
+     return ok(carts.serialise(st))
+ 
+ 
++@bp.route("/internal/carts/<cart_id>/items", methods=["DELETE"])
++def clear_items(cart_id):
++    st = carts.get_open_cart(cart_id)
++    carts.clear(st)
++    return ok(carts.serialise(st))
++
++
+ @bp.route("/internal/carts/<cart_id>/items/<sku>", methods=["DELETE"])
+ def remove_item(cart_id, sku):
+     st = carts.get_open_cart(cart_id)
+diff --git a/services/edge_api/views/cart.py b/services/edge_api/views/cart.py
+index cfe044f..c2c65ba 100644
+--- a/services/edge_api/views/cart.py
++++ b/services/edge_api/views/cart.py
+@@ -34,6 +34,11 @@ def add_item(cart_id):
+     return ok(upstreams.add_item(cart_id, data.get("sku"), data.get("qty", 1)))
+ 
+ 
++@bp.route("/api/carts/<cart_id>/items", methods=["DELETE"])
++def clear_items(cart_id):
++    return ok(upstreams.call(upstreams.CART, "DELETE", "/internal/carts/%s/items" % cart_id).body)
++
++
+ @bp.route("/api/carts/<cart_id>/items/<sku>", methods=["DELETE"])
+ def remove_item(cart_id, sku):
+     return ok(upstreams.remove_item(cart_id, sku))

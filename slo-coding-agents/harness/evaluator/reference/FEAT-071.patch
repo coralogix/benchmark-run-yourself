@@ -1,0 +1,35 @@
+Reference implementation for FEAT-071 (evaluator-only).
+Repo: ops. Apply from a fresh copy of baseline/ops:  git apply FEAT-071.patch
+
+diff --git a/services/bus/routes/admin.js b/services/bus/routes/admin.js
+index c6adcbc..3c6eb7a 100644
+--- a/services/bus/routes/admin.js
++++ b/services/bus/routes/admin.js
+@@ -20,7 +20,13 @@ var worker = require('../worker');
+ var router = express.Router();
+ 
+ router.get('/bus/topics', function (req, res) {
+-  res.json({ topics: worker.statusAll() });
++  res.json({ topics: worker.statusAll().map(function (t) {
++    if (t.oldest_pending_age_s === undefined) {  // FEAT-071: topics whose worker isn't running
++      var head = store.head(t.topic);
++      t.oldest_pending_age_s = head ? Math.max(0, (Date.now() - new Date(head.published_at).getTime()) / 1000) : 0;
++    }
++    return t;
++  }) });
+ });
+ 
+ router.get('/bus/subscriptions', function (req, res) {
+diff --git a/services/bus/worker.js b/services/bus/worker.js
+index 96d7b81..660d51d 100644
+--- a/services/bus/worker.js
++++ b/services/bus/worker.js
+@@ -230,6 +230,8 @@ TopicWorker.prototype.status = function () {
+     depth: this.store.depth(this.topic),
+     head_seq: head ? head.seq : null,
+     head_age_ms: head ? Date.now() - new Date(head.published_at).getTime() : 0,
++    // FEAT-071: the head is the oldest undelivered event (per-topic FIFO)
++    oldest_pending_age_s: head ? Math.max(0, Math.round((Date.now() - new Date(head.published_at).getTime()) / 100) / 10) : 0,
+     current: this.current ? _.assign({}, this.current, { for_ms: Date.now() - this.current.since }) : null,
+     head_attempts: head ? head.attempts : {},
+     head_delivered: head ? Object.keys(head.delivered) : [],

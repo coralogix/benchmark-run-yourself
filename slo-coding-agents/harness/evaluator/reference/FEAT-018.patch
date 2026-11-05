@@ -1,0 +1,136 @@
+diff --git a/services/cart/carts.py b/services/cart/carts.py
+index e28452d..d9dba96 100644
+--- a/services/cart/carts.py
++++ b/services/cart/carts.py
+@@ -9,7 +9,7 @@ from larder_common import settings, utils
+ from larder_common.errors import BadRequest, Conflict, NotFound
+ from larder_common.helpers.dates import iso_now
+ from larder_common.log import get_logger
+-from services.cart import pricing_client, state, store
++from services.cart import events, pricing_client, state, store
+ 
+ log = get_logger("cart")
+ 
+@@ -63,6 +63,7 @@ def add_item(st, sku, qty):
+     st.touch()
+     store.save_line(st.cart_id, sku, st.lines[sku], st.added_at.get(sku))
+     store.save_cart(st)
++    events.publish_updated(st)
+     return st
+ 
+ 
+@@ -73,6 +74,25 @@ def remove_item(st, sku):
+         store.delete_line(st.cart_id, sku)
+     st.touch()
+     store.save_cart(st)
++    events.publish_updated(st)
++    return st
++
++
++def set_qty(st, sku, qty):
++    """PATCH a line to an absolute quantity. 0 removes the line."""
++    if isinstance(qty, bool) or not isinstance(qty, int) or qty < 0:
++        raise BadRequest("invalid_qty")
++    if sku not in st.lines:
++        raise NotFound("item_not_in_cart")
++    if qty == 0:
++        return remove_item(st, sku)
++    if qty > MAX_QTY_PER_LINE:
++        raise BadRequest("qty_too_large")
++    st.lines[sku] = qty
++    st.touch()
++    store.save_line(st.cart_id, sku, qty, st.added_at.get(sku))
++    store.save_cart(st)
++    events.publish_updated(st)
+     return st
+ 
+ 
+diff --git a/services/cart/events.py b/services/cart/events.py
+new file mode 100644
+index 0000000..d10f1a6
+--- /dev/null
++++ b/services/cart/events.py
+@@ -0,0 +1,32 @@
++"""
++cart.updated on the event bus (PM-1290).
++
++The partner's CRM (PARTNER-77) and marketing's abandoned-basket journey want
++every change to a basket's contents. We publish after the change is saved and
++before the API answers, with the repriced total so consumers don't have to
++call back for it.
++"""
++from larder_common.http import client
++from larder_common.log import get_logger
++
++log = get_logger("cart.events")
++
++
++def publish_updated(st):
++    from services.cart import carts
++
++    breakdown = carts.price(st)
++    body = {
++        "topic": "cart.updated",
++        "key": st.cart_id,
++        "payload": {
++            "cart_id": st.cart_id,
++            "user_id": st.user_id,
++            "lines": st.raw_lines(),
++            "total_pence": breakdown.get("total_pence"),
++        },
++    }
++    res = client("bus").post("/publish", json=body)
++    if not res.ok:
++        log.warning("cart.updated for %s not published: %r", st.cart_id, res)
++    return res.ok
+diff --git a/services/cart/routes.py b/services/cart/routes.py
+index f6fcf68..ef05e3b 100644
+--- a/services/cart/routes.py
++++ b/services/cart/routes.py
+@@ -58,6 +58,14 @@ def remove_item(cart_id, sku):
+     return ok(carts.serialise(st))
+ 
+ 
++@bp.route("/internal/carts/<cart_id>/items/<sku>", methods=["PATCH"])
++def set_item_qty(cart_id, sku):
++    data = body()
++    st = carts.get_open_cart(cart_id)
++    carts.set_qty(st, sku, data.get("qty"))
++    return ok(carts.serialise(st))
++
++
+ @bp.route("/internal/carts/<cart_id>/coupon", methods=["POST"])
+ def apply_coupon(cart_id):
+     data = body()
+diff --git a/services/edge_api/upstreams.py b/services/edge_api/upstreams.py
+index 429cf7a..c778e14 100644
+--- a/services/edge_api/upstreams.py
++++ b/services/edge_api/upstreams.py
+@@ -142,6 +142,10 @@ def remove_item(cart_id, sku):
+     return call(CART, "DELETE", "/internal/carts/%s/items/%s" % (cart_id, sku)).body
+ 
+ 
++def set_item_qty(cart_id, sku, qty):
++    return call(CART, "PATCH", "/internal/carts/%s/items/%s" % (cart_id, sku), json={"qty": qty}).body
++
++
+ def apply_coupon(cart_id, code):
+     return post(CART, "/internal/carts/%s/coupon" % cart_id, json={"code": code})
+ 
+diff --git a/services/edge_api/views/cart.py b/services/edge_api/views/cart.py
+index cfe044f..4e0b8c0 100644
+--- a/services/edge_api/views/cart.py
++++ b/services/edge_api/views/cart.py
+@@ -39,6 +39,12 @@ def remove_item(cart_id, sku):
+     return ok(upstreams.remove_item(cart_id, sku))
+ 
+ 
++@bp.route("/api/carts/<cart_id>/items/<sku>", methods=["PATCH"])
++def set_item_qty(cart_id, sku):
++    data = body()
++    return ok(upstreams.set_item_qty(cart_id, sku, data.get("qty")))
++
++
+ @bp.route("/api/carts/<cart_id>/coupon", methods=["POST"])
+ def apply_coupon(cart_id):
+     data = body()

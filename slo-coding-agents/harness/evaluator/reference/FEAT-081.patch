@@ -1,0 +1,65 @@
+Reference implementation for FEAT-081 (evaluator-only).
+Repo: commerce. Apply from a fresh copy of baseline/commerce:  git apply FEAT-081.patch
+
+diff --git a/services/edge_api/app.py b/services/edge_api/app.py
+index 4f4bbf2..3a72aee 100644
+--- a/services/edge_api/app.py
++++ b/services/edge_api/app.py
+@@ -31,6 +31,10 @@ def create_app():
+ 
+         app.register_blueprint(v1_bp, url_prefix="/v1")
+ 
++    from services.edge_api import compression
++
++    compression.install(app)
++
+     from services.edge_api import upstreams
+ 
+     log.info("edge-api upstreams: %s", upstreams.describe())
+diff --git a/services/edge_api/compression.py b/services/edge_api/compression.py
+new file mode 100644
+index 0000000..62454f0
+--- /dev/null
++++ b/services/edge_api/compression.py
+@@ -0,0 +1,41 @@
++"""gzip for responses over 1 KB when the client accepts it (FEAT-081)."""
++import gzip
++
++from flask import request
++
++MIN_BYTES = 1024
++
++
++def _accepts_gzip():
++    for part in request.headers.get("Accept-Encoding", "").split(","):
++        bits = part.strip().split(";")
++        if bits[0].strip().lower() in ("gzip", "*"):
++            q = 1.0
++            for b in bits[1:]:
++                if b.strip().startswith("q="):
++                    try:
++                        q = float(b.strip()[2:])
++                    except ValueError:
++                        q = 0.0
++            if q > 0:
++                return True
++    return False
++
++
++def install(app):
++    @app.after_request
++    def _gzip(resp):
++        vary = resp.headers.get("Vary")
++        if "accept-encoding" not in (vary or "").lower():
++            resp.headers["Vary"] = (vary + ", " if vary else "") + "Accept-Encoding"
++        if resp.direct_passthrough or resp.status_code < 200 or resp.status_code in (204, 304):
++            return resp
++        if "Content-Encoding" in resp.headers or not _accepts_gzip():
++            return resp
++        data = resp.get_data()
++        if len(data) <= MIN_BYTES:
++            return resp
++        resp.set_data(gzip.compress(data, compresslevel=5))
++        resp.headers["Content-Encoding"] = "gzip"
++        resp.headers["Content-Length"] = str(len(resp.get_data()))
++        return resp

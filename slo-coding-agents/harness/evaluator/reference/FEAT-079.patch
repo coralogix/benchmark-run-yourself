@@ -1,0 +1,43 @@
+Reference implementation for FEAT-079 (evaluator-only).
+Repo: commerce. Apply from a fresh copy of baseline/commerce:  git apply FEAT-079.patch
+
+diff --git a/services/edge_api/headers.py b/services/edge_api/headers.py
+index 902dc37..9827608 100644
+--- a/services/edge_api/headers.py
++++ b/services/edge_api/headers.py
+@@ -18,11 +18,35 @@ CACHEABLE_PREFIXES = ("/api/products", "/api/categories")
+ PRODUCT_MAX_AGE = 60
+ 
+ 
++# FEAT-079: the new web app
++CORS_ORIGINS = ("https://www.larder.test",)
++CORS_METHODS = "GET, POST, PUT, PATCH, DELETE, OPTIONS"
++
++
+ def install(app):
+     @app.before_request
+     def _request_id():
+         g.request_id = request.headers.get("X-Request-Id") or uuid.uuid4().hex[:16]
+ 
++    @app.before_request
++    def _preflight():
++        if request.method == "OPTIONS" and request.path.startswith("/api/"):
++            return app.response_class(status=204)
++        return None
++
++    @app.after_request
++    def _cors(resp):
++        origin = request.headers.get("Origin")
++        if request.path.startswith("/api") and origin in CORS_ORIGINS:
++            resp.headers["Access-Control-Allow-Origin"] = origin
++            resp.headers["Vary"] = "Origin"
++            if request.method == "OPTIONS":
++                resp.headers["Access-Control-Allow-Methods"] = CORS_METHODS
++                resp.headers["Access-Control-Allow-Headers"] = (
++                    request.headers.get("Access-Control-Request-Headers") or "Content-Type, X-Request-Id")
++                resp.headers["Access-Control-Max-Age"] = "600"
++        return resp
++
+     @app.after_request
+     def _headers(resp):
+         resp.headers["X-Request-Id"] = getattr(g, "request_id", "-")

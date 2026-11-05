@@ -1,0 +1,235 @@
+#!/usr/bin/env python3
+"""larderctl - control the Larder services in this workspace.
+
+  larderctl status                 table of all services (repo, up, pid, restarts, port) + time left
+  larderctl restart <target>       restart a service, or a group: commerce | ops | all
+                                   (groups restart in dependency order and wait for health)
+  larderctl stop <target>          stop a service or group (stays down until started)
+  larderctl start <target>         start a stopped service or group
+  larderctl logs <svc> [-n 200]    last N lines of one service's stdout/stderr
+  larderctl time                   minutes remaining in the session
+  larderctl services               list service names and groups
+
+Services (commerce): edge-api catalog search pricing promotions cart checkout accounts
+                     loyalty recommendations
+Services (ops):      orders inventory slots payments fraud ledger tax webhooks warehouse
+                     notifications bus
+
+Finds the supervisor via $LARDER_CONTROL_URL or <workspace>/.larder/control.env
+(searched upwards from the current directory, or from $LARDER_WORKSPACE).
+Service logs are also on disk at <workspace>/.larder/logs/<svc>.log.
+"""
+
+import json
+import os
+import sys
+import time
+import urllib.error
+import urllib.request
+
+COMMERCE = ("edge-api", "catalog", "search", "pricing", "promotions", "cart", "checkout", "accounts",
+            "loyalty", "recommendations")
+OPS = ("orders", "inventory", "slots", "payments", "fraud", "ledger", "tax", "webhooks", "warehouse",
+       "notifications", "bus")
+SERVICES = COMMERCE + OPS
+GROUPS = {"commerce": COMMERCE, "ops": OPS, "all": SERVICES}
+
+
+def die(msg, code=1):
+    sys.stderr.write("larderctl: " + msg + "\n")
+    sys.exit(code)
+
+
+def find_control_url():
+    url = os.environ.get("LARDER_CONTROL_URL")
+    if url:
+        return url.rstrip("/")
+    starts = []
+    if os.environ.get("LARDER_WORKSPACE"):
+        starts.append(os.environ["LARDER_WORKSPACE"])
+    starts.append(os.getcwd())
+    starts.append(os.path.dirname(os.path.abspath(__file__)))
+    for start in starts:
+        d = os.path.abspath(start)
+        while True:
+            f = os.path.join(d, ".larder", "control.env")
+            if os.path.isfile(f):
+                with open(f) as fh:
+                    for line in fh:
+                        line = line.strip()
+                        if line.startswith("LARDER_CONTROL_URL="):
+                            return line.split("=", 1)[1].strip().strip("'\"").rstrip("/")
+            parent = os.path.dirname(d)
+            if parent == d:
+                break
+            d = parent
+    die("cannot find the supervisor (no $LARDER_CONTROL_URL and no .larder/control.env above this directory)")
+
+
+def call(method, path, timeout=60.0, raw=False):
+    url = find_control_url() + path
+    req = urllib.request.Request(url, method=method, data=b"" if method == "POST" else None)
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as r:
+            data = r.read()
+    except urllib.error.HTTPError as e:
+        body = e.read().decode("utf-8", "replace")
+        die("HTTP %s from supervisor: %s" % (e.code, body.strip()[:300]))
+    except (urllib.error.URLError, OSError) as e:
+        die("supervisor not reachable at %s (%s)" % (url, e))
+    if raw:
+        return data.decode("utf-8", "replace")
+    return json.loads(data.decode("utf-8"))
+
+
+def fmt_remaining(st):
+    m = st.get("minutes_remaining")
+    if m is None:
+        return "no session clock set"
+    return "%.1f minutes remaining (deadline %s)" % (m, st.get("deadline"))
+
+
+def cmd_status(_args):
+    st = call("GET", "/status")
+    svcs = st.get("services", {})
+    order = [n for n in SERVICES if n in svcs] + sorted(n for n in svcs if n not in SERVICES)
+    fmt = "%-16s %-9s %-4s %-11s %-8s %-8s %-5s %s"
+    print(fmt % ("SERVICE", "REPO", "UP", "STATE", "PID", "RESTARTS", "PORT", "MESH"))
+    down = 0
+    for name in order:
+        s = svcs[name]
+        state = "running" if s.get("running") else ("stopped" if s.get("desired") == "stopped" else "down")
+        if s.get("restart_pending"):
+            state = "restarting"
+        if not s.get("up"):
+            down += 1
+        print(
+            fmt
+            % (
+                name,
+                s.get("repo") or "-",
+                "yes" if s.get("up") else "no",
+                state,
+                s.get("pid") or "-",
+                s.get("restarts", 0),
+                s.get("port") or "-",
+                s.get("mesh_port") or "-",
+            )
+        )
+    print()
+    print("%d/%d services up; time: %s" % (len(svcs) - down, len(svcs), fmt_remaining(st)))
+
+
+def need_target(args, groups=True):
+    names = SERVICES + (tuple(GROUPS) if groups else ())
+    if not args or args[0] not in names:
+        die("expected a service name%s: %s" % (" or group (commerce | ops | all)" if groups else "", " | ".join(SERVICES)), 2)
+    return args[0]
+
+
+def need_svc(args):
+    return need_target(args, groups=False)
+
+
+def wait_up(names, timeout=90.0):
+    t_end = time.time() + timeout
+    pending = set(names)
+    while time.time() < t_end and pending:
+        st = call("GET", "/status").get("services", {})
+        for n in list(pending):
+            s = st.get(n, {})
+            if s.get("up"):
+                pending.discard(n)
+            elif not s.get("running") and not s.get("restart_pending") and len(names) == 1:
+                return pending
+        if pending:
+            time.sleep(1.0)
+    return pending
+
+
+def _after_start(target, verb, r):
+    names = list(GROUPS.get(target, (target,)))
+    if target in GROUPS:
+        print("%s %s (%d services); waiting for health checks..." % (target, verb, len(names)))
+    else:
+        print("%s %s (pid %s); waiting for health check..." % (target, verb, r.get("pid")))
+    bad = wait_up(names, 120.0 if target in GROUPS else 90.0)
+    if not bad:
+        print("%s is up" % target)
+    else:
+        print("NOT healthy yet: %s - check: larderctl logs <svc>" % ", ".join(sorted(bad)))
+        sys.exit(1)
+
+
+def cmd_restart(args):
+    target = need_target(args)
+    r = call("POST", "/services/%s/restart" % target, timeout=600 if target in GROUPS else 120)
+    _after_start(target, "restarted", r)
+
+
+def cmd_stop(args):
+    target = need_target(args)
+    call("POST", "/services/%s/stop" % target, timeout=120)
+    print("%s stopped" % target)
+
+
+def cmd_start(args):
+    target = need_target(args)
+    r = call("POST", "/services/%s/start" % target, timeout=600 if target in GROUPS else 120)
+    _after_start(target, "started", r)
+
+
+def cmd_services(_args):
+    for g in ("commerce", "ops"):
+        print("%-9s %s" % (g + ":", " ".join(GROUPS[g])))
+    print("groups:   commerce ops all")
+
+
+def cmd_logs(args):
+    svc = need_svc(args)
+    n = 200
+    rest = args[1:]
+    i = 0
+    while i < len(rest):
+        a = rest[i]
+        if a in ("-n", "--lines") and i + 1 < len(rest):
+            n = rest[i + 1]
+            i += 2
+            continue
+        if a.startswith("-n") and a[2:].isdigit():
+            n = a[2:]
+        i += 1
+    try:
+        n = int(n)
+    except ValueError:
+        die("-n expects a number", 2)
+    sys.stdout.write(call("GET", "/services/%s/logs?lines=%d" % (svc, n), raw=True))
+
+
+def cmd_time(_args):
+    print(fmt_remaining(call("GET", "/status")))
+
+
+COMMANDS = {
+    "status": cmd_status,
+    "restart": cmd_restart,
+    "stop": cmd_stop,
+    "start": cmd_start,
+    "logs": cmd_logs,
+    "time": cmd_time,
+    "services": cmd_services,
+}
+
+
+def main(argv):
+    if not argv or argv[0] in ("-h", "--help", "help"):
+        print(__doc__.strip())
+        return
+    fn = COMMANDS.get(argv[0])
+    if fn is None:
+        die("unknown command %r (try: larderctl help)" % argv[0], 2)
+    fn(argv[1:])
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])

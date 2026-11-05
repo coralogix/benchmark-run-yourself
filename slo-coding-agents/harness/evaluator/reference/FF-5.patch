@@ -1,0 +1,232 @@
+# FF-5 reference fix. Repo: ops (apply inside the ops/ directory: git apply FF-5.patch)
+diff --git a/services/bus/worker.js b/services/bus/worker.js
+index 96d7b81..edb6071 100644
+--- a/services/bus/worker.js
++++ b/services/bus/worker.js
+@@ -3,20 +3,22 @@
+ /*
+  * Topic workers.
+  *
+- * One TopicWorker per topic. Each worker runs a single loop:
++ * One TopicWorker per topic. Each worker runs one loop PER SUBSCRIBER:
+  *
+- *   take the HEAD message of the topic
+- *     for each subscriber, in config/bus-subscriptions.json order:
+- *       skip if message.delivered[subscriber]
+- *       POST {topic,key,payload,delivery_id} with a bus.deliveryTimeoutMs timeout
+- *       on 2xx: mark delivered, persist, next subscriber
+- *       otherwise: sleep bus.retrySleepMs and try the SAME subscriber again,
+- *                  forever
+- *     ack (remove) the message, persist
++ *   take the oldest message of the topic this subscriber has not had yet
++ *     POST {topic,key,payload,delivery_id} with a bus.deliveryTimeoutMs timeout
++ *     on 2xx: mark delivered, persist
++ *     otherwise: sleep bus.retrySleepMs and try the SAME message again, forever
++ *   once every subscriber has a message: ack (remove) it, persist
+  *   repeat
+  *
++ * (REL: until 2024 there was ONE loop per topic that walked the subscribers in
++ * order for each message, so one slow subscriber - notifications waiting on
++ * the email provider - held up every other subscriber of the topic.)
++ *
+  * Guarantees we give subscribers (ARCHITECTURE.md "bus"):
+  *   - per-topic ordering: a subscriber never sees message N+1 before N
++ *     (per subscriber; subscribers no longer wait for each other)
+  *   - at-least-once: a delivery that timed out on our side may well have
+  *     been processed. Subscribers must tolerate duplicates.
+  *
+@@ -82,33 +84,34 @@ function TopicWorker(topic, opts) {
+   });
+   this.running = false;
+   this.stopped = false;
+-  this.current = null; // { message_id, subscriber, since, attempts }
++  this.current = null; // last started delivery { message_id, subscriber, since, attempts }
++  this.currents = {}; // subscriber -> in-flight delivery
++  this._wakes = {}; // subscriber -> wake fn while idle
+   this.delivered = 0;
+   this.failures = 0;
+   this.lastDeliveryMs = 0;
+-  this._wake = null;
+-  this._loop = null;
++  this._loops = null;
+ }
+ 
+-TopicWorker.prototype._sleep = function (ms) {
++// idle sleep for one subscriber loop; kick() cuts it short
++TopicWorker.prototype._sleep = function (ms, key) {
+   var self = this;
++  key = key || '_';
+   return new Promise(function (resolve) {
+     var t = setTimeout(function () {
+-      self._wake = null;
++      delete self._wakes[key];
+       resolve();
+     }, ms);
+-    self._wake = function () {
++    self._wakes[key] = function () {
+       clearTimeout(t);
+-      self._wake = null;
++      delete self._wakes[key];
+       resolve();
+     };
+   });
+ };
+ 
+-// publish() calls this so an idle worker doesn't wait out idleSleepMs.
+-// It does NOT interrupt a retry sleep (the wake only fires when idle).
+ TopicWorker.prototype.kick = function () {
+-  if (this._wake && !this.current) this._wake();
++  _.forEach(_.values(this._wakes), function (wake) { wake(); });
+ };
+ 
+ TopicWorker.prototype.deliver = function (sub, msg) {
+@@ -134,17 +137,20 @@ TopicWorker.prototype.deliver = function (sub, msg) {
+ // worker is stopped. Resolves true when delivered, false when stopped.
+ TopicWorker.prototype.deliverUntilDone = function (sub, msg) {
+   var self = this;
+-  self.current = { message_id: msg.id, seq: msg.seq, subscriber: sub.name, since: Date.now(), attempts: 0 };
++  var cur = { message_id: msg.id, seq: msg.seq, subscriber: sub.name, since: Date.now(), attempts: 0 };
++  self.currents[sub.name] = cur;
++  self.current = cur;
+ 
+   function attempt() {
+     if (self.stopped) return Promise.resolve(false);
+-    self.current.attempts++;
++    cur.attempts++;
+     return self.deliver(sub, msg).then(function (r) {
+       if (r.ok) {
+         telemetry.inc('busDeliveries', { subscriber: sub.name, outcome: 'delivered' });
+         self.store.markDelivered(msg, sub.name);
+         self.delivered++;
+         globals.counters.busDelivered++;
++        delete self.currents[sub.name];
+         return true;
+       }
+       var outcome = outcomeFor(r.err, r.res);
+@@ -164,46 +170,50 @@ TopicWorker.prototype.deliverUntilDone = function (sub, msg) {
+           err: r.err && r.err.message
+         });
+       }
+-      return self._sleep(self.retrySleepMs).then(attempt);
++      return Promise.delay(self.retrySleepMs).then(attempt);
+     });
+   }
+ 
+   return attempt();
+ };
+ 
+-TopicWorker.prototype.processHead = function () {
+-  var self = this;
+-  var msg = self.store.head(self.topic);
+-  if (!msg) return Promise.resolve(false);
++// oldest message on the topic that `sub` has not had yet
++TopicWorker.prototype.nextFor = function (sub) {
++  var queue = this.store.peek(this.topic, Infinity);
++  for (var i = 0; i < queue.length; i++) {
++    if (!queue[i].delivered[sub.name]) return queue[i];
++  }
++  return null;
++};
+ 
+-  return Promise.each(self.subscribers, function (sub) {
+-    if (self.stopped) return null;
+-    if (msg.delivered[sub.name]) return null;
+-    return self.deliverUntilDone(sub, msg);
+-  }).then(function () {
+-    self.current = null;
+-    if (self.stopped) return false;
+-    self.store.ack(self.topic, msg.id);
+-    return true;
+-  });
++TopicWorker.prototype.maybeAck = function (msg) {
++  var everyone = _.every(this.subscribers, function (s) { return msg.delivered[s.name]; });
++  if (everyone) this.store.ack(this.topic, msg.id);
++  return everyone;
+ };
+ 
+-TopicWorker.prototype.loop = function () {
++TopicWorker.prototype.subLoop = function (sub) {
+   var self = this;
+   if (self.stopped) return Promise.resolve();
+-  return self.processHead().then(function (didWork) {
+-    if (self.stopped) return null;
+-    if (!didWork) return self._sleep(self.idleSleepMs);
+-    return null;
+-  }).catch(function (e) {
+-    // a bug in here would otherwise kill the topic silently
+-    logger.error('bus: worker loop error', { topic: self.topic, err: e.message, stack: e.stack });
+-    return self._sleep(self.retrySleepMs);
++  var msg = self.nextFor(sub);
++  var step = msg
++    ? self.deliverUntilDone(sub, msg).then(function (ok) { if (ok) self.maybeAck(msg); })
++    : self._sleep(self.idleSleepMs, sub.name);
++  return Promise.resolve(step).catch(function (e) {
++    logger.error('bus: worker loop error', { topic: self.topic, subscriber: sub.name, err: e.message, stack: e.stack });
++    return Promise.delay(self.retrySleepMs);
+   }).then(function () {
+-    return self.loop();
++    return self.subLoop(sub);
+   });
+ };
+ 
++TopicWorker.prototype.loop = function () {
++  var self = this;
++  // messages already delivered to everyone (e.g. persisted just before a crash)
++  self.store.peek(self.topic, Infinity).forEach(function (m) { self.maybeAck(m); });
++  return Promise.all(self.subscribers.map(function (sub) { return self.subLoop(sub); }));
++};
++
+ TopicWorker.prototype.start = function () {
+   if (this.running) return;
+   this.running = true;
+@@ -214,13 +224,13 @@ TopicWorker.prototype.start = function () {
+     timeout_ms: this.timeoutMs,
+     retry_sleep_ms: this.retrySleepMs
+   });
+-  this._loop = this.loop();
++  this._loops = this.loop();
+ };
+ 
+ TopicWorker.prototype.stop = function () {
+   this.stopped = true;
+   this.running = false;
+-  if (this._wake) this._wake();
++  this.kick();
+ };
+ 
+ TopicWorker.prototype.status = function () {
+@@ -230,7 +240,9 @@ TopicWorker.prototype.status = function () {
+     depth: this.store.depth(this.topic),
+     head_seq: head ? head.seq : null,
+     head_age_ms: head ? Date.now() - new Date(head.published_at).getTime() : 0,
+-    current: this.current ? _.assign({}, this.current, { for_ms: Date.now() - this.current.since }) : null,
++    current: this.current && this.currents[this.current.subscriber] === this.current
++      ? _.assign({}, this.current, { for_ms: Date.now() - this.current.since }) : null,
++    in_flight: _.mapValues(this.currents, function (c) { return _.assign({}, c, { for_ms: Date.now() - c.since }); }),
+     head_attempts: head ? head.attempts : {},
+     head_delivered: head ? Object.keys(head.delivered) : [],
+     last_error: head ? head.last_error : null,
+diff --git a/test/bus/worker.test.js b/test/bus/worker.test.js
+index e231066..3d43c09 100644
+--- a/test/bus/worker.test.js
++++ b/test/bus/worker.test.js
+@@ -57,14 +57,17 @@ describe('bus: topic worker', function () {
+     });
+   }
+ 
+-  it('delivers each message to every subscriber in configured order', function (done) {
++  it('delivers each message to every subscriber, in order per subscriber', function (done) {
+     store.append('order.confirmed', 'R1', { n: 1 });
+     store.append('order.confirmed', 'R2', { n: 2 });
+     w = makeWorker();
+     w.start();
+     helpers.waitFor(function () { return store.depth('order.confirmed') === 0; }, 3000, function (err) {
+       if (err) return done(err);
+-      expect(received.map(function (r) { return r.who + r.seq; })).to.deep.equal(['a1', 'b1', 'c1', 'a2', 'b2', 'c2']);
++      ['a', 'b', 'c'].forEach(function (who) {
++        expect(received.filter(function (r) { return r.who === who; }).map(function (r) { return r.seq; }))
++          .to.deep.equal([1, 2]);
++      });
+       expect(received[0].topic).to.equal('order.confirmed');
+       expect(received[0].delivery_id).to.match(/^order-confirmed:1:/);
+       done();

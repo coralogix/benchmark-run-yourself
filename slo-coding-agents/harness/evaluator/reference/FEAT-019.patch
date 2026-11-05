@@ -1,0 +1,29 @@
+diff --git a/services/cart/carts.py b/services/cart/carts.py
+index e28452d..67ffda7 100644
+--- a/services/cart/carts.py
++++ b/services/cart/carts.py
+@@ -13,7 +13,8 @@ from services.cart import pricing_client, state, store
+ 
+ log = get_logger("cart")
+ 
+-MAX_QTY_PER_LINE = settings.CART_MAX_QTY_PER_LINE
++# FEAT-019: bulk buyers - no line may go over 24 units
++MAX_QTY_PER_LINE = 24
+ MAX_LINES = settings.CART_MAX_LINES
+ 
+ 
+@@ -50,11 +51,11 @@ def add_item(st, sku, qty):
+     qty = utils.parse_int(qty, default=None)
+     if not sku or qty is None or qty < 1:
+         raise BadRequest("invalid_item")
+-    if qty > MAX_QTY_PER_LINE:
+-        raise BadRequest("qty_too_large")
++    if st.lines.get(sku, 0) + qty > MAX_QTY_PER_LINE:
++        raise BadRequest("qty_limit", max=MAX_QTY_PER_LINE)
+     pricing_client.check_sku(sku)
+     if sku in st.lines:
+-        st.lines[sku] = min(MAX_QTY_PER_LINE, st.lines[sku] + qty)
++        st.lines[sku] = st.lines[sku] + qty
+     else:
+         if len(st.lines) >= MAX_LINES:
+             raise BadRequest("too_many_lines")

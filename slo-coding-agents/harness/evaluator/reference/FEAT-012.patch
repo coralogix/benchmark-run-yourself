@@ -1,0 +1,230 @@
+diff --git a/services/cart/carts.py b/services/cart/carts.py
+index e28452d..24bc608 100644
+--- a/services/cart/carts.py
++++ b/services/cart/carts.py
+@@ -82,7 +82,7 @@ def apply_coupon(st, code):
+         raise BadRequest("code_required")
+     # pricing asks promotions whether the code is OK for this basket and
+     # passes any refusal straight back to us (and we pass it to edge-api)
+-    breakdown = pricing_client.price(st.raw_lines(), code, validate_coupon=True)
++    breakdown = pricing_client.price(st.raw_lines(), code, validate_coupon=True, user_id=st.user_id)
+     coupon = breakdown.get("coupon") or {}
+     st.coupon_code = coupon.get("code") or code.upper()
+     st.touch()
+diff --git a/services/cart/pricing_client.py b/services/cart/pricing_client.py
+index 7f54fa9..9e3ae69 100644
+--- a/services/cart/pricing_client.py
++++ b/services/cart/pricing_client.py
+@@ -6,9 +6,10 @@ from larder_common.log import get_logger
+ log = get_logger("cart.pricing")
+ 
+ 
+-def price(raw_lines, coupon_code=None, validate_coupon=False):
++def price(raw_lines, coupon_code=None, validate_coupon=False, user_id=None):
+     """-> pricing breakdown. Non-2xx answers are passed straight through."""
+-    payload = {"lines": raw_lines, "coupon_code": coupon_code, "validate_coupon": bool(validate_coupon)}
++    payload = {"lines": raw_lines, "coupon_code": coupon_code, "validate_coupon": bool(validate_coupon),
++               "user_id": user_id}
+     try:
+         res = client("pricing").post("/internal/price", json=payload)
+     except Exception as e:
+diff --git a/services/checkout/checkout.py b/services/checkout/checkout.py
+index 3c39e3c..ce4dbd6 100644
+--- a/services/checkout/checkout.py
++++ b/services/checkout/checkout.py
+@@ -97,6 +97,18 @@ def checkout(cart_id, hold_id, payment_token):
+     record = _save_pending(order_ref, cart, breakdown, hold_id)
+     body = payload.build_order_body(order_ref, cart, breakdown, email, hold_id, payment_token)
+ 
++    # FEAT-012: one-use coupons are claimed before the order exists
++    claimed = None
++    coupon_code = (body.get("coupon") or {}).get("code")
++    if coupon_code:
++        from larder_common.http import client as _client
++
++        cres = _client("promotions").post("/internal/coupons/%s/claim" % coupon_code,
++                                          json={"user_id": cart.get("user_id"), "order_ref": order_ref})
++        if not cres.ok:
++            _fail(record, 400, "coupon_already_used", "coupon_already_used")
++        claimed = (coupon_code, {"user_id": cart.get("user_id"), "order_ref": order_ref})
++
+     INFLIGHT[order_ref] = time.time()
+     t0 = time.time()
+     try:
+@@ -110,6 +122,15 @@ def checkout(cart_id, hold_id, payment_token):
+         if took > SLOW_ORDERS_CALL:
+             log.warning("orders call for %s took %.1fs", order_ref, took)
+ 
++    if claimed:
++        from larder_common.http import client as _client
++
++        method = "PUT" if outcomes.is_confirmed(res) else "DELETE"
++        try:
++            _client("promotions").request(method, "/internal/coupons/%s/claim" % claimed[0], json=claimed[1])
++        except Exception as e:  # noqa
++            log.error("coupon claim %s for %s not settled: %s", method, order_ref, e)
++
+     if outcomes.is_confirmed(res):
+         record.status = "confirmed"
+         record.charge_id = res.body.get("charge_id")
+diff --git a/services/pricing/coupons_client.py b/services/pricing/coupons_client.py
+index d1df229..bb1f53b 100644
+--- a/services/pricing/coupons_client.py
++++ b/services/pricing/coupons_client.py
+@@ -33,8 +33,9 @@ def resolve(code):
+     }
+ 
+ 
+-def validate(code, subtotal_pence):
+-    res = client("promotions").post("/internal/coupons/validate", json={"code": code, "subtotal_pence": subtotal_pence})
++def validate(code, subtotal_pence, user_id=None):
++    res = client("promotions").post("/internal/coupons/validate",
++                                    json={"code": code, "subtotal_pence": subtotal_pence, "user_id": user_id})
+     if not res.ok:
+         # whatever promotions said (400 invalid/expired/min_spend, or a 500),
+         # the caller gets exactly that
+diff --git a/services/pricing/quote.py b/services/pricing/quote.py
+index 1b1bcf7..50594cc 100644
+--- a/services/pricing/quote.py
++++ b/services/pricing/quote.py
+@@ -46,12 +46,12 @@ def price_lines(lines, coupon=None):
+     return _shape(engine.price_cart(lines, coupon), coupon)
+ 
+ 
+-def quote(raw_lines, coupon_code=None, validate_coupon=False):
++def quote(raw_lines, coupon_code=None, validate_coupon=False, user_id=None):
+     lines = prices.build_lines(raw_lines)
+     if coupon_code and validate_coupon:
+         # price once without the coupon to get the subtotal promotions wants
+         bare = price_lines(lines, None)
+-        coupons_client.validate(coupon_code, bare["subtotal_pence"])
++        coupons_client.validate(coupon_code, bare["subtotal_pence"], user_id)
+     coupon = coupons_client.resolve(coupon_code) if coupon_code else None
+     return price_lines(lines, coupon)
+ 
+diff --git a/services/pricing/routes.py b/services/pricing/routes.py
+index 6c5cc10..236873b 100644
+--- a/services/pricing/routes.py
++++ b/services/pricing/routes.py
+@@ -24,7 +24,7 @@ def price():
+         lines = []
+     if not isinstance(lines, list):
+         raise BadRequest("lines_required")
+-    return ok(quote.quote(lines, data.get("coupon_code"), bool(data.get("validate_coupon"))))
++    return ok(quote.quote(lines, data.get("coupon_code"), bool(data.get("validate_coupon")), data.get("user_id")))
+ 
+ 
+ @bp.route("/internal/prices/<sku>")
+diff --git a/services/promotions/one_use.py b/services/promotions/one_use.py
+new file mode 100644
+index 0000000..5b4a758
+--- /dev/null
++++ b/services/promotions/one_use.py
+@@ -0,0 +1,59 @@
++"""
++FEAT-012: one-use-per-customer coupons.
++
++A redemption row is a claim on (code, user). Checkout claims the code before it
++asks ops for the order (so two simultaneous checkouts can't both get the
++discount), confirms the claim when the order is confirmed and drops it if the
++order fails. Applying a code that the customer has a confirmed redemption for
++is refused with coupon_already_used.
++"""
++import datetime
++import threading
++
++from larder_common import dbx
++from larder_common.errors import CouponError
++
++ONE_USE_CODES = {"WELCOME10", "STUDENT20"}
++_LOCK = threading.Lock()
++
++
++def _db():
++    return dbx.db("promotions")
++
++
++def _now():
++    return datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
++
++
++def check_unused(code, user_id):
++    if code not in ONE_USE_CODES or not user_id:
++        return
++    n = _db().scalar("SELECT COUNT(*) FROM redemptions WHERE code = ? AND user_id = ? AND order_ref NOT LIKE 'claim:%'",
++                     (code, user_id), 0)
++    if n:
++        raise CouponError("coupon_already_used")
++
++
++def claim(code, user_id, order_ref):
++    """True if this checkout may use the code. Claims are 'claim:<ref>' until confirmed."""
++    if code not in ONE_USE_CODES or not user_id:
++        return True
++    with _LOCK:
++        n = _db().scalar("SELECT COUNT(*) FROM redemptions WHERE code = ? AND user_id = ?", (code, user_id), 0)
++        if n:
++            return False
++        _db().execute("INSERT INTO redemptions (code, user_id, order_ref, created_at) VALUES (?, ?, ?, ?)",
++                      (code, user_id, "claim:" + order_ref, _now()))
++        return True
++
++
++def confirm(code, user_id, order_ref):
++    with _LOCK:
++        _db().execute("UPDATE redemptions SET order_ref = ? WHERE code = ? AND user_id = ? AND order_ref = ?",
++                      (order_ref, code, user_id, "claim:" + order_ref))
++
++
++def release(code, user_id, order_ref):
++    with _LOCK:
++        _db().execute("DELETE FROM redemptions WHERE code = ? AND user_id = ? AND order_ref IN (?, ?)",
++                      (code, user_id, order_ref, "claim:" + order_ref))
+diff --git a/services/promotions/routes.py b/services/promotions/routes.py
+index 507a475..c479860 100644
+--- a/services/promotions/routes.py
++++ b/services/promotions/routes.py
+@@ -14,7 +14,7 @@ from flask import Blueprint
+ from larder_common.errors import NotFound
+ from larder_common.utils import safe_int
+ from larder_common.web import body, ok
+-from services.promotions import coupons
++from services.promotions import coupons, one_use
+ 
+ bp = Blueprint("promotions", __name__)
+ 
+@@ -28,9 +28,34 @@ def list_coupons():
+ def validate():
+     data = body()
+     coupon = coupons.check_code(data.get("code"), safe_int(data.get("subtotal_pence"), 0))
++    one_use.check_unused(coupon.code, data.get("user_id"))
+     return ok(coupon.as_payload())
+ 
+ 
++@bp.route("/internal/coupons/<code>/claim", methods=["POST"])
++def claim(code):
++    data = body()
++    code = coupons.normalise_code(code)
++    if not one_use.claim(code, data.get("user_id"), data.get("order_ref") or ""):
++        from larder_common.errors import CouponError
++
++        raise CouponError("coupon_already_used")
++    return ok({"ok": True})
++
++
++@bp.route("/internal/coupons/<code>/claim", methods=["PUT", "DELETE"])
++def settle(code):
++    from flask import request
++
++    data = body()
++    code = coupons.normalise_code(code)
++    if request.method == "PUT":
++        one_use.confirm(code, data.get("user_id"), data.get("order_ref") or "")
++    else:
++        one_use.release(code, data.get("user_id"), data.get("order_ref") or "")
++    return ok({"ok": True})
++
++
+ @bp.route("/internal/coupons/<code>")
+ def get_coupon(code):
+     c = coupons.lookup(code)

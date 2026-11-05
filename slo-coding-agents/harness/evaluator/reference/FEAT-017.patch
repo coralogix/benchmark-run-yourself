@@ -1,0 +1,21 @@
+diff --git a/services/cart/routes.py b/services/cart/routes.py
+index f6fcf68..7cb1120 100644
+--- a/services/cart/routes.py
++++ b/services/cart/routes.py
+@@ -14,6 +14,7 @@ cart routes (internal; edge-api proxies /api/carts/* here, checkout reads /lines
+ """
+ from flask import Blueprint
+ 
++from larder_common.errors import NotFound
+ from larder_common.web import body, ok
+ from services.cart import carts, state
+ 
+@@ -54,6 +55,8 @@ def add_item(cart_id):
+ @bp.route("/internal/carts/<cart_id>/items/<sku>", methods=["DELETE"])
+ def remove_item(cart_id, sku):
+     st = carts.get_open_cart(cart_id)
++    if sku not in st.lines:
++        raise NotFound("item_not_in_cart")
+     carts.remove_item(st, sku)
+     return ok(carts.serialise(st))
+ 

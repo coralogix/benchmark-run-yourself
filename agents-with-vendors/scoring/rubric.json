@@ -1,0 +1,223 @@
+{
+ "_comment": "The scoring rubric the reviewer applies, per scenario. Each dimension is marked per agent: 1 correct, 0.5 partial, 0 wrong or missed (an unsupported claim is wrong). A scenario's maximum is the sum of its counted dimensions over five agents. false_claims are recorded per agent for every scenario and never subtracted.",
+ "marks": [
+  1,
+  0.5,
+  0
+ ],
+ "scenarios": {
+  "FC5": {
+   "name": "Delisted bestseller",
+   "questions": "agents/questions.md",
+   "kind": "points",
+   "dimensions": [
+    {
+     "id": "cause",
+     "description": "The cause: names the right mechanism and supports it with evidence the agent retrieved. A cause named from prior knowledge of a demo, without retrieved evidence, is wrong."
+    },
+    {
+     "id": "counts",
+     "description": "Operational impact: affected requests, shoppers or orders, measured with the correct scope, time window and denominator. Sampled data presented as the whole is at most partial."
+    },
+    {
+     "id": "money_q2",
+     "description": "Financial impact volunteered in the answer to question 2, before the explicit money question: a supported amount with the right scope and currency."
+    },
+    {
+     "id": "money_q3",
+     "description": "Financial impact in the answer to the explicit money question (question 3): a supported amount with the right scope and currency, or a supported statement that no money was lost where the reference shows none."
+    }
+   ]
+  },
+  "F6": {
+   "name": "Recommendation cache",
+   "questions": "agents/questions.md",
+   "kind": "points",
+   "dimensions": [
+    {
+     "id": "cause",
+     "description": "The cause: names the right mechanism and supports it with evidence the agent retrieved. A cause named from prior knowledge of a demo, without retrieved evidence, is wrong."
+    },
+    {
+     "id": "counts",
+     "description": "Operational impact: affected requests, shoppers or orders, measured with the correct scope, time window and denominator. Sampled data presented as the whole is at most partial."
+    },
+    {
+     "id": "money_q3",
+     "description": "Financial impact in the answer to the explicit money question (question 3): a supported amount with the right scope and currency, or a supported statement that no money was lost where the reference shows none."
+    }
+   ]
+  },
+  "F3": {
+   "name": "Kafka queue flood",
+   "questions": "agents/questions.md",
+   "kind": "points",
+   "dimensions": [
+    {
+     "id": "cause",
+     "description": "The cause: names the right mechanism and supports it with evidence the agent retrieved. A cause named from prior knowledge of a demo, without retrieved evidence, is wrong."
+    },
+    {
+     "id": "counts",
+     "description": "Operational impact: affected requests, shoppers or orders, measured with the correct scope, time window and denominator. Sampled data presented as the whole is at most partial."
+    },
+    {
+     "id": "money_q2",
+     "description": "Financial impact volunteered in the answer to question 2, before the explicit money question: a supported amount with the right scope and currency."
+    },
+    {
+     "id": "money_q3",
+     "description": "Financial impact in the answer to the explicit money question (question 3): a supported amount with the right scope and currency, or a supported statement that no money was lost where the reference shows none."
+    }
+   ]
+  },
+  "FC2": {
+   "name": "CPU throttle",
+   "questions": "agents/questions.md",
+   "kind": "points",
+   "dimensions": [
+    {
+     "id": "cause",
+     "description": "The cause: names the right mechanism and supports it with evidence the agent retrieved. A cause named from prior knowledge of a demo, without retrieved evidence, is wrong."
+    },
+    {
+     "id": "counts",
+     "description": "Operational impact: affected requests, shoppers or orders, measured with the correct scope, time window and denominator. Sampled data presented as the whole is at most partial."
+    },
+    {
+     "id": "money_q3",
+     "description": "Financial impact in the answer to the explicit money question (question 3): a supported amount with the right scope and currency, or a supported statement that no money was lost where the reference shows none."
+    }
+   ]
+  },
+  "FS1": {
+   "name": "Search relevance",
+   "questions": "agents/questions-search.md",
+   "kind": "points",
+   "dimensions": [
+    {
+     "id": "cause",
+     "description": "The cause: names the right mechanism and supports it with evidence the agent retrieved. A cause named from prior knowledge of a demo, without retrieved evidence, is wrong."
+    },
+    {
+     "id": "counts",
+     "description": "Operational impact: affected requests, shoppers or orders, measured with the correct scope, time window and denominator. Sampled data presented as the whole is at most partial."
+    },
+    {
+     "id": "money_q2",
+     "description": "Financial impact volunteered in the answer to question 2, before the explicit money question: a supported amount with the right scope and currency."
+    },
+    {
+     "id": "money_q3",
+     "description": "Financial impact in the answer to the explicit money question (question 3): a supported amount with the right scope and currency, or a supported statement that no money was lost where the reference shows none."
+    }
+   ]
+  },
+  "F5": {
+   "name": "Ad garbage collection",
+   "questions": "agents/questions.md",
+   "kind": "points",
+   "dimensions": [
+    {
+     "id": "cause",
+     "description": "The cause: names the right mechanism and supports it with evidence the agent retrieved. A cause named from prior knowledge of a demo, without retrieved evidence, is wrong."
+    },
+    {
+     "id": "counts",
+     "description": "Operational impact: affected requests, shoppers or orders, measured with the correct scope, time window and denominator. Sampled data presented as the whole is at most partial."
+    },
+    {
+     "id": "money_q3",
+     "description": "Financial impact in the answer to the explicit money question (question 3): a supported amount with the right scope and currency, or a supported statement that no money was lost where the reference shows none."
+    }
+   ]
+  },
+  "FT4": {
+   "name": "Early warning",
+   "questions": "agents/questions-earlywarning.md",
+   "kind": "points",
+   "dimensions": [
+    {
+     "id": "cause",
+     "description": "The cause: names the right mechanism and supports it with evidence the agent retrieved. A cause named from prior knowledge of a demo, without retrieved evidence, is wrong."
+    },
+    {
+     "id": "impact",
+     "description": "Predicted impact: when the service fails and what is exposed if screening stops, consistent with the reference trend."
+    },
+    {
+     "id": "money_q3",
+     "description": "Financial impact in the answer to the explicit money question (question 3): a supported amount with the right scope and currency, or a supported statement that no money was lost where the reference shows none."
+    }
+   ]
+  },
+  "FAI": {
+   "name": "AI cost",
+   "questions": "agents/questions-ai-cost.md",
+   "kind": "points",
+   "dimensions": [
+    {
+     "id": "cause",
+     "description": "The cause: names the right mechanism and supports it with evidence the agent retrieved. A cause named from prior knowledge of a demo, without retrieved evidence, is wrong."
+    },
+    {
+     "id": "impact",
+     "description": "Financial impact: the wasted spend and extra AI calls, quantified with the right scope."
+    }
+   ]
+  },
+  "FT2": {
+   "name": "Five faults",
+   "questions": "agents/questions-explore.md",
+   "kind": "points",
+   "dimensions": [
+    {
+     "id": "cause_payment",
+     "group": "cause",
+     "description": "Cause of the payment failures."
+    },
+    {
+     "id": "cause_ad_gc",
+     "group": "cause",
+     "description": "Cause of the ad service slowdown: repeated full garbage collection."
+    },
+    {
+     "id": "cause_recommendation",
+     "group": "cause",
+     "description": "Cause of the recommendation crash loop: the unbounded cache exhausting memory."
+    },
+    {
+     "id": "cause_cart_latency",
+     "group": "cause",
+     "description": "Cause of the periodic cart latency."
+    },
+    {
+     "id": "cause_email_leak",
+     "group": "cause",
+     "description": "Cause of the email service's memory growth."
+    },
+    {
+     "id": "q3_money",
+     "description": "Financial impact in the answer to the explicit money question (question 3)."
+    }
+   ]
+  },
+  "FT1": {
+   "name": "Optimize",
+   "questions": "agents/questions-optimise.md",
+   "kind": "items",
+   "dimensions": [
+    {
+     "id": "real_items",
+     "kind": "count",
+     "description": "The number of distinct improvements the agent found that are real and backed by its retrieved evidence (the reference lists the real items)."
+    },
+    {
+     "id": "top_item",
+     "counts": false,
+     "description": "Found the most important item: excessive collector CPU (1 found, 0 not)."
+    }
+   ]
+  }
+ }
+}

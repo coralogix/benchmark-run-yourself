@@ -1,0 +1,30 @@
+diff --git a/services/edge_api/upstreams.py b/services/edge_api/upstreams.py
+index 5fd77bc..c559e93 100644
+--- a/services/edge_api/upstreams.py
++++ b/services/edge_api/upstreams.py
+@@ -196,5 +196,9 @@ def hold_slot(slot_id, cart_ref):
+                 raise_errors=False)
+ 
+ 
++def cancel_order(order_ref):
++    return call(ORDERS, "POST", "/internal/orders/%s/cancel" % order_ref, json={}, raise_errors=False)
++
++
+ def order(order_ref):
+     return call(ORDERS, "GET", "/internal/orders/%s" % order_ref, raise_errors=False)
+diff --git a/services/edge_api/views/checkout.py b/services/edge_api/views/checkout.py
+index c4f59da..d37babb 100644
+--- a/services/edge_api/views/checkout.py
++++ b/services/edge_api/views/checkout.py
+@@ -24,6 +24,11 @@ def do_checkout():
+     return passthrough(res)
+ 
+ 
++@bp.route("/api/orders/<order_ref>/cancel", methods=["POST"])
++def cancel_order(order_ref):
++    return passthrough(upstreams.cancel_order(order_ref))
++
++
+ @bp.route("/api/orders/<order_ref>")
+ def get_order(order_ref):
+     return ok(orders_view.get_order(order_ref))

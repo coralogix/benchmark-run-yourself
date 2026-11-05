@@ -1,0 +1,124 @@
+{
+  "teams": [
+    {
+      "pair": 1,
+      "condition": "basic",
+      "team_name": "larder-without-slos-1",
+      "team_id": 0
+    },
+    {
+      "pair": 1,
+      "condition": "slo-guided",
+      "team_name": "larder-with-slos-1",
+      "team_id": 0
+    },
+    {
+      "pair": 2,
+      "condition": "basic",
+      "team_name": "larder-without-slos-2",
+      "team_id": 0
+    },
+    {
+      "pair": 2,
+      "condition": "slo-guided",
+      "team_name": "larder-with-slos-2",
+      "team_id": 0
+    },
+    {
+      "pair": 3,
+      "condition": "basic",
+      "team_name": "larder-without-slos-3",
+      "team_id": 0
+    },
+    {
+      "pair": 3,
+      "condition": "slo-guided",
+      "team_name": "larder-with-slos-3",
+      "team_id": 0
+    },
+    {
+      "pair": 4,
+      "condition": "basic",
+      "team_name": "larder-without-slos-4",
+      "team_id": 0
+    },
+    {
+      "pair": 4,
+      "condition": "slo-guided",
+      "team_name": "larder-with-slos-4",
+      "team_id": 0
+    },
+    {
+      "pair": 5,
+      "condition": "basic",
+      "team_name": "larder-without-slos-5",
+      "team_id": 0
+    },
+    {
+      "pair": 5,
+      "condition": "slo-guided",
+      "team_name": "larder-with-slos-5",
+      "team_id": 0
+    },
+    {
+      "pair": 6,
+      "condition": "basic",
+      "team_name": "larder-without-slos-6",
+      "team_id": 0
+    },
+    {
+      "pair": 6,
+      "condition": "slo-guided",
+      "team_name": "larder-with-slos-6",
+      "team_id": 0
+    },
+    {
+      "pair": 7,
+      "condition": "basic",
+      "team_name": "larder-without-slos-7",
+      "team_id": 0
+    },
+    {
+      "pair": 7,
+      "condition": "slo-guided",
+      "team_name": "larder-with-slos-7",
+      "team_id": 0
+    },
+    {
+      "pair": 8,
+      "condition": "basic",
+      "team_name": "larder-without-slos-8",
+      "team_id": 0
+    },
+    {
+      "pair": 8,
+      "condition": "slo-guided",
+      "team_name": "larder-with-slos-8",
+      "team_id": 0
+    },
+    {
+      "pair": 9,
+      "condition": "basic",
+      "team_name": "larder-without-slos-9",
+      "team_id": 0
+    },
+    {
+      "pair": 9,
+      "condition": "slo-guided",
+      "team_name": "larder-with-slos-9",
+      "team_id": 0
+    },
+    {
+      "pair": 10,
+      "condition": "basic",
+      "team_name": "larder-without-slos-10",
+      "team_id": 0
+    },
+    {
+      "pair": 10,
+      "condition": "slo-guided",
+      "team_name": "larder-with-slos-10",
+      "team_id": 0
+    }
+  ]
+}

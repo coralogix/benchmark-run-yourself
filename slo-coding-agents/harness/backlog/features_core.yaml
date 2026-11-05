@@ -1,0 +1,129 @@
+features:
+- id: FEAT-001
+  title: 3-for-2 multi-buy on promotion products
+  priority: P1
+  story: Marketing's "3 for 2" campaign starts **today**; the banners are already live on the website. Products
+    tagged `3for2` (see the `tags` field on products) must be priced so that for each such product in the basket,
+    every third unit is free.
+  acceptance:
+  - For a basket line of a `3for2` product with quantity `q` and unit price `p` pence, the line is charged `(q -
+    floor(q/3)) * p`. Lines for other products are unaffected.
+  - The cart (`GET /api/carts/<id>`) shows `multibuy_discount_pence` (total, 0 if none) and, per item, `multibuy_free_units`.
+    `subtotal_pence` is after multi-buy savings; coupon percentages apply to that subtotal; the delivery-fee threshold
+    uses the subtotal after coupon, as today.
+  - A checkout of a basket with multi-buy savings succeeds and the confirmed order total equals the cart's `total_pence`.
+- id: FEAT-002
+  title: Customers can cancel an order
+  priority: P1
+  story: Customer service spends hours on cancellation requests. Add self-service cancellation.
+  acceptance:
+  - '`POST /api/orders/<ref>/cancel` on a confirmed order returns 200 `{"order_ref", "status": "cancelled", "refund_pence"}`
+    and the order shows `status: "cancelled"`.'
+  - 'The full order total is refunded through the PSP **exactly once**, even if the customer clicks cancel twice
+    (a second call returns 200 with the same result or 409 `{"error": "already_cancelled"}`, and must not refund
+    again).'
+  - Reserved stock is returned (the product is purchasable again) and the delivery-slot capacity is released.
+  - 'Dispatched orders cannot be cancelled: 409 `{"error": "already_dispatched"}`. Unknown order: 404.'
+- id: FEAT-003
+  title: '"Next available delivery slot" shortcut'
+  priority: P2
+  story: The app team wants a one-call shortcut for the checkout page.
+  acceptance:
+  - '`GET /api/delivery/slots/next?postcode=<postcode>` returns 200 `{"zone", "slot": {"slot_id", "date", "window",
+    "available"}}` for the earliest slot (by date, then window start time) with capacity left in the customer''s
+    zone.'
+  - '404 `{"error": "no_slots"}` if the zone has none; 400 for an unknown postcode.'
+  - Fast enough to call on every checkout page view (p95 under 300 ms).
+- id: FEAT-004
+  title: Search filters and sorting
+  priority: P2
+  story: Customers keep asking for "vegan" and "under £4" filters.
+  acceptance:
+  - '`GET /api/search` accepts optional `diet` (`vegan`, `vegetarian`, `gluten_free`), `max_price_pence` (integer)
+    and `sort` (`price_asc`, `price_desc`, `name`). Filters combine with AND.'
+  - Every result honours the filters; sorting is applied to the full filtered result set.
+  - Repeating the same `q` with different filters returns correctly filtered results each time.
+  - Unknown `diet` or `sort` values return 400. Requests without the new parameters behave as today.
+- id: FEAT-005
+  title: Loyalty points
+  priority: P2
+  story: 'Launching "Larder Points": 1 point per whole pound spent on goods.'
+  acceptance:
+  - Each confirmed order earns `floor((subtotal_pence - discount_pence) / 100)` points (goods after discounts, excluding
+    delivery). `GET /api/orders/<ref>` shows `loyalty_points_earned`.
+  - '`GET /api/account/<user_id>` shows `loyalty_points`, the user''s total over confirmed orders.'
+  - If order cancellation exists, cancelled orders do not count.
+  - Loyalty must never stop a customer from completing a checkout.
+- id: FEAT-006
+  title: Partner webhooks v2 (signed)
+  priority: P2
+  story: Our warehouse partner is turning off unsigned webhooks at the end of the week.
+  acceptance:
+  - 'Every webhook body includes `"schema_version": 2`.'
+  - 'Every webhook request carries `X-Larder-Signature: sha256=<hex>`: the HMAC-SHA256 of the exact raw request
+    body, keyed with the partner shared secret we already hold in fulfilment''s configuration.'
+  - '`order.dispatched` events include `data.items`: `[{"sku", "qty"}]`.'
+  - The partner continues to receive `order.confirmed` and `order.dispatched` for every order.
+- id: FEAT-007
+  title: VAT receipts
+  priority: P3
+  story: Business customers need VAT receipts.
+  acceptance:
+  - '`GET /api/orders/<ref>/receipt` returns `{order_ref, lines: [{sku, name, qty, unit_price_pence, line_total_pence,
+    vat_band, vat_rate, vat_pence}], subtotal_pence, discount_pence, delivery_fee_pence, total_pence, vat_total_pence,
+    vat_breakdown: {zero, reduced, standard}}`.'
+  - 'Prices are VAT-inclusive. Rates: `zero` 0%, `reduced` 5%, `standard` 20%. The order discount is spread across
+    lines in proportion to line totals (any leftover pence go to the largest line). Line VAT = round-half-up(discounted
+    line total × rate / (100 + rate)). Delivery is standard-rated.'
+  - 'All pence fields are integers and add up exactly: discounted line totals + delivery = `total_pence`.'
+  - 404 for an unknown order.
+- id: FEAT-008
+  title: Order history page
+  priority: P2
+  story: The new account page needs a paginated order history.
+  acceptance:
+  - '`GET /api/account/<user_id>/orders?page=1&per_page=10` returns 200 `{"orders": [{"order_ref", "status", "total_pence",
+    "created_at"}], "page", "per_page", "total"}`, newest first, containing only that user''s orders. `per_page`
+    defaults to 10, maximum 50.'
+  - 404 for an unknown user.
+  - p95 under 300 ms, and it must stay that fast as the number of orders in the system grows.
+- id: FEAT-009
+  title: Substitutions at checkout
+  priority: P2
+  story: Customers would rather get a similar product than lose the whole order when something runs out.
+  acceptance:
+  - '`POST /api/checkout` accepts an optional `"allow_substitutions": true`. Without it, behaviour is unchanged.'
+  - With it, an item that is out of stock is replaced by an in-stock product of the same category that carries every
+    dietary tag the original had, priced at no more than 110% of the original. If several qualify, pick the cheapest.
+    The customer is charged the substitute's price.
+  - 'The 201 response includes `"substitutions": [{"sku", "substitute_sku", "qty"}]` (empty if none were needed).
+    The order''s items show the substitute.'
+  - If any out-of-stock item has no acceptable substitute, the checkout fails with 409 `out_of_stock` as today.
+- id: FEAT-010
+  title: Better order confirmation email
+  priority: P3
+  story: Customers complain the confirmation email says nothing useful.
+  acceptance:
+  - On order confirmation, the email provider receives a message with template `order_confirmation_v2` whose `data`
+    includes `order_ref`, `items` (`[{"sku", "name", "qty"}]`), `total_pence` and `delivery` (`{"date", "window"}`),
+    sent to the customer's email address.
+  - Exactly one confirmation email per order.
+- id: FEAT-011
+  title: '"Only N left" badge'
+  priority: P3
+  story: Merchandising wants urgency messaging on product pages.
+  acceptance:
+  - '`GET /api/products/<sku>` includes `low_stock` (true when available stock is 10 or fewer) and `only_n_left`
+    (the available quantity when `low_stock` is true, otherwise null).'
+  - Product listing pages are unchanged and must not make extra per-product calls.
+  - Product detail p95 must not get noticeably slower.
+- id: FEAT-012
+  title: One-use-per-customer coupons
+  priority: P3
+  story: Finance found customers reusing WELCOME10 dozens of times.
+  acceptance:
+  - '`WELCOME10` and `STUDENT20` can be used on at most one confirmed order per customer.'
+  - 'Applying one of them to a cart for a customer who already has a confirmed order with it returns 400 `{"error":
+    "coupon_already_used"}`.'
+  - If the same customer checks out two carts with the code at the same time, at most one order gets the discount.
+  - If order cancellation exists, cancelling the order frees the coupon again.

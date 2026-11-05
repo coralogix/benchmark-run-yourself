@@ -1,0 +1,14 @@
+diff --git a/services/edge_api/views/catalogue.py b/services/edge_api/views/catalogue.py
+index 79a9c7a..cd569e3 100644
+--- a/services/edge_api/views/catalogue.py
++++ b/services/edge_api/views/catalogue.py
+@@ -47,7 +47,8 @@ def product_detail(sku):
+     if also is not None:
+         also = shaping.products(also)
+         stock.attach_stock([item], also)
+-        item["also_bought"] = also
++        # FEAT-045: never recommend something that can't be bought
++        item["also_bought"] = [p for p in also if p.get("in_stock") is True]
+     else:
+         stock.attach_stock([item])
+     return ok(item)

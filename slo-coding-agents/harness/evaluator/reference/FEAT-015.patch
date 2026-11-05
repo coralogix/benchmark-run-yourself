@@ -1,0 +1,31 @@
+diff --git a/services/edge_api/upstreams.py b/services/edge_api/upstreams.py
+index 5fd77bc..3614a29 100644
+--- a/services/edge_api/upstreams.py
++++ b/services/edge_api/upstreams.py
+@@ -77,6 +77,10 @@ def categories():
+     return get(CATALOG, "/internal/categories").get("categories", [])
+ 
+ 
++def category_counts():
++    return get(CATALOG, "/internal/categories/counts").get("counts", {})
++
++
+ # --- search / recommendations ---------------------------------------------------
+ 
+ 
+diff --git a/services/edge_api/views/catalogue.py b/services/edge_api/views/catalogue.py
+index 79a9c7a..4a3950d 100644
+--- a/services/edge_api/views/catalogue.py
++++ b/services/edge_api/views/catalogue.py
+@@ -55,7 +55,10 @@ def product_detail(sku):
+ 
+ @bp.route("/api/categories")
+ def categories():
+-    return ok({"categories": upstreams.categories()})
++    # FEAT-015: every category with its (active) product count, by name
++    counts = upstreams.category_counts()
++    names = sorted(set(upstreams.categories()) | set(counts))
++    return ok({"categories": [{"category": c, "product_count": int(counts.get(c, 0))} for c in names]})
+ 
+ 
+ @bp.route("/api/search")

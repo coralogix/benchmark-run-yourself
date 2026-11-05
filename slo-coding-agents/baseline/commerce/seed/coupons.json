@@ -1,0 +1,75 @@
+[
+ {
+  "code": "WELCOME10",
+  "expires": "2027-06-30",
+  "min_spend_pence": 0,
+  "percent_off": 10
+ },
+ {
+  "code": "SPRING15",
+  "expires": "2027-04-30T23:59:59Z",
+  "min_spend_pence": 2000,
+  "percent_off": 15
+ },
+ {
+  "code": "LARDER5",
+  "expires": "2027-12-31",
+  "min_spend_pence": 0,
+  "percent_off": 5
+ },
+ {
+  "code": "FAMILY12",
+  "expires": "2027-01-31",
+  "min_spend_pence": 4000,
+  "percent_off": 12.5
+ },
+ {
+  "code": "STUDENT20",
+  "expires": "31/12/2026",
+  "min_spend_pence": 1500,
+  "percent_off": 20
+ },
+ {
+  "code": "AUTUMN10",
+  "expires": "30/11/2026",
+  "min_spend_pence": 1000,
+  "percent_off": 10
+ },
+ {
+  "code": "LOYAL15",
+  "expires": "2027-03-31",
+  "min_spend_pence": 2500,
+  "percent_off": 15
+ },
+ {
+  "code": "FREESHIP",
+  "expires": "2027-12-31",
+  "free_delivery": true,
+  "min_spend_pence": 0,
+  "percent_off": 0
+ },
+ {
+  "code": "SUMMER25",
+  "expires": "2026-08-31",
+  "min_spend_pence": 3000,
+  "percent_off": 25
+ },
+ {
+  "code": "BLACKFRI",
+  "expires": "28/11/2025",
+  "min_spend_pence": 5000,
+  "percent_off": 30
+ },
+ {
+  "code": "NHS10",
+  "expires": "never",
+  "min_spend_pence": 0,
+  "percent_off": 10
+ },
+ {
+  "code": "VIP7",
+  "expires": "2027-02-28",
+  "min_spend_pence": 0,
+  "percent_off": 7.5
+ }
+]

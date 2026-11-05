@@ -1,0 +1,73 @@
+diff --git a/services/edge_api/views/catalogue.py b/services/edge_api/views/catalogue.py
+index 79a9c7a..9c61843 100644
+--- a/services/edge_api/views/catalogue.py
++++ b/services/edge_api/views/catalogue.py
+@@ -58,6 +58,14 @@ def categories():
+     return ok({"categories": upstreams.categories()})
+ 
+ 
++@bp.route("/api/search/suggest")
++def search_suggest():
++    q = request.args.get("q", "") or ""
++    if len(q.strip()) < 2:
++        return ok({"suggestions": []})
++    return ok(upstreams.get(upstreams.SEARCH, "/internal/search/suggest", params={"q": q}))
++
++
+ @bp.route("/api/search")
+ def do_search():
+     q = (request.args.get("q", "") or "")[:MAX_SEARCH_QUERY]
+diff --git a/services/search/routes.py b/services/search/routes.py
+index d40496d..b9f3de2 100644
+--- a/services/search/routes.py
++++ b/services/search/routes.py
+@@ -22,6 +22,14 @@ def do_search():
+     return ok({"query": q, "results": results, "count": len(results)})
+ 
+ 
++@bp.route("/internal/search/suggest")
++def suggest():
++    from services.search import index, suggest as _suggest
++
++    index.ensure_index()
++    return ok({"suggestions": _suggest.suggest_words(request.args.get("q", ""))})
++
++
+ @bp.route("/internal/search/stats")
+ def stats():
+     return ok(engine.stats())
+diff --git a/services/search/suggest.py b/services/search/suggest.py
+index 3a98bfb..2bc2fd7 100644
+--- a/services/search/suggest.py
++++ b/services/search/suggest.py
+@@ -28,3 +28,30 @@ def suggest(prefix):
+         if node is None:
+             return []
+     return sorted(set(node.get("$", [])))[:MAX_SUGGESTIONS]
++
++
++# FEAT-030: suggestions for the search box. Names whose words start with the
++# prefix (case-insensitive), distinct, alphabetical, at most 8. Built once from
++# the index (products don't change while we run).
++MIN_PREFIX = 2
++_NAMES = {"list": None}
++
++
++def _names():
++    if _NAMES["list"] is None:
++        names = sorted({e.name for e in index.index_snapshot()}, key=lambda n: (n.casefold(), n))
++        _NAMES["list"] = [(n, [w.casefold() for w in n.split()]) for n in names]
++    return _NAMES["list"]
++
++
++def suggest_words(prefix):
++    p = (prefix or "").strip().casefold()
++    if len(p) < MIN_PREFIX:
++        return []
++    out = []
++    for name, words in _names():
++        if any(w.startswith(p) for w in words):
++            out.append(name)
++            if len(out) == MAX_SUGGESTIONS:
++                break
++    return out

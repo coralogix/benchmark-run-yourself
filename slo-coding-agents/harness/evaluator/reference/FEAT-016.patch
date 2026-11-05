@@ -1,0 +1,20 @@
+diff --git a/services/edge_api/shaping.py b/services/edge_api/shaping.py
+index ffc7150..6ba1f38 100644
+--- a/services/edge_api/shaping.py
++++ b/services/edge_api/shaping.py
+@@ -13,9 +13,15 @@ PRODUCT_FIELDS = ("sku", "name", "category", "price", "price_pence", "vat_band",
+ DETAIL_FIELDS = PRODUCT_FIELDS + ("description",)
+ 
+ 
++# FEAT-016: VAT rate (percent) per band, shown on product pages
++VAT_RATES = {"zero": 0, "reduced": 5, "standard": 20}
++
++
+ def product(p, detail=False):
+     fields = DETAIL_FIELDS if detail else PRODUCT_FIELDS
+     out = {k: p.get(k) for k in fields}
++    if detail:
++        out["vat_rate"] = VAT_RATES.get(out.get("vat_band"), 20)
+     if out.get("price") is not None:
+         out["price_pence"] = int(round(out["price"] * 100))
+     if out.get("diet") is None:

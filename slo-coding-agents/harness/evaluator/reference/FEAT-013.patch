@@ -1,0 +1,99 @@
+diff --git a/services/catalog/products.py b/services/catalog/products.py
+index 8808ccb..f78b580 100644
+--- a/services/catalog/products.py
++++ b/services/catalog/products.py
+@@ -55,15 +55,24 @@ def serialise(product, tags=None, diet=None, detail=False):
+ # --- listing / detail -------------------------------------------------------
+ 
+ 
+-def list_products(page=1, per_page=DEFAULT_PER_PAGE, category=None):
++# FEAT-013: listing sort orders (id breaks ties so pages never overlap)
++SORT_ORDERS = {
++    "price_asc": "price ASC, id",
++    "price_desc": "price DESC, id",
++    "name": "name COLLATE NOCASE, id",
++}
++
++
++def list_products(page=1, per_page=DEFAULT_PER_PAGE, category=None, sort=None):
+     page = max(1, page)
+     per_page = max(1, min(MAX_PER_PAGE, per_page))
+     filters = {"active": 1}
+     if category:
+         filters["category"] = category
++    order_by = SORT_ORDERS.get(sort, "id")
+     with CATALOG_LOCK:
+         total = Product.count(**filters)
+-        products = Product.filter(order_by="id", limit=per_page, offset=(page - 1) * per_page, **filters)
++        products = Product.filter(order_by=order_by, limit=per_page, offset=(page - 1) * per_page, **filters)
+         items = [serialise(p) for p in products]
+     return {"items": items, "page": page, "per_page": per_page, "total": total}
+ 
+diff --git a/services/catalog/routes.py b/services/catalog/routes.py
+index 1b3c20e..7d2a5e0 100644
+--- a/services/catalog/routes.py
++++ b/services/catalog/routes.py
+@@ -25,7 +25,10 @@ def list_products():
+     page = parse_int(request.args.get("page"), 1, lo=1)
+     per_page = parse_int(request.args.get("per_page"), products.DEFAULT_PER_PAGE, lo=1, hi=products.MAX_PER_PAGE)
+     category = request.args.get("category") or None
+-    return ok(products.list_products(page=page, per_page=per_page, category=category))
++    sort = request.args.get("sort") or None
++    if sort is not None and sort not in products.SORT_ORDERS:
++        raise BadRequest("invalid_sort")
++    return ok(products.list_products(page=page, per_page=per_page, category=category, sort=sort))
+ 
+ 
+ @bp.route("/internal/products/by-id/<int:product_id>")
+diff --git a/services/edge_api/upstreams.py b/services/edge_api/upstreams.py
+index 5fd77bc..d8b6ef9 100644
+--- a/services/edge_api/upstreams.py
++++ b/services/edge_api/upstreams.py
+@@ -62,10 +62,12 @@ def post(target, path, json=None, **kw):
+ # --- catalog ----------------------------------------------------------------
+ 
+ 
+-def list_products(page, per_page, category=None):
++def list_products(page, per_page, category=None, sort=None):
+     params = {"page": page, "per_page": per_page}
+     if category:
+         params["category"] = category
++    if sort:
++        params["sort"] = sort
+     return get(CATALOG, "/internal/products", params=params)
+ 
+ 
+diff --git a/services/edge_api/views/catalogue.py b/services/edge_api/views/catalogue.py
+index 79a9c7a..a2c7299 100644
+--- a/services/edge_api/views/catalogue.py
++++ b/services/edge_api/views/catalogue.py
+@@ -4,7 +4,7 @@ GET /api/products, /api/products/<sku>, /api/categories, /api/search
+ from flask import Blueprint, request
+ 
+ from larder_common import settings
+-from larder_common.errors import NotFound, PassThrough
++from larder_common.errors import BadRequest, NotFound, PassThrough
+ from larder_common.log import get_logger
+ from larder_common.utils import parse_int
+ from larder_common.web import ok
+@@ -20,13 +20,19 @@ MAX_PER_PAGE = settings.CATALOG_MAX_PER_PAGE
+ # DP 2023: search is capped at 50 by search itself (40 on prod, settings_local)
+ MAX_SEARCH_QUERY = 200
+ 
++# FEAT-013
++SORTS = ("price_asc", "price_desc", "name")
++
+ 
+ @bp.route("/api/products")
+ def products():
+     page = parse_int(request.args.get("page"), 1, lo=1)
+     per_page = parse_int(request.args.get("per_page"), DEFAULT_PER_PAGE, lo=1, hi=MAX_PER_PAGE)
+     category = request.args.get("category") or None
+-    data = upstreams.list_products(page, per_page, category)
++    sort = request.args.get("sort")
++    if sort is not None and sort not in SORTS:
++        raise BadRequest("invalid_sort")
++    data = upstreams.list_products(page, per_page, category, sort=sort)
+     items = shaping.products(data.get("items"))
+     stock.attach_stock(items)
+     return ok({"items": items, "page": data.get("page", page), "per_page": data.get("per_page", per_page),

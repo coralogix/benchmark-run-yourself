@@ -1,0 +1,89 @@
+# SF-3 reference fix. Repo: commerce (apply inside the commerce/ directory: git apply SF-3.patch)
+diff --git a/services/search/engine.py b/services/search/engine.py
+index 38a3b39..2932073 100644
+--- a/services/search/engine.py
++++ b/services/search/engine.py
+@@ -1,15 +1,18 @@
+ """
+ Product search.
+ 
+-Results are cached in-process in _SEARCH_CACHE. When the cache grows past
+-SEARCH_CACHE_SOFT_LIMIT the safety valve recycles it and refreshes the
+-catalogue index (so new products show up without a restart).
++Results are cached in-process in _SEARCH_CACHE, a bounded LRU: once it holds
++SEARCH_CACHE_SOFT_LIMIT entries the least recently used one is evicted. (It used
++to be recycled wholesale with an index rebuild under INDEX_LOCK, which stalled
++every search and product page for seconds - REL-5.)
+ 
+     search(q, uid=None) -> [P]
+ 
+ P is the product dict catalog returns (no in_stock; edge-api adds that).
+ """
++import collections
+ import datetime
++import threading
+ 
+ from larder_common import dbx, settings, telemetry
+ from larder_common.helpers.strings import tokenise
+@@ -21,9 +24,10 @@ log = get_logger("search")
+ # TODO(AS 2020-09-14): read this from settings.SEARCH_CACHE_SOFT_LIMIT
+ SEARCH_CACHE_SOFT_LIMIT = 400
+ 
+-# query -> results. Module global, shared by all worker threads.
+-_SEARCH_CACHE = {}
+-_STATS = {"hits": 0, "misses": 0, "flushes": 0}
++# query -> results, least recently used first. Shared by all worker threads.
++_SEARCH_CACHE = collections.OrderedDict()
++_CACHE_LOCK = threading.Lock()
++_STATS = {"hits": 0, "misses": 0, "flushes": 0, "evictions": 0}
+ 
+ # don't log zero-result queries shorter than this (AS 2023-06)
+ MIN_LOGGED_QUERY = 3
+@@ -87,21 +91,36 @@ def _search_uncached(q, uid=None):
+     return results
+ 
+ 
++def _cache_get(key):
++    with _CACHE_LOCK:
++        hit = _SEARCH_CACHE.get(key)
++        if hit is not None:
++            _SEARCH_CACHE.move_to_end(key)
++        return hit
++
++
++def _cache_put(key, results):
++    with _CACHE_LOCK:
++        _SEARCH_CACHE[key] = results
++        _SEARCH_CACHE.move_to_end(key)
++        while len(_SEARCH_CACHE) > SEARCH_CACHE_SOFT_LIMIT:
++            _SEARCH_CACHE.popitem(last=False)
++            _STATS["evictions"] += 1
++
++
+ def search(q, uid=None):
+     # PM-702 (AS 2021-03-09): the cache served results for products that had
+     # been deleted while the index was rebuilding. Make sure the index is warm
+     # before we answer, even from cache.
+     index.ensure_index()
+     key = _cache_key(q, uid)
+-    hit = _SEARCH_CACHE.get(key)
++    hit = _cache_get(key)
+     if hit is not None:
+         _STATS["hits"] += 1
+         return live_prices.overlay(hit)
+     _STATS["misses"] += 1
+-    if len(_SEARCH_CACHE) > SEARCH_CACHE_SOFT_LIMIT:
+-        _safety_valve()
+     results = _search_uncached(q, uid)
+-    _SEARCH_CACHE[key] = results
++    _cache_put(key, results)
+     return live_prices.overlay(results)
+ 
+ 
+@@ -110,4 +129,5 @@ def stats():
+ 
+ 
+ def clear():
+-    _SEARCH_CACHE.clear()
++    with _CACHE_LOCK:
++        _SEARCH_CACHE.clear()

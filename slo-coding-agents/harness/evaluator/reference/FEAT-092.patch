@@ -1,0 +1,21 @@
+Reference implementation for FEAT-092 (evaluator-only).
+Repo: ops. Apply from a fresh copy of baseline/ops:  git apply FEAT-092.patch
+
+diff --git a/services/notifications/routes/notifications.js b/services/notifications/routes/notifications.js
+index 9b420d6..3fc06c8 100644
+--- a/services/notifications/routes/notifications.js
++++ b/services/notifications/routes/notifications.js
+@@ -16,7 +16,12 @@ var router = express.Router();
+ router.get('/notifications', asyncRoute(async function (req, res) {
+   if (req.query.order_ref) {
+     var list = await store.byOrderRef(String(req.query.order_ref));
+-    return res.json({ notifications: list });
++    // FEAT-092
++    return res.json({
++      messages: list.map(function (d) {
++        return { template: d.template, to: d.to, sent_at: d.created_at, status: d.status, error: d.error || null };
++      })
++    });
+   }
+   var limit = Math.min(parseInt(req.query.limit, 10) || 50, 500);
+   res.json({ notifications: await store.recent(limit) });

@@ -1,0 +1,21 @@
+{
+ "runs": [
+  {
+   "pair": 11,
+   "condition": "slo",
+   "run_id": "<run-id>",
+   "defects": {
+    "HC-1": {
+     "diagnosis": {
+      "source": {"file": "runs/<run-id>/agent_transcript.log", "line": 0},
+      "quote": "<the agent's text or task-plan line, copied exactly>"
+     },
+     "first_targeted_repair": {
+      "source": {"file": "runs/<run-id>/agent_transcript.log", "line": 0}
+     },
+     "audit_note": "<why this is the first correct causal explanation or targeted change>"
+    }
+   }
+  }
+ ]
+}

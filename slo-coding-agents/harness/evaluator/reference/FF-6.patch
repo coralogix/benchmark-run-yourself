@@ -1,0 +1,199 @@
+# FF-6 reference fix. Repo: ops (apply inside the ops/ directory: git apply FF-6.patch)
+diff --git a/services/fraud/history.js b/services/fraud/history.js
+index 747e6a9..3b20998 100644
+--- a/services/fraud/history.js
++++ b/services/fraud/history.js
+@@ -41,10 +41,37 @@ function file() {
+   return path.join(config.get('data.dir'), config.get('fraud.historyFile', 'fraud_history.json'));
+ }
+ 
+-function load() {
++// In-memory copy of the history plus a per-customer index, loaded from the
++// file once per process (REL: re-reading, re-parsing and linearly scanning the
++// whole file on every score made fraud - and so payments and checkout - slower
++// with every payment ever scored). The file is still written synchronously on
++// every score, but by appending to the JSON array instead of rewriting it.
++var cache = null; // { list, byKey: {key: [{at, iso, decision, amount}]}, byDay, bytes, rewrite }
++
++function keyOf(rec) {
++  return rec.signals ? rec.signals.user_key : signals.normaliseEmail(rec.email);
++}
++
++function indexRecord(c, rec) {
++  var at = moment(rec.scored_at, moment.ISO_8601);
++  var day = at.format('YYYY-MM-DD');
++  c.byDay[day] = (c.byDay[day] || 0) + 1;
++  var key = keyOf(rec);
++  (c.byKey[key] = c.byKey[key] || []).push({
++    at: at.isValid() ? at.valueOf() : NaN,
++    iso: at.toISOString(),
++    decision: rec.decision,
++    amount: rec.request && rec.request.amount_pence ? rec.request.amount_pence : 0,
++    rec: rec
++  });
++}
++
++function ensureLoaded() {
++  if (cache) return cache;
+   var started = Date.now();
+   var list = [];
+   var raw = null;
++  var rewrite = false;
+   try {
+     raw = fs.readFileSync(file(), 'utf8');
+   } catch (e) {
+@@ -54,84 +81,96 @@ function load() {
+     try {
+       list = JSON.parse(raw);
+     } catch (e) {
+-      // half-written file after a crash. Start again rather than 500 forever.
+       stats.corrupt++;
+       logger.error('fraud: history file corrupt, starting empty', { err: e.message, file: file() });
+       list = [];
++      rewrite = true;
+     }
+   }
+-  if (!Array.isArray(list)) list = [];
+-  stats.loads++;
++  if (!Array.isArray(list)) {
++    list = [];
++    rewrite = true;
++  }
++  cache = { list: list, byKey: {}, byDay: {}, bytes: raw && !rewrite ? Buffer.byteLength(raw) : 0, rewrite: rewrite };
++  list.forEach(function (rec) { indexRecord(cache, rec); });
+   stats.last_load_ms = Date.now() - started;
+-  stats.last_size_bytes = raw ? raw.length : 0;
+-  stats.records = list.length;
+-  return list;
++  stats.last_size_bytes = cache.bytes;
++  return cache;
++}
++
++function load() {
++  var c = ensureLoaded();
++  stats.loads++;
++  stats.records = c.list.length;
++  return c.list;
+ }
+ 
+ /**
+  * count(history, signals, now) -> { count, amount_pence, first_seen, last_seen, declines }
+- * Counts records for the same customer inside the velocity window.
++ * Counts records for the same customer inside the velocity window (from the index;
++ * `history` is the list load() returned).
+  */
+ function count(history, sig, now) {
++  var c = ensureLoaded();
+   var windowMins = config.get('fraud.velocityWindowMinutes', 60);
+-  var since = moment(now || undefined).subtract(windowMins, 'minutes');
+-  var key = sig.user_key;
++  var since = moment(now || undefined).subtract(windowMins, 'minutes').valueOf();
+   var out = { count: 0, amount_pence: 0, first_seen: null, last_seen: null, blocked_before: 0, lifetime: 0 };
+-  // per-day volume for the ops dashboard tile (m.adeyemi 2023). Computed
+-  // over ALL customers on every request, read by /internal/fraud/history/stats.
+-  var byDay = {};
+-  for (var i = 0; i < history.length; i++) {
+-    var rec = history[i];
+-    // window check first "because it's the cheap one" (it isn't)
+-    var at = moment(rec.scored_at, moment.ISO_8601);
+-    var inWindow = at.isValid() && at.isAfter(since);
+-    var day = at.format('YYYY-MM-DD');
+-    byDay[day] = (byDay[day] || 0) + 1;
+-    var recKey = rec.signals ? rec.signals.user_key : signals.normaliseEmail(rec.email);
+-    if (recKey !== key) continue;
++  var firstAt = Infinity;
++  (c.byKey[sig.user_key] || []).forEach(function (e) {
+     out.lifetime++;
+-    if (!out.first_seen || at.isBefore(out.first_seen)) out.first_seen = at.toISOString();
+-    out.last_seen = at.toISOString();
+-    if (rec.decision === 'block') out.blocked_before++;
+-    if (!inWindow) continue;
++    if (e.at < firstAt) {
++      firstAt = e.at;
++      out.first_seen = e.iso;
++    }
++    out.last_seen = e.iso;
++    if (e.decision === 'block') out.blocked_before++;
++    if (!(e.at > since)) return;
+     out.count++;
+-    out.amount_pence += rec.request && rec.request.amount_pence ? rec.request.amount_pence : 0;
+-  }
+-  stats.by_day = byDay;
++    out.amount_pence += e.amount;
++  });
++  stats.by_day = c.byDay;
+   return out;
+ }
+ 
++function writeAll(c) {
++  var body = JSON.stringify(c.list);
++  fs.writeFileSync(file(), body, 'utf8');
++  c.bytes = Buffer.byteLength(body);
++  c.rewrite = false;
++}
++
+ function append(history, record) {
+   var started = Date.now();
+-  history.push(record);
+-  // FRAUD-44 (2025-01): the file was truncated mid-write during the January
+-  // deploy and the velocity history was lost ("starting empty" above). Now:
+-  // keep the previous file as .bak, write to .tmp, fsync, rename over.
+-  // Pretty-printed since FRAUD-47 so the analysts can read it in an editor.
+-  var f = file();
+-  try { fs.copyFileSync(f, f + '.bak'); } catch (e) { if (e.code !== 'ENOENT') throw e; }
+-  var fd = fs.openSync(f + '.tmp', 'w');
+-  try {
+-    fs.writeSync(fd, JSON.stringify(history, null, 2), null, 'utf8');
+-    fs.fsyncSync(fd);
+-  } finally {
+-    fs.closeSync(fd);
++  var c = ensureLoaded();
++  if (history !== c.list) history.push(record);
++  c.list.push(record);
++  indexRecord(c, record);
++  if (c.rewrite || c.bytes < 2) {
++    writeAll(c);
++  } else {
++    // replace the closing "]" with ",<record>]"
++    var chunk = Buffer.from((c.list.length > 1 ? ',' : '') + JSON.stringify(record) + ']', 'utf8');
++    var fd = fs.openSync(file(), 'r+');
++    try {
++      fs.writeSync(fd, chunk, 0, chunk.length, c.bytes - 1);
++    } finally {
++      fs.closeSync(fd);
++    }
++    c.bytes += chunk.length - 1;
+   }
+-  fs.renameSync(f + '.tmp', f);
+   stats.appends++;
+-  stats.records = history.length;
++  stats.records = c.list.length;
++  stats.last_size_bytes = c.bytes;
+   stats.last_write_ms = Date.now() - started;
+ }
+ 
+ // last n records for this customer, newest first, summarised for FRAUD-49
++// (from the per-customer index, not a scan of the whole history)
+ function recentFor(history, key, n) {
+-  var mine = history.filter(function (rec) {
+-    return (rec.signals ? rec.signals.user_key : signals.normaliseEmail(rec.email)) === key;
+-  });
+-  mine.sort(function (a, b) {
+-    return moment(b.scored_at, moment.ISO_8601).valueOf() - moment(a.scored_at, moment.ISO_8601).valueOf();
+-  });
+-  return mine.slice(0, n).map(function (rec) {
++  var c = ensureLoaded();
++  var mine = (c.byKey[key] || []).slice(-n).reverse();
++  return mine.map(function (e) {
++    var rec = e.rec;
+     return { order_ref: rec.order_ref, scored_at: rec.scored_at, decision: rec.decision, score: rec.score,
+       amount_pence: rec.request && rec.request.amount_pence, reasons: rec.reasons, velocity: rec.velocity };
+   });
+@@ -153,6 +192,7 @@ function snapshot() {
+ 
+ // tests
+ function _reset() {
++  cache = null;
+   try {
+     fs.unlinkSync(file());
+   } catch (e) { /* not there */ }

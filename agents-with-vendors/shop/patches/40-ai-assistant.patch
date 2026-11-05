@@ -1,0 +1,449 @@
+diff --git a/compose.ai.yaml b/compose.ai.yaml
+new file mode 100644
+index 0000000..5fb968e
+--- /dev/null
++++ b/compose.ai.yaml
+@@ -0,0 +1,78 @@
++# Benchmark: the shop's AI assistant (agent) backed by a stand-in LLM
++# gateway (src/llm-gateway), for the AI cost scenario. Use it instead of
++# compose.agent.yaml, which would also add mcp and chatbot and patch
++# frontend-proxy and load-generator. agents/ops.sh dc includes it.
++#
++# No MCP (built-in shop tools), no VCR replay, no API key: the gateway
++# answers in 20 to 50 ms and reports token usage at about 4 characters per token.
++
++services:
++  llm-gateway:
++    image: harness-llm-gateway:1
++    pull_policy: build
++    container_name: llm-gateway
++    build:
++      context: ./
++      dockerfile: src/llm-gateway/Dockerfile
++    deploy:
++      resources:
++        limits:
++          memory: 64M
++    restart: unless-stopped
++    environment:
++      - LLM_GATEWAY_PORT=8020
++      - LLM_GATEWAY_MIN_MS=20
++      - LLM_GATEWAY_MAX_MS=50
++      # Share of comparison replies wrapped in prose when the prompt doesn't
++      # say "JSON only" (see gateway.py). 0.25 gives about 10 affected
++      # requests in a 20-minute window at 25% compare share (AGENT_COMPARE_SHARE).
++      - LLM_GATEWAY_FREEFORM_RATE=${LLM_GATEWAY_FREEFORM_RATE:-0.25}
++      - LLM_GATEWAY_FOLLOWUP_FREEFORM_RATE=${LLM_GATEWAY_FOLLOWUP_FREEFORM_RATE:-0.15}
++    logging:
++      driver: "json-file"
++      options:
++        max-size: "5m"
++        max-file: "2"
++
++  agent:
++    image: harness-agent:1
++    pull_policy: build
++    container_name: agent
++    build:
++      context: ./
++      dockerfile: ${AGENT_DOCKERFILE}
++    deploy:
++      resources:
++        limits:
++          memory: 500M
++    restart: unless-stopped
++    ports:
++      - "${AGENT_PORT}"
++    environment:
++      - TRACELOOP_BASE_URL
++      - GRAPH_RECURSION_LIMIT
++      - MCP_ENABLED=False
++      - AGENT_ENDPOINT
++      - AGENT_PORT
++      - LLM_BASE_URL=http://llm-gateway:8020/v1
++      - LLM_MODEL=gpt-4o-mini
++      - LLM_TLS_VERIFY=False
++      - USE_VCR=False
++      - API_KEY=
++      - APPLICATION_ENDPOINT
++      - OTEL_EXPORTER_OTLP_INSECURE=true
++      - OTEL_RESOURCE_ATTRIBUTES=${OTEL_RESOURCE_ATTRIBUTES},service.criticality=low
++      - OTEL_SERVICE_NAME=agent
++      - FLAGD_HOST
++      - FLAGD_PORT
++      - OTEL_PYTHON_SDK_INTERNAL_METRICS_ENABLED=true
++    depends_on:
++      otel-collector:
++        condition: service_started
++      llm-gateway:
++        condition: service_started
++    logging:
++      driver: "json-file"
++      options:
++        max-size: "5m"
++        max-file: "2"
+diff --git a/src/agent/src/agents/agents.py b/src/agent/src/agents/agents.py
+index 75be159..4f64392 100644
+--- a/src/agent/src/agents/agents.py
++++ b/src/agent/src/agents/agents.py
+@@ -14,6 +14,7 @@ from langchain.agents import create_agent
+ from langchain.tools import tool
+ from langchain_mcp_adapters.tools import load_mcp_tools
+ from pydantic import BaseModel
++from src.agents.compare import compare_products
+ from src.agents.feature_flags import get_int_feature_flag
+ from src.agents.llm import ChatLLM
+ from src.agents.mcp_client import MCPClient
+@@ -37,10 +38,15 @@ class ChatRequest(BaseModel):
+     history: List[Dict] | None = None
+ 
+ 
++class CompareRequest(BaseModel):
++    category: str = "telescopes"
++
++
+ class Agent:
+     def __init__(self):
+         self.app = FastAPI(lifespan=self.lifespan)
+         self.app.post("/prompt")(self.handle_prompt)
++        self.app.post("/compare")(self.handle_compare)
+         self.agentRecursionLimit = int(os.getenv("GRAPH_RECURSION_LIMIT", "25"))
+         self.mcp_server_url = f"http://{os.getenv('MCP_ENDPOINT', '0.0.0.0')}:{os.getenv('MCP_PORT', '8011')}/mcp"
+ 
+@@ -60,6 +66,12 @@ class Agent:
+     async def handle_prompt(self, request: ChatRequest):
+         return await self.run_agent(request.message, request.history)
+ 
++    async def handle_compare(self, request: CompareRequest):
++        try:
++            return await compare_products(request.category)
++        except Exception as e:
++            raise HTTPException(status_code=500, detail=str(e)) from e
++
+     async def get_tool_list(self):
+         mcp_enabled = os.getenv("MCP_ENABLED", "False") == "True"
+         if mcp_enabled and self.mcp_server is not None:
+diff --git a/src/agent/src/agents/compare.py b/src/agent/src/agents/compare.py
+new file mode 100644
+index 0000000..d3aba65
+--- /dev/null
++++ b/src/agent/src/agents/compare.py
+@@ -0,0 +1,113 @@
++#!/usr/bin/python
++# Benchmark: the assistant's "compare products" feature.
++# The model is asked for a structured comparison, which the shop renders as
++# a table, so the reply must parse as JSON. A reply that doesn't parse is
++# sent back with a short follow-up, up to MAX_FOLLOWUPS times; after that
++# the raw text is returned as the summary, so the shopper always gets an answer.
++#
++# The prompt template is chosen per request from a small config file
++# (PROMPT_VERSION_FILE, "v1" or "v2"; v1 if missing), so it can be changed
++# without a restart.
++
++import json
++import logging
++import os
++from typing import Any, Dict, List
++
++from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
++from src.agents.llm import ChatLLM
++from src.agents.tools import list_products
++from traceloop.sdk.decorators import task, workflow
++
++logger = logging.getLogger(__name__)
++
++PROMPT_VERSION_FILE = os.getenv("COMPARE_PROMPT_VERSION_FILE", "/tmp/compare_prompt_version")
++MAX_FOLLOWUPS = int(os.getenv("COMPARE_MAX_FOLLOWUPS", "3"))
++
++SCHEMA = (
++    '{"products": [{"id", "name", "price_usd", "best_for", "pros", "cons"}], '
++    '"recommendation": "<product name>", "summary": "<one sentence>"}'
++)
++
++TEMPLATES = {
++    "v1": (
++        "You are the Astronomy Shop's product comparison assistant. Compare the "
++        "products the shopper is looking at. Respond only with a JSON object in "
++        f"this shape: {SCHEMA}. Do not add any other text."
++    ),
++    # v2: rewritten for a friendlier, more personal tone.
++    "v2": (
++        "You are the Astronomy Shop's product comparison assistant: friendly, "
++        "enthusiastic and knowledgeable about astronomy. Help the shopper choose "
++        "between the products they're looking at, highlighting what each one is "
++        f"best for. Use this structure: {SCHEMA}."
++    ),
++}
++
++FOLLOWUP = "Your previous reply could not be read. Reply again with only the JSON object, no other text."
++
++
++def prompt_version() -> str:
++    try:
++        with open(PROMPT_VERSION_FILE) as f:
++            v = f.read().strip()
++        return v if v in TEMPLATES else "v1"
++    except OSError:
++        return "v1"
++
++
++def product_rows(products: List[Dict[str, Any]], category: str) -> List[Dict[str, Any]]:
++    rows = []
++    for p in products:
++        if category and category not in (p.get("categories") or []):
++            continue
++        price = p.get("priceUsd") or {}
++        rows.append({
++            "id": p.get("id"),
++            "name": p.get("name"),
++            "description": p.get("description"),
++            "price_usd": round(float(price.get("units", 0)) + float(price.get("nanos", 0)) / 1e9, 2),
++        })
++    return rows
++
++
++def parse(content: str) -> Dict[str, Any] | None:
++    try:
++        obj = json.loads(content)
++    except (TypeError, ValueError):
++        return None
++    return obj if isinstance(obj, dict) and "products" in obj else None
++
++
++@task(name="generate_comparison")
++async def generate(model, messages) -> str:
++    reply = await model.ainvoke(messages)
++    return reply.content if isinstance(reply.content, str) else str(reply.content)
++
++
++@workflow(name="product_comparison")
++async def compare_products(category: str, model=None, products=None) -> Dict[str, Any]:
++    model = model or ChatLLM()
++    if products is None:
++        products = await list_products()
++        if isinstance(products, dict):
++            products = products.get("products", [])
++        if not isinstance(products, list):
++            products = []
++    rows = product_rows(products, category)
++    messages = [
++        SystemMessage(content=TEMPLATES[prompt_version()]),
++        HumanMessage(content=f"Category: {category}. Products: {json.dumps(rows)}"),
++    ]
++    content = await generate(model, messages)
++    result = parse(content)
++    followups = 0
++    while result is None and followups < MAX_FOLLOWUPS:
++        followups += 1
++        logger.debug("comparison reply not parseable, follow-up %d", followups)
++        messages += [AIMessage(content=content), HumanMessage(content=FOLLOWUP)]
++        content = await generate(model, messages)
++        result = parse(content)
++    if result is None:
++        result = {"products": [], "recommendation": None, "summary": content}
++    return {"category": category, "comparison": result}
+diff --git a/src/llm-gateway/Dockerfile b/src/llm-gateway/Dockerfile
+new file mode 100644
+index 0000000..080e940
+--- /dev/null
++++ b/src/llm-gateway/Dockerfile
+@@ -0,0 +1,12 @@
++# Benchmark: stand-in LLM gateway (see gateway.py). Stdlib only.
++FROM python:3.14-slim@sha256:cad9a2c871761c413caa6fdd6441c783451e740a48aaeba60ae62a8b53525ef6
++
++ENV PYTHONDONTWRITEBYTECODE=1 \
++    PYTHONUNBUFFERED=1
++WORKDIR /app
++COPY src/llm-gateway/gateway.py .
++
++ARG LLM_GATEWAY_PORT=8020
++EXPOSE ${LLM_GATEWAY_PORT}
++
++CMD ["python", "gateway.py"]
+diff --git a/src/llm-gateway/gateway.py b/src/llm-gateway/gateway.py
+new file mode 100644
+index 0000000..d32f988
+--- /dev/null
++++ b/src/llm-gateway/gateway.py
+@@ -0,0 +1,181 @@
++#!/usr/bin/python
++# Benchmark: a stand-in for a hosted LLM. OpenAI-compatible /v1/chat/completions, fast
++# (20 to 50 ms) and free, with `usage` at about 4 characters per token.
++# It plays the model's part for the shop assistant:
++# - Tool-using chat (the agent's /prompt): ask for one shop tool, then answer.
++# - Product comparisons (the agent's /compare): reply with the comparison
++#   object. When the request doesn't spell out "JSON only", the reply is
++#   sometimes wrapped in prose instead
++#   (FREEFORM_RATE). After a "reply with only the JSON object" follow-up it
++#   complies, except at FOLLOWUP_FREEFORM_RATE.
++# Stdlib only. No OpenTelemetry of its own: it stands for an external API.
++
++import json
++import math
++import os
++import random
++import re
++import time
++import uuid
++from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
++
++PORT = int(os.getenv("LLM_GATEWAY_PORT", "8020"))
++MIN_MS = float(os.getenv("LLM_GATEWAY_MIN_MS", "20"))
++MAX_MS = float(os.getenv("LLM_GATEWAY_MAX_MS", "50"))
++FREEFORM_RATE = float(os.getenv("LLM_GATEWAY_FREEFORM_RATE", "0.10"))
++FOLLOWUP_FREEFORM_RATE = float(os.getenv("LLM_GATEWAY_FOLLOWUP_FREEFORM_RATE", "0.15"))
++JSON_ONLY_RE = re.compile(r"only (with )?(a|the) JSON object", re.I)
++
++
++def tokens(text):
++    return max(1, math.ceil(len(text) / 4))
++
++
++def text_of(message):
++    c = message.get("content") or ""
++    if isinstance(c, list):  # content parts
++        c = " ".join(p.get("text", "") for p in c if isinstance(p, dict))
++    return c
++
++
++def prompt_tokens(body):
++    n = 0
++    for m in body.get("messages", []):
++        n += 4 + tokens(text_of(m))  # per-message overhead, like tiktoken's
++        for tc in m.get("tool_calls") or []:
++            n += tokens(json.dumps(tc))
++    if body.get("tools"):
++        n += tokens(json.dumps(body["tools"]))
++    return n + 3
++
++
++def comparison_object(messages):
++    """Build the comparison from the products listed in the user message."""
++    products = []
++    for m in messages:
++        if m.get("role") != "user":
++            continue
++        t = text_of(m)
++        i = t.find("[")
++        if i >= 0:
++            try:
++                products = json.loads(t[i:t.rindex("]") + 1])
++                break
++            except ValueError:
++                pass
++    rows = []
++    for p in products[:8]:
++        rows.append({
++            "id": p.get("id"),
++            "name": p.get("name"),
++            "price_usd": p.get("price_usd"),
++            "best_for": random.choice(["beginners", "travel", "deep-sky viewing", "families", "astrophotography"]),
++            "pros": random.sample(["lightweight", "easy setup", "sharp optics", "good value", "smartphone app", "sturdy mount"], 2),
++            "cons": random.sample(["small aperture", "manual tracking", "heavy", "pricier", "needs accessories"], 1),
++        })
++    pick = min(rows, key=lambda r: r.get("price_usd") or 0)["name"] if rows else None
++    return {"products": rows, "recommendation": pick,
++            "summary": f"Compared {len(rows)} products; {pick} is the best value for most shoppers." if rows else "No products to compare."}
++
++
++def comparison_reply(messages):
++    obj = json.dumps(comparison_object(messages), indent=2)
++    followup = messages and messages[-1].get("role") == "user" and JSON_ONLY_RE.search(text_of(messages[-1]))
++    strict = any(m.get("role") == "system" and JSON_ONLY_RE.search(text_of(m)) for m in messages)
++    if followup:
++        freeform = random.random() < FOLLOWUP_FREEFORM_RATE
++    elif strict:
++        freeform = False
++    else:
++        freeform = random.random() < FREEFORM_RATE
++    if not freeform:
++        return obj
++    return ("Great question! Here's a side-by-side look at these products to help you choose:\n\n"
++            f"```json\n{obj}\n```\n\nLet me know if you'd like more detail on any of them!")
++
++
++def tool_call_for(prompt):
++    p = prompt.lower()
++    if "currenc" in p:
++        return "get_supported_currencies", {}
++    if "promotion" in p or "ads" in p or "deal" in p:
++        cat = "binoculars" if "binocular" in p else "telescopes"
++        return "get_ads", {"category": cat}
++    if "product" in p or "store" in p or "catalog" in p:
++        return "list_products", {}
++    return None, None
++
++
++def chat_reply(body):
++    messages = body.get("messages", [])
++    system = " ".join(text_of(m) for m in messages if m.get("role") == "system")
++    if "product comparison" in system.lower():
++        return {"role": "assistant", "content": comparison_reply(messages)}, "stop"
++    last = messages[-1] if messages else {}
++    if last.get("role") == "tool":
++        result = text_of(last)
++        return {"role": "assistant",
++                "content": f"Here's what I found: {result[:600]}" + ("…" if len(result) > 600 else "")}, "stop"
++    user = next((text_of(m) for m in reversed(messages) if m.get("role") == "user"), "")
++    name, args = tool_call_for(user) if body.get("tools") else (None, None)
++    if name:
++        return {"role": "assistant", "content": None, "tool_calls": [{
++            "id": "call_" + uuid.uuid4().hex[:24], "type": "function",
++            "function": {"name": name, "arguments": json.dumps(args)}}]}, "tool_calls"
++    return {"role": "assistant", "content": "I can help you browse products, check promotions and currencies."}, "stop"
++
++
++def completion(body):
++    message, finish = chat_reply(body)
++    pt = prompt_tokens(body)
++    out = message.get("content") or json.dumps(message.get("tool_calls"))
++    ct = tokens(out)
++    return {
++        "id": "chatcmpl-" + uuid.uuid4().hex[:29],
++        "object": "chat.completion",
++        "created": int(time.time()),
++        "model": body.get("model") or "gpt-4o-mini",
++        "system_fingerprint": "fp_" + uuid.uuid4().hex[:10],
++        "choices": [{"index": 0, "message": message, "logprobs": None, "finish_reason": finish}],
++        "usage": {"prompt_tokens": pt, "completion_tokens": ct, "total_tokens": pt + ct,
++                  "prompt_tokens_details": {"cached_tokens": 0, "audio_tokens": 0},
++                  "completion_tokens_details": {"reasoning_tokens": 0, "audio_tokens": 0,
++                                                "accepted_prediction_tokens": 0, "rejected_prediction_tokens": 0}},
++    }
++
++
++class Handler(BaseHTTPRequestHandler):
++    protocol_version = "HTTP/1.1"
++
++    def _send(self, code, obj):
++        data = json.dumps(obj).encode()
++        self.send_response(code)
++        self.send_header("Content-Type", "application/json")
++        self.send_header("Content-Length", str(len(data)))
++        self.end_headers()
++        self.wfile.write(data)
++
++    def do_GET(self):
++        if self.path.rstrip("/").endswith("/models"):
++            return self._send(200, {"object": "list", "data": [{"id": "gpt-4o-mini", "object": "model", "owned_by": "openai"}]})
++        if self.path == "/health":
++            return self._send(200, {"status": "ok"})
++        self._send(404, {"error": {"message": "not found"}})
++
++    def do_POST(self):
++        n = int(self.headers.get("Content-Length") or 0)
++        try:
++            body = json.loads(self.rfile.read(n) or b"{}")
++        except ValueError:
++            return self._send(400, {"error": {"message": "invalid JSON body", "type": "invalid_request_error"}})
++        if not self.path.rstrip("/").endswith("/chat/completions"):
++            return self._send(404, {"error": {"message": "not found"}})
++        time.sleep(random.uniform(MIN_MS, MAX_MS) / 1000)
++        self._send(200, completion(body))
++
++    def log_message(self, *args):
++        pass
++
++
++if __name__ == "__main__":
++    ThreadingHTTPServer(("0.0.0.0", PORT), Handler).serve_forever()

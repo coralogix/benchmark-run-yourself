@@ -1,0 +1,79 @@
+diff --git a/services/edge_api/views/catalogue.py b/services/edge_api/views/catalogue.py
+index 79a9c7a..413b9fc 100644
+--- a/services/edge_api/views/catalogue.py
++++ b/services/edge_api/views/catalogue.py
+@@ -58,6 +58,11 @@ def categories():
+     return ok({"categories": upstreams.categories()})
+ 
+ 
++@bp.route("/api/promotions")
++def promotions():
++    return ok(upstreams.get("promotions", "/internal/promotions/active"))
++
++
+ @bp.route("/api/search")
+ def do_search():
+     q = (request.args.get("q", "") or "")[:MAX_SEARCH_QUERY]
+diff --git a/services/promotions/coupons.py b/services/promotions/coupons.py
+index 4405f91..283cb86 100644
+--- a/services/promotions/coupons.py
++++ b/services/promotions/coupons.py
+@@ -128,3 +128,42 @@ def expiry_display(coupon):
+     """For the marketing export. NB: blows up on the same rows validate() does."""
+     exp = parse_expiry(coupon.expires)
+     return exp.strftime("%d %b %Y") if exp else "No expiry"
++
++
++# FEAT-048: active promotions. Expiry text comes in several formats; anything we
++# can read is used, and a coupon with an unreadable date is treated as not
++# expiring rather than taking the whole list down.
++_DMY = re.compile(r"^(\d{1,2})/(\d{1,2})/(\d{4})$")
++_NEVER = ("never", "none", "n/a", "-", "")
++
++
++def expiry_date(raw):
++    s = str(raw or "").strip()
++    if s.lower() in _NEVER:
++        return None
++    m = _DMY.match(s)
++    if m:
++        return datetime.date(int(m.group(3)), int(m.group(2)), int(m.group(1)))
++    try:
++        exp = parse_expiry(s)
++    except Exception:  # noqa
++        log.warning("unreadable expiry %r", raw)
++        return None
++    return exp.date() if exp else None
++
++
++def active_promotions(today=None):
++    today = today or datetime.datetime.now(datetime.timezone.utc).date()
++    out = []
++    for c in list_visible():
++        exp = expiry_date(c.expires)
++        if exp is not None and exp < today:
++            continue
++        pct = c.percent_off or 0
++        out.append({
++            "code": c.code,
++            "percent_off": int(pct) if float(pct) == int(pct) else pct,
++            "min_spend_pence": int(round((c.min_spend or 0) * 100)),
++            "expires": exp.isoformat() if exp else None,
++        })
++    return out
+diff --git a/services/promotions/routes.py b/services/promotions/routes.py
+index 507a475..b239a46 100644
+--- a/services/promotions/routes.py
++++ b/services/promotions/routes.py
+@@ -24,6 +24,11 @@ def list_coupons():
+     return ok({"coupons": [c.as_dict() for c in coupons.list_visible()]})
+ 
+ 
++@bp.route("/internal/promotions/active")
++def active():
++    return ok({"promotions": coupons.active_promotions()})
++
++
+ @bp.route("/internal/coupons/validate", methods=["POST"])
+ def validate():
+     data = body()

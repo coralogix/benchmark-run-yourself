@@ -1,0 +1,13 @@
+diff --git a/services/cart/carts.py b/services/cart/carts.py
+index e28452d..fc395c9 100644
+--- a/services/cart/carts.py
++++ b/services/cart/carts.py
+@@ -177,6 +177,8 @@ def serialise(st, breakdown=None):
+         "coupon": st.coupon_code,
+         "hold_id": st.hold_id,
+         "prices_changed": prices_changed(st),
++        # FEAT-022: coupon discount + multi-buy savings
++        "savings_pence": int(breakdown.get("discount_pence") or 0) + int(breakdown.get("multibuy_discount_pence") or 0),
+     }
+ 
+ 

@@ -1,0 +1,19 @@
+diff --git a/services/edge_api/delivery.py b/services/edge_api/delivery.py
+index 18b686d..279b1cf 100644
+--- a/services/edge_api/delivery.py
++++ b/services/edge_api/delivery.py
+@@ -104,4 +104,13 @@ def hold(cart_id, slot_id):
+     expires_at = res.body.get("expires_at")
+     # remember it on the cart so checkout can find it without hold_id
+     upstreams.set_hold(cart_id, hold_id, slot_id, expires_at)
+-    return {"hold_id": hold_id, "expires_at": expires_at}
++    # FEAT-036: say which slot was held
++    slot = {"slot_id": slot_id, "date": None, "window": None}
++    try:
++        for s in upstreams.get(upstreams.SLOTS, "/internal/slots", params={"all": "1"}).get("slots", []):
++            if s.get("slot_id") == slot_id:
++                slot = {"slot_id": slot_id, "date": s.get("date"), "window": s.get("window")}
++                break
++    except Exception as e:  # noqa
++        log.warning("slot details for %s failed: %s", slot_id, e)
++    return {"hold_id": hold_id, "expires_at": expires_at, "slot": slot}

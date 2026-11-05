@@ -1,0 +1,14 @@
+diff --git a/services/edge_api/views/catalogue.py b/services/edge_api/views/catalogue.py
+index 79a9c7a..cb67085 100644
+--- a/services/edge_api/views/catalogue.py
++++ b/services/edge_api/views/catalogue.py
+@@ -60,7 +60,8 @@ def categories():
+ 
+ @bp.route("/api/search")
+ def do_search():
+-    q = (request.args.get("q", "") or "")[:MAX_SEARCH_QUERY]
++    # FEAT-033: case and whitespace don't matter ("  APPLES " == "apples")
++    q = " ".join((request.args.get("q", "") or "").split()).lower()[:MAX_SEARCH_QUERY]
+     uid = request.args.get("uid") or None
+     data = upstreams.search(q, uid=uid)
+     results = shaping.products(data.get("results"))

@@ -1,0 +1,18 @@
+Reference implementation for FEAT-098 (evaluator-only), ops half.
+Repo: ops. Apply from a fresh copy of baseline/ops:  git apply FEAT-098.ops.patch (the feature needs both halves)
+
+diff --git a/lib/service.js b/lib/service.js
+index 81b0ade..decf602 100644
+--- a/lib/service.js
++++ b/lib/service.js
+@@ -67,6 +67,10 @@ function create(spec) {
+     app.get('/healthz', function (req, res) {
+       res.json({ ok: true, service: name });
+     });
++    // FEAT-098: uniform info endpoint
++    app.get('/internal/info', function (req, res) {
++      res.json({ service: name, repo: 'ops', uptime_s: Math.round(process.uptime() * 10) / 10 });
++    });
+     // k8s-style alias from the 2021 migration that never happened
+     app.get('/internal/health', function (req, res) {
+       res.json({ ok: true, service: name, version: config.get('app.version'), ready: !!globals.ready });

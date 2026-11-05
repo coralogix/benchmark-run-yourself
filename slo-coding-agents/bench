@@ -1,0 +1,4 @@
+#!/bin/sh
+# Operator entry point. See README.md.
+cd "$(dirname "$0")" || exit 1
+exec uv run --frozen python -m harness.bench "$@"

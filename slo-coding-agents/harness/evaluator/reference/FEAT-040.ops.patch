@@ -1,0 +1,27 @@
+diff --git a/services/slots/slots.js b/services/slots/slots.js
+index 462c2d5..73307b8 100644
+--- a/services/slots/slots.js
++++ b/services/slots/slots.js
+@@ -113,9 +113,9 @@ function createHold(conn, slot, cartRef) {
+ }
+ 
+ /**
+- * Turn a hold into a booking. Throws HoldExpired if the hold is unknown or
+- * no longer held. A hold past expires_at that the sweeper hasn't reached yet
+- * is still accepted (grace period, intentional per PLAT-233).
++ * Turn a hold into a booking. Throws HoldExpired if the hold is unknown,
++ * no longer held, or past its expires_at (FEAT-040: no grace period - the
++ * sweeper may not have reached it yet, but it has expired).
+  */
+ function confirmHold(conn, holdId, orderRef) {
+   return conn.collection('holds').get(holdId).then(function (hold) {
+@@ -124,6 +124,9 @@ function confirmHold(conn, holdId, orderRef) {
+     if (hold.status !== HOLD_STATUS.HELD) {
+       throw new errors.HoldExpired('hold ' + holdId + ' is ' + hold.status);
+     }
++    if (new Date(hold.expires_at).getTime() <= Date.now()) {
++      throw new errors.HoldExpired('hold ' + holdId + ' expired at ' + hold.expires_at);
++    }
+     hold.status = HOLD_STATUS.BOOKED;
+     hold.order_ref = orderRef;
+     hold.booked_at = new Date().toISOString();

@@ -1,0 +1,54 @@
+#!/usr/bin/env python3
+"""ship: record that you consider a reviewed backlog item done, and the review score you accepted.
+
+Usage:
+  tools/ship FEAT-017 --accepted-score 78 --reason "Meets all acceptance criteria; the remaining should-fix is cosmetic"
+  tools/ship FEAT-017,FEAT-018 --accepted-score 80 --reason "..."   (one decision recorded per item)
+
+There is no pass mark: you decide what score is good enough for this item, and why. You can ship below the
+latest score's must-fix list if you judge the risk acceptable, or keep improving and request another review.
+"""
+import argparse
+import json
+import os
+import sys
+import urllib.error
+import urllib.request
+from pathlib import Path
+
+WS = Path(__file__).resolve().parent.parent
+
+
+def url():
+    u = os.environ.get("LARDER_REVIEW_URL")
+    if not u:
+        for ln in (WS / ".larder" / "agent.env").read_text().splitlines():
+            if ln.startswith("LARDER_REVIEW_URL="):
+                u = ln.split("=", 1)[1].strip()
+    if not u:
+        sys.exit("ship: review service not configured")
+    return u.rstrip("/")
+
+
+def main():
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("item")
+    ap.add_argument("--accepted-score", type=float, required=True, help="the overall review score (0-100) you accept for this item")
+    ap.add_argument("--reason", required=True, help="why this is good enough to ship")
+    a = ap.parse_args()
+    req = urllib.request.Request(url() + "/ship", data=json.dumps({"item": a.item, "accepted_score": a.accepted_score,
+                                                                   "reason": a.reason}).encode(),
+                                 headers={"Content-Type": "application/json"}, method="POST")
+    try:
+        with urllib.request.urlopen(req, timeout=30) as r:
+            res = json.loads(r.read())
+    except urllib.error.HTTPError as e:
+        sys.exit(f"ship failed: {e.read().decode()[:300]}")
+    for d in res.get("decisions", []):
+        note = "" if d.get("reviews_for_item") else " (note: no completed review found for this item)"
+        print(f"Recorded: {d['item']} shipped at accepted score {d['accepted_score']}"
+              f" (latest review {d.get('last_review_overall')}, open must-fix: {d.get('open_must_fix')}){note}")
+
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,11 @@
+{
+ "telemetry-spans-exported-total": "sum(otelcol_exporter_sent_spans__span__total)",
+ "host-disk-used":                 "sum(<filesystem usage bytes>{<state label>=\"used\", <mountpoint label>=\"/\"})",
+ "web-service-memory":             "sum(<container memory usage bytes>{<container label>=\"<frontend container>\"})",
+ "request-rate":                   "sum(rate(<span metrics calls counter>[5m]))",
+ "service-heap-memory":            "sum(<JVM memory used bytes>{<service label>=\"<a JVM service>\"})",
+ "error-rate":                     "sum(rate(<span metrics calls counter>{<status label>=\"<error status>\"}[5m]))",
+ "web-service-latency-p99":        "histogram_quantile(0.99, sum by (le)(rate(<span metrics duration histogram>_bucket{<service label>=\"<frontend service>\"}[5m])))",
+ "host-load-average":              "max(<host 1-minute load average gauge>)",
+ "transaction-rate":               "sum(rate(<payment transactions counter>[5m]))"
+}

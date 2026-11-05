@@ -1,0 +1,130 @@
+diff --git a/services/edge_api/upstreams.py b/services/edge_api/upstreams.py
+index 5fd77bc..53732b2 100644
+--- a/services/edge_api/upstreams.py
++++ b/services/edge_api/upstreams.py
+@@ -80,10 +80,11 @@ def categories():
+ # --- search / recommendations ---------------------------------------------------
+ 
+ 
+-def search(q, uid=None):
++def search(q, uid=None, **filters):
+     params = {"q": q}
+     if uid:
+         params["uid"] = uid
++    params.update({k: v for k, v in filters.items() if v is not None})
+     return get(SEARCH, "/internal/search", params=params)
+ 
+ 
+diff --git a/services/edge_api/views/catalogue.py b/services/edge_api/views/catalogue.py
+index 79a9c7a..0adf3b7 100644
+--- a/services/edge_api/views/catalogue.py
++++ b/services/edge_api/views/catalogue.py
+@@ -62,7 +62,8 @@ def categories():
+ def do_search():
+     q = (request.args.get("q", "") or "")[:MAX_SEARCH_QUERY]
+     uid = request.args.get("uid") or None
+-    data = upstreams.search(q, uid=uid)
++    data = upstreams.search(q, uid=uid, diet=request.args.get("diet"), sort=request.args.get("sort"),
++                            max_price_pence=request.args.get("max_price_pence"))
+     results = shaping.products(data.get("results"))
+     stock.attach_stock(results)
+     return ok({"query": q, "results": results, "count": len(results)})
+diff --git a/services/search/engine.py b/services/search/engine.py
+index 38a3b39..95d32c0 100644
+--- a/services/search/engine.py
++++ b/services/search/engine.py
+@@ -78,7 +78,9 @@ def _search_uncached(q, uid=None):
+         scored.append((s, pop, entry))
+     scored.sort(key=ranking.sort_key)
+     results = []
+-    for s, pop, entry in scored[: settings.SEARCH_RESULTS_LIMIT]:
++    # every match is kept (FEAT-004: filters and sorting apply to the full result set);
++    # the results limit is applied after filtering/sorting, in search()
++    for s, pop, entry in scored:
+         row = index.product_row_by_sku(entry.sku)
+         if row is None:
+             continue
+@@ -87,7 +89,28 @@ def _search_uncached(q, uid=None):
+     return results
+ 
+ 
+-def search(q, uid=None):
++DIETS = ("vegan", "vegetarian", "gluten_free")
++SORTS = {
++    "price_asc": (lambda p: (p["price_pence"], p["name"]), False),
++    "price_desc": (lambda p: (p["price_pence"], p["name"]), True),
++    "name": (lambda p: (p["name"].casefold(), p["sku"]), False),
++}
++
++
++def refine(results, diet=None, max_price_pence=None, sort=None):
++    """FEAT-004: filters (AND) then sort, over every match. Doesn't touch the cached list."""
++    out = list(results)
++    if diet:
++        out = [p for p in out if diet in (p.get("diet") or [])]
++    if max_price_pence is not None:
++        out = [p for p in out if p["price_pence"] <= max_price_pence]
++    if sort:
++        key, rev = SORTS[sort]
++        out.sort(key=key, reverse=rev)
++    return out
++
++
++def search(q, uid=None, diet=None, max_price_pence=None, sort=None):
+     # PM-702 (AS 2021-03-09): the cache served results for products that had
+     # been deleted while the index was rebuilding. Make sure the index is warm
+     # before we answer, even from cache.
+@@ -96,12 +119,14 @@ def search(q, uid=None):
+     hit = _SEARCH_CACHE.get(key)
+     if hit is not None:
+         _STATS["hits"] += 1
+-        return live_prices.overlay(hit)
+-    _STATS["misses"] += 1
+-    if len(_SEARCH_CACHE) > SEARCH_CACHE_SOFT_LIMIT:
+-        _safety_valve()
+-    results = _search_uncached(q, uid)
+-    _SEARCH_CACHE[key] = results
++        results = hit
++    else:
++        _STATS["misses"] += 1
++        if len(_SEARCH_CACHE) > SEARCH_CACHE_SOFT_LIMIT:
++            _safety_valve()
++        results = _search_uncached(q, uid)
++        _SEARCH_CACHE[key] = results
++    results = refine(results, diet, max_price_pence, sort)[: settings.SEARCH_RESULTS_LIMIT]
+     return live_prices.overlay(results)
+ 
+ 
+diff --git a/services/search/routes.py b/services/search/routes.py
+index d40496d..8a5c5df 100644
+--- a/services/search/routes.py
++++ b/services/search/routes.py
+@@ -8,6 +8,7 @@ uid is optional; when present it's part of the cache key (see engine.py).
+ """
+ from flask import Blueprint, request
+ 
++from larder_common.errors import BadRequest
+ from larder_common.web import ok
+ from services.search import engine
+ 
+@@ -18,7 +19,19 @@ bp = Blueprint("search", __name__)
+ def do_search():
+     q = request.args.get("q", "")
+     uid = request.args.get("uid") or None
+-    results = engine.search(q, uid=uid)
++    diet = request.args.get("diet")
++    if diet is not None and diet not in engine.DIETS:
++        raise BadRequest("invalid_diet")
++    sort = request.args.get("sort")
++    if sort is not None and sort not in engine.SORTS:
++        raise BadRequest("invalid_sort")
++    max_price = request.args.get("max_price_pence")
++    if max_price is not None:
++        try:
++            max_price = int(max_price)
++        except ValueError:
++            raise BadRequest("invalid_max_price_pence")
++    results = engine.search(q, uid=uid, diet=diet, max_price_pence=max_price, sort=sort)
+     return ok({"query": q, "results": results, "count": len(results)})
+ 
+ 

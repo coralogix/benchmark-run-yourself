@@ -1,0 +1,120 @@
+# Ground truth to measure for each scenario, from unsampled data: Coralogix's
+# full telemetry inside the agents' window, plus the shop's own database where
+# needed (for example joining order IDs to the accounting table). Fill in a
+# copy per run (results/ground-truth.yaml). The reviewer (scoring/review.sh)
+# reads each scenario's section beside the blinded transcripts, so write
+# measurements only: no platform names.
+#
+# "before" is the clean baseline, "during" is fault-on to agent launch. Give
+# every rate with its denominator and every money figure per currency.
+# Marks: best or right 1, partial 0.5, wrong or missed 0. A cause counts only
+# if the agent's own retrieved evidence supports it.
+
+FC5-delistedBestseller:
+  questions: agents/questions.md
+  scored: [cause, counts, money_q2, money_q3]      # out of 20
+  measure:
+    orders_placed: {before: , during_ok: , during_failed: }
+    shoppers_who_failed:
+    product_page_errors: {before: , during: , requests_during: }
+    revenue_shortfall_vs_before_rate: {USD: , CAD: }
+    failed_carts_at_list_price: {USD: , CAD: }
+    shoppers_holding_product_at_window_end: {shoppers: , units: }
+
+F6-recommendationCacheFailure:
+  questions: agents/questions.md
+  scored: [cause, counts, money_q3]                # out of 15
+  measure:
+    cached_product_list_size: {before: , peak: }
+    container_memory_mb: {before: , peak: , limit: }
+    restarts_in_window:
+    failed_recommendation_calls: {failed: , total_after_onset: }
+    orders_failed:
+    money_lost:
+
+F3-kafkaQueue:
+  questions: agents/questions.md
+  scored: [cause, counts, money_q2, money_q3]      # out of 20
+  measure:
+    orders_after_onset: {count: , failed: , USD: , CAD: }
+    duplicates_skipped_by_accounting:
+    orders_screened_by_fraud_detection_after_onset:
+    unscreened_at_window_end: {orders: , USD: , CAD: }
+    fraud_detection_backlog: {start: , end: , per_minute: }
+    oldest_order_waiting_min:
+
+FC2-cpuThrottle:
+  questions: agents/questions.md
+  scored: [cause, counts, money_q3]                # out of 15
+  measure:
+    product_lookup_ms: {before_p50: , before_p95: , during_p50: , during_p95: }
+    orders: {before: , before_failed: , during: , during_failed: }
+    browser_requests_abandoned: {before: , during: }
+    money_lost:
+
+FS1-searchRelevance:
+  questions: agents/questions-search.md
+  scored: [cause, counts, money_q2, money_q3]      # out of 20
+  measure:
+    searches_returning_nothing: {before: , before_total: , during: , during_total: , multi_word: }
+    empty_search_journeys_that_ordered: {ordered: , journeys: }
+    search_with_results_to_order_rate_before:
+    lost_orders_estimate: {orders: , USD: , CAD: }   # excess empty searches x conversion before onset x mean search-journey order value
+    all_orders_per_min: {before: , during: }
+
+F5-adManualGc:
+  questions: agents/questions.md
+  scored: [cause, counts, money_q3]                # out of 15
+  measure:
+    full_gcs_per_min: {before: , during: }
+    gc_seconds_per_second:
+    long_lived_memory_after_gc_mb: {before: , during: , max: }
+    ad_request_ms: {before_p50: , before_p95: , during_p50: , during_p95: }
+    ad_requests_per_min: {before: , during: }
+    failed_ad_requests: {before: , during: }
+    orders_per_min: {before: , during: }
+
+FT4-earlyWarning:
+  questions: agents/questions-earlywarning.md
+  scored: [cause, impact, money_q3]                # out of 15
+  measure:
+    idle_non_daemon_threads: {start: , end: , per_min: }
+    container_memory_mib: {start: , end: , limit: }
+    time_to_out_of_memory_h:
+    symptoms_in_window:
+    money_through_fraud_detection_per_hour: {USD: , CAD: }
+
+FT1-optimise:
+  questions: agents/questions-optimise.md
+  scored: [real_items]                             # average count of real, evidence-backed improvements per agent
+  also_recorded: [top_item]
+  measure:
+    top_item: excessive collector CPU (cores used, next highest)
+    other_real_items: []                           # list each finding that the data supports
+
+FAI-assistantRetries:
+  questions: agents/questions-ai-cost.md
+  scored: [cause, impact]                          # out of 10
+  measure:
+    comparisons: {before: , during: }
+    needed_a_reask: {before: , during: }
+    extra_ai_calls:
+    feature_tokens_change_pct:
+    feature_cost_change_pct:
+    errors_or_slowdown:
+
+FT2-fiveFaults:
+  questions: agents/questions-explore.md
+  scored: [cause_total, q3_money]                  # cause_total: the five causes, each 1, 0.5 or 0 per agent, out of 25; money out of 5
+  also_recorded: [cause_payment, cause_ad_gc, cause_recommendation, cause_cart_latency, cause_email_leak]
+  measure:
+    payment_failures: {failed_orders: , rate_since_onset: , USD: , CAD: }
+    ad_gc: {gc_seconds_per_second: , ad_p50_ms_before: , ad_p50_ms_during: }
+    recommendation_cache: {peak_list_size: , restarts: , failed_share: }
+    cart_latency_bursts: {burst_times: []}
+    email_memory_leak: {memory_mb_start: , memory_mb_end: , limit: }
+
+# Every scenario: the reviewer lists each agent's false claims
+# (statements the truth contradicts, such as inflated failure rates or
+# saying telemetry does not exist when it does). Missing a finding is not a
+# false claim. A platform's query rate limits count as platform behaviour.

@@ -1,0 +1,37 @@
+Reference implementation for FEAT-073 (evaluator-only).
+Repo: ops. Apply from a fresh copy of baseline/ops:  git apply FEAT-073.patch
+
+diff --git a/services/slots/routes/slots.js b/services/slots/routes/slots.js
+index e65e1dc..7c10d63 100644
+--- a/services/slots/routes/slots.js
++++ b/services/slots/routes/slots.js
+@@ -19,6 +19,7 @@
+ var express = require('express');
+ var slots = require('../slots');
+ var pool = require('../../../lib/pool');
++var db = require('../../../lib/db');
+ var logger = require('../../../lib/logger');
+ var globals = require('../../../lib/globals');
+ var errors = require('../../../lib/errors');
+@@ -114,6 +115,21 @@ router.post('/slot-holds/:id/release', asyncRoute(async function (req, res) {
+   res.json({ hold_id: hold.hold_id, status: hold.status });
+ }));
+ 
++// FEAT-073: PATCH /internal/slots/:slot_id { capacity } (never below current bookings)
++router.patch('/slots/:slot_id', asyncRoute(async function (req, res) {
++  var cap = req.body && req.body.capacity;
++  if (typeof cap !== 'number' || !Number.isInteger(cap) || cap < 0) {
++    return res.status(400).json({ error: 'invalid_capacity' });
++  }
++  var col = db.collection('slots');
++  var slot = await col.get(req.params.slot_id);
++  if (!slot) return res.status(404).json({ error: 'slot_not_found' });
++  if (cap < slot.booked) return res.status(409).json({ error: 'below_booked', booked: slot.booked });
++  slot.capacity = cap;
++  await col.put(slot);
++  res.json(slots.slotView(slot));
++}));
++
+ router.get('/debug/pool', function (req, res) {
+   res.json(pool.get().stats());
+ });

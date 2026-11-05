@@ -1,0 +1,21 @@
+[project]
+name = "larder-bench-harness"
+version = "0.1.0"
+description = "Harness for the SLOs and Coding Agents benchmark"
+requires-python = ">=3.11,<3.12"
+dependencies = [
+    "aiohttp>=3.9",
+    "httpx>=0.27",
+    "psutil>=5.9",
+    "pyyaml>=6.0",
+    "pytest>=8.0",
+    "opentelemetry-sdk>=1.25",
+    "opentelemetry-exporter-otlp-proto-http>=1.25",
+    "matplotlib>=3.11.2",
+]
+
+[tool.uv]
+package = false
+
+[tool.pytest.ini_options]
+testpaths = ["harness"]

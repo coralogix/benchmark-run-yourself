@@ -1,0 +1,564 @@
+diff --git a/compose.extras.yaml b/compose.extras.yaml
+index 06e72ac..8ff0c61 100644
+--- a/compose.extras.yaml
++++ b/compose.extras.yaml
+@@ -24,3 +24,29 @@
+ #         condition: service_started
+ #
+ # Then add your exporter config to src/otel-collector/otelcol-config-extras.yml.
++
++# Benchmark: the otel-collector service in compose.yaml passes through an
++# explicit allowlist of env vars. This adds the per-platform settings that
++# otelcol-config-extras.yml reads.
++#
++# The collector runs five platforms' pipelines, four tail samplers and five
++# export queues, so it gets 3 GB instead of the shop's 400 MB; its
++# memory_limiter refuses data at 80% of the limit.
++services:
++  otel-collector:
++    deploy:
++      resources:
++        limits:
++          memory: 3G
++    environment:
++      - CORALOGIX_DOMAIN
++      - CORALOGIX_PRIVATE_KEY
++      - DATADOG_API_KEY
++      - DATADOG_SITE
++      - GRAFANA_OTLP_ENDPOINT
++      - GRAFANA_INSTANCE_ID
++      - GRAFANA_API_TOKEN
++      - NEWRELIC_OTLP_ENDPOINT
++      - NEWRELIC_LICENSE_KEY
++      - DYNATRACE_OTLP_ENDPOINT
++      - DYNATRACE_API_TOKEN
+diff --git a/src/otel-collector/otelcol-config-extras.yml b/src/otel-collector/otelcol-config-extras.yml
+index d677e98..c32085c 100644
+--- a/src/otel-collector/otelcol-config-extras.yml
++++ b/src/otel-collector/otelcol-config-extras.yml
+@@ -1,33 +1,496 @@
+ # Copyright The OpenTelemetry Authors
+ # SPDX-License-Identifier: Apache-2.0
+ 
+-# Extras/customization layer for the OTel Collector.
+-# Override this file in your fork to add exporters for your own observability backend.
++# Benchmark: fans the demo's telemetry out to five platforms. Coralogix gets
++# everything; each of the other four gets a reduced share sized so its
++# list-price spend matches Coralogix's for the same traffic.
++# agents/budget-window.py checks
++# each platform's spend against its budget.
+ #
+-# This file is intentionally empty. It is always loaded last, giving forks
+-# a stable, well-defined seam to customize without touching upstream files.
+-#
+-# IMPORTANT: The OTel Collector merges config files but REPLACES arrays, not appends.
+-# If you want to keep the default observability stack alongside your own exporters,
+-# you must explicitly repeat the upstream exporter names in your pipeline definitions.
+-#
+-# Upstream exporter names (repeat these to keep them active):
+-#   traces:  otlp_grpc/jaeger, debug, span_metrics
+-#   metrics: otlp_http/prometheus, debug
+-#   logs:    opensearch, debug
+-#
+-# Example:
+-#
+-# exporters:
+-#   otlp_grpc/mybackend:
+-#     endpoint: https://ingest.mybackend.com
+-#
+-# service:
+-#   pipelines:
+-#     traces:
+-#       exporters: [otlp_grpc/jaeger, debug, span_metrics, otlp_grpc/mybackend]  # repeat upstream exporters
+-#     metrics:
+-#       receivers: [docker_stats, http_check/frontend-proxy, host_metrics, nginx, otlp, redis, span_metrics]
+-#       exporters: [otlp_http/prometheus, debug, otlp_grpc/mybackend]           # repeat upstream exporters
+-#     logs:
+-#       exporters: [opensearch, debug, otlp_grpc/mybackend]                     # repeat upstream exporters
++# The collector merges config files but replaces arrays, so the upstream
++# `traces`/`metrics`/`logs` pipelines (local debug, Jaeger, Prometheus,
++# span_metrics) are left untouched here. Each platform has its own
++# `<signal>/<platform>` pipelines reading the same receivers.
++
++exporters:
++  debug:
++
++  # Delivery settings, identical for every platform: a queue sized in items
++  # (spans, log records, metric points), batched sends and retries, so the
++  # collector delivers everything each pipeline keeps, including the bursts a
++  # fault produces. agents/delivery-check.py confirms nothing was refused,
++  # dropped from a queue or failed to send in a window.
++  coralogix:
++    domain: "${env:CORALOGIX_DOMAIN}"
++    private_key: "${env:CORALOGIX_PRIVATE_KEY}"
++    application_name: "otel-astronomy-shop"
++    subsystem_name: "otel-demo"
++    timeout: 30s
++    sending_queue:
++      enabled: true
++      num_consumers: 10
++      sizer: items
++      queue_size: 100000
++      batch:
++        flush_timeout: 2s
++        min_size: 1000
++        max_size: 2000
++    retry_on_failure:
++      enabled: true
++      initial_interval: 5s
++      max_interval: 60s
++      max_elapsed_time: 10m
++
++  datadog:
++    api:
++      key: "${env:DATADOG_API_KEY}"
++      site: "${env:DATADOG_SITE}"
++    timeout: 30s
++    sending_queue:
++      enabled: true
++      num_consumers: 10
++      sizer: items
++      queue_size: 100000
++      batch:
++        flush_timeout: 2s
++        min_size: 1000
++        max_size: 2000
++    retry_on_failure:
++      enabled: true
++      initial_interval: 5s
++      max_interval: 60s
++      max_elapsed_time: 10m
++
++  otlphttp/grafana:
++    endpoint: "${env:GRAFANA_OTLP_ENDPOINT}"
++    auth:
++      authenticator: basicauth/grafana
++    timeout: 30s
++    sending_queue:
++      enabled: true
++      num_consumers: 10
++      sizer: items
++      queue_size: 100000
++      batch:
++        flush_timeout: 2s
++        min_size: 1000
++        max_size: 2000
++    retry_on_failure:
++      enabled: true
++      initial_interval: 5s
++      max_interval: 60s
++      max_elapsed_time: 10m
++
++  otlphttp/newrelic:
++    endpoint: "${env:NEWRELIC_OTLP_ENDPOINT}"
++    headers:
++      api-key: "${env:NEWRELIC_LICENSE_KEY}"
++    timeout: 30s
++    sending_queue:
++      enabled: true
++      num_consumers: 10
++      sizer: items
++      queue_size: 100000
++      batch:
++        flush_timeout: 2s
++        min_size: 1000
++        max_size: 2000
++    retry_on_failure:
++      enabled: true
++      initial_interval: 5s
++      max_interval: 60s
++      max_elapsed_time: 10m
++
++  otlphttp/dynatrace:
++    endpoint: "${env:DYNATRACE_OTLP_ENDPOINT}"
++    headers:
++      Authorization: "Api-Token ${env:DYNATRACE_API_TOKEN}"
++    timeout: 30s
++    sending_queue:
++      enabled: true
++      num_consumers: 10
++      sizer: items
++      queue_size: 100000
++      batch:
++        flush_timeout: 2s
++        min_size: 1000
++        max_size: 2000
++    retry_on_failure:
++      enabled: true
++      initial_interval: 5s
++      max_interval: 60s
++      max_elapsed_time: 10m
++
++extensions:
++  basicauth/grafana:
++    client_auth:
++      username: "${env:GRAFANA_INSTANCE_ID}"
++      password: "${env:GRAFANA_API_TOKEN}"
++
++processors:
++  # --- Traces: tail sampling. Keeps 100% of error traces and 100% of
++  # traces over 1500 ms (Datadog: 45% of slow traces); the baseline over
++  # routine traffic is sized to each platform's budget. Coralogix is
++  # unsampled. Every sampler buffers up to 200,000 traces for 30 s before
++  # deciding, so a burst never forces a decision before a trace is complete.
++  tail_sampling/datadog:
++    decision_wait: 30s
++    num_traces: 200000
++    expected_new_traces_per_sec: 2000
++    policies:
++      - name: errors
++        type: status_code
++        status_code:
++          status_codes: [ERROR]
++      - name: high-latency-sampled
++        type: and
++        and:
++          and_sub_policy:
++            - name: latency-filter
++              type: latency
++              latency:
++                threshold_ms: 1500
++            - name: latency-probabilistic
++              type: probabilistic
++              probabilistic:
++                sampling_percentage: 45
++      # The budget left after errors and slow traces goes to a routine baseline.
++      - name: baseline
++        type: probabilistic
++        probabilistic:
++          sampling_percentage: 11
++  tail_sampling/grafana:
++    decision_wait: 30s
++    num_traces: 200000
++    expected_new_traces_per_sec: 2000
++    policies:
++      - name: errors
++        type: status_code
++        status_code:
++          status_codes: [ERROR]
++      - name: high-latency
++        type: latency
++        latency:
++          threshold_ms: 1500
++      - name: baseline
++        type: probabilistic
++        probabilistic:
++          sampling_percentage: 32
++  # New Relic drops runtime metrics (filter/cut_cardinality, as Grafana and
++  # Dynatrace do); the ingest saved goes to the trace baseline.
++  tail_sampling/newrelic:
++    decision_wait: 30s
++    num_traces: 200000
++    expected_new_traces_per_sec: 2000
++    policies:
++      - name: errors
++        type: status_code
++        status_code:
++          status_codes: [ERROR]
++      - name: high-latency
++        type: latency
++        latency:
++          threshold_ms: 1500
++      - name: baseline
++        type: probabilistic
++        probabilistic:
++          sampling_percentage: 33
++  tail_sampling/dynatrace:
++    decision_wait: 30s
++    num_traces: 200000
++    expected_new_traces_per_sec: 2000
++    policies:
++      - name: errors
++        type: status_code
++        status_code:
++          status_codes: [ERROR]
++      - name: high-latency
++        type: latency
++        latency:
++          threshold_ms: 1500
++      - name: baseline
++        type: probabilistic
++        probabilistic:
++          sampling_percentage: 38
++
++  # --- Traces: remove OpenFeature flag-evaluation data from spans for every
++  # platform, so investigation agents can't read which fault flag is on.
++  filter/strip_feature_flag_events:
++    error_mode: ignore
++    traces:
++      spanevent:
++        - 'name == "feature_flag.evaluation"'
++  transform/strip_feature_flag_attributes:
++    error_mode: ignore
++    trace_statements:
++      - context: span
++        statements:
++          # Regex: any attribute key starting with "feature_flag."
++          - delete_matching_keys(attributes, "^feature_flag\\..*")
++          # Regex: any key starting with "demo.feature_flag." (recommendation
++          # tags every span with demo.feature_flag.recommendation_cache)
++          - delete_matching_keys(attributes, "^demo\\.feature_flag\\..*")
++
++  # --- Metrics: the collector's own self-telemetry, dropped everywhere.
++  # Names are matched in their in-pipeline dot-separated form.
++  filter/drop_self_telemetry:
++    error_mode: ignore
++    metrics:
++      metric:
++        # Regex: metric names starting with "otelcol."
++        - 'IsMatch(metric.name, "^otelcol\\..*")'
++
++  # --- Metrics: drop generic runtime/instrumentation-library metrics
++  # (Grafana, New Relic and Dynatrace). Request/error/latency metrics
++  # (traces.span.*), host, container, Kafka, Postgres, Redis, nginx stay.
++  # Each regex matches metric names starting with the named prefix.
++  filter/cut_cardinality:
++    error_mode: ignore
++    metrics:
++      metric:
++        - 'IsMatch(metric.name, "^datadog\\.trace_agent\\..*")'
++        - 'IsMatch(metric.name, "^otel\\.sdk\\..*")'
++        - 'IsMatch(metric.name, "^http\\.client\\..*")'
++        - 'IsMatch(metric.name, "^rpc\\.client\\..*")'
++        - 'IsMatch(metric.name, "^process\\.runtime\\..*")'
++        - 'IsMatch(metric.name, "^nodejs\\.eventloop\\..*")'
++        - 'IsMatch(metric.name, "^dotnet\\.gc\\..*")'
++        - 'IsMatch(metric.name, "^v8js\\..*")'
++        - 'IsMatch(metric.name, "^jvm\\..*")'
++        - 'IsMatch(metric.name, "^go\\.memory\\..*")'
++        - 'IsMatch(metric.name, "^db\\.sql\\..*")'
++        - 'IsMatch(metric.name, "^db\\.client\\..*")'
++        - 'IsMatch(metric.name, "^dns\\.lookup\\..*")'
++
++  # --- Metrics: Datadog's deeper cut (per-series pricing). Same list plus
++  # host/container metrics, and traces.span.* because Datadog gets its native
++  # request/error metrics from datadog/connector instead. Kafka metrics stay
++  # (kafkaQueueProblems' signal). Each regex matches the named prefix.
++  filter/cut_cardinality_datadog:
++    error_mode: ignore
++    metrics:
++      metric:
++        - 'IsMatch(metric.name, "^datadog\\.trace_agent\\..*")'
++        - 'IsMatch(metric.name, "^otel\\.sdk\\..*")'
++        - 'IsMatch(metric.name, "^http\\.client\\..*")'
++        - 'IsMatch(metric.name, "^rpc\\.client\\..*")'
++        - 'IsMatch(metric.name, "^process\\.runtime\\..*")'
++        - 'IsMatch(metric.name, "^nodejs\\.eventloop\\..*")'
++        - 'IsMatch(metric.name, "^dotnet\\.gc\\..*")'
++        - 'IsMatch(metric.name, "^v8js\\..*")'
++        - 'IsMatch(metric.name, "^jvm\\..*")'
++        - 'IsMatch(metric.name, "^go\\.memory\\..*")'
++        - 'IsMatch(metric.name, "^db\\.sql\\..*")'
++        - 'IsMatch(metric.name, "^db\\.client\\..*")'
++        - 'IsMatch(metric.name, "^traces\\.span\\..*")'
++        - 'IsMatch(metric.name, "^dns\\.lookup\\..*")'
++        - 'IsMatch(metric.name, "^system\\..*")'
++        - 'IsMatch(metric.name, "^container\\..*")'
++
++  # Dynatrace bills per datapoint, so drop the detail series;
++  # container CPU/memory core, uptime, Kafka, Postgres, Redis, nginx and span
++  # metrics stay. Each regex matches the named metric or prefix.
++  filter/trim_dynatrace:
++    error_mode: ignore
++    metrics:
++      metric:
++        - 'IsMatch(metric.name, "^system\\.disk\\..*")'
++        - 'IsMatch(metric.name, "^system\\.network\\..*") and metric.name != "system.network.connections"'
++        - 'metric.name == "system.cpu.time"'
++        - 'IsMatch(metric.name, "^container\\.network\\..*")'
++        - 'IsMatch(metric.name, "^container\\.blockio\\..*")'
++        - 'IsMatch(metric.name, "^container\\.cpu\\.usage\\.(kernelmode|usermode|system)$")'
++
++  # --- Metrics: coarser resolution for per-GB / per-datapoint platforms.
++  interval/newrelic:
++    interval: 150s
++  interval/dynatrace:
++    interval: 180s
++  # Dynatrace OTLP ingest rejects cumulative sums/histograms. Runs after
++  # interval/dynatrace, which only aggregates cumulative metrics.
++  cumulativetodelta/dynatrace:
++
++  # --- Logs: cuts applied on every platform.
++  filter/drop_universal_noncritical_logs:
++    error_mode: ignore
++    logs:
++      log_record:
++        # Regex: exactly these service names
++        - 'IsMatch(resource.attributes["service.name"], "^(load-generator|otelcol-contrib|kafka)$")'
++  # --- Logs: four services' logs excluded on New Relic, Grafana and Datadog.
++  filter/exclude_noncritical_services_logs:
++    error_mode: ignore
++    logs:
++      log_record:
++        # Regex: exactly these service names
++        - 'IsMatch(resource.attributes["service.name"], "^(recommendation|ad|quote|fraud-detection)$")'
++  # --- Logs: Datadog only, drop frontend-proxy (Envoy) access logs for
++  # successful requests; 4xx/5xx lines are kept.
++  filter/drop_proxy_success_logs:
++    error_mode: ignore
++    logs:
++      log_record:
++        # Regex: a 2xx/3xx status code right after the request line,
++        # e.g. `"GET /x HTTP/1.1" 200 `
++        - 'resource.attributes["service.name"] == "frontend-proxy" and IsMatch(body, "HTTP/[0-9.]+\" [23][0-9][0-9] ")'
++
++  # --- Logs: drop lines where a demo fault announces itself (e.g.
++  # "FeatureFlag 'kafkaQueueProblems' is activated"), identically for every
++  # platform, so investigation agents can't read which fault is on.
++  filter/drop_fault_announcement_logs:
++    error_mode: ignore
++    logs:
++      log_record:
++        # Regex: "feature flag"/"featureflag" (any case) or "overload simulation"
++        - 'IsMatch(body, "(?i)feature ?flag|overload simulation")'
++        # Regex: adManualGc's "Triggering a manual garbage collection..." and
++        # "The artificially triggered GCs took...", and productCatalogLockContention's
++        # "lock contention scenario active..." / "...for lock contention scenario"
++        - 'IsMatch(body, "(?i)artificially triggered|manual garbage collection|lock contention scenario")'
++
++  # --- flagd (the fault-injection harness) hidden from every platform, so
++  # agents can't see flag changes or flagd restarts. Each regex matches
++  # flagd / its OFREP API / the proxy's flagservice route, case-insensitive.
++  filter/hide_flagd_traces:
++    error_mode: ignore
++    traces:
++      span:
++        - 'IsMatch(resource.attributes["service.name"], "^flagd")'
++        - 'IsMatch(name, "(?i)flagd|ofrep|flagservice")'
++        - 'IsMatch(attributes["rpc.service"], "(?i)flagd")'
++        - 'IsMatch(attributes["url.full"], "(?i)flagd|ofrep|flagservice")'
++        - 'IsMatch(attributes["http.url"], "(?i)flagd|ofrep|flagservice")'
++        - 'IsMatch(attributes["url.path"], "(?i)ofrep|flagservice")'
++        - 'IsMatch(attributes["http.target"], "(?i)ofrep|flagservice")'
++        - 'IsMatch(attributes["server.address"], "^flagd")'
++        - 'IsMatch(attributes["net.peer.name"], "^flagd")'
++        - 'IsMatch(attributes["upstream.cluster"], "(?i)flag")'
++  filter/hide_flagd_logs:
++    error_mode: ignore
++    logs:
++      log_record:
++        - 'IsMatch(resource.attributes["service.name"], "^flagd")'
++        - 'IsMatch(body, "(?i)flagd|flagservice|ofrep")'
++        - 'IsMatch(attributes["url.path"], "(?i)flagservice|ofrep")'
++        - 'IsMatch(attributes["upstream.cluster"], "(?i)flag")'
++  filter/hide_flagd_metrics:
++    error_mode: ignore
++    metrics:
++      metric:
++        - 'IsMatch(resource.attributes["service.name"], "^flagd")'
++        - 'IsMatch(resource.attributes["container.name"], "flagd")'
++        - 'IsMatch(metric.name, "^feature_flag")'
++      datapoint:
++        - 'IsMatch(attributes["service.name"], "^flagd")'
++        - 'IsMatch(attributes["span.name"], "(?i)flagd|ofrep|flagservice")'
++        - 'IsMatch(attributes["rpc.service"], "(?i)flagd")'
++        - 'IsMatch(attributes["server.address"], "^flagd")'
++        - 'IsMatch(attributes["url.path"], "(?i)ofrep|flagservice")'
++        - 'IsMatch(attributes["http.url"], "(?i)flagd|ofrep|flagservice")'
++        - 'IsMatch(attributes["url.full"], "(?i)flagd|ofrep|flagservice")'
++
++connectors:
++  # Computes Datadog APM trace metrics (hits/errors/latency) from all
++  # traces, before tail sampling. The Datadog exporter doesn't compute them.
++  datadog/connector:
++
++service:
++  extensions: [basicauth/grafana]
++  pipelines:
++    traces/datadog-apm-stats:
++      receivers: [otlp]
++      processors: [resource_detection, memory_limiter, transform/sanitize_spans, gen_ai_normalizer, transform/redact_sensitive_data, redaction, filter/strip_feature_flag_events, transform/strip_feature_flag_attributes, filter/hide_flagd_traces]
++      exporters: [datadog/connector]
++    metrics/datadog-apm-stats:
++      receivers: [datadog/connector]
++      exporters: [datadog]
++
++    traces/coralogix:
++      receivers: [otlp]
++      processors: [resource_detection, memory_limiter, transform/sanitize_spans, gen_ai_normalizer, transform/redact_sensitive_data, redaction, filter/strip_feature_flag_events, transform/strip_feature_flag_attributes, filter/hide_flagd_traces]
++      exporters: [coralogix]
++    traces/datadog:
++      receivers: [otlp]
++      processors: [resource_detection, memory_limiter, transform/sanitize_spans, gen_ai_normalizer, transform/redact_sensitive_data, redaction, filter/strip_feature_flag_events, transform/strip_feature_flag_attributes, filter/hide_flagd_traces, tail_sampling/datadog]
++      exporters: [datadog]
++    traces/grafana:
++      receivers: [otlp]
++      processors: [resource_detection, memory_limiter, transform/sanitize_spans, gen_ai_normalizer, transform/redact_sensitive_data, redaction, filter/strip_feature_flag_events, transform/strip_feature_flag_attributes, filter/hide_flagd_traces, tail_sampling/grafana]
++      exporters: [otlphttp/grafana]
++    traces/newrelic:
++      receivers: [otlp]
++      processors: [resource_detection, memory_limiter, transform/sanitize_spans, gen_ai_normalizer, transform/redact_sensitive_data, redaction, filter/strip_feature_flag_events, transform/strip_feature_flag_attributes, filter/hide_flagd_traces, tail_sampling/newrelic]
++      exporters: [otlphttp/newrelic]
++    traces/dynatrace:
++      receivers: [otlp]
++      processors: [resource_detection, memory_limiter, transform/sanitize_spans, gen_ai_normalizer, transform/redact_sensitive_data, redaction, filter/strip_feature_flag_events, transform/strip_feature_flag_attributes, filter/hide_flagd_traces, tail_sampling/dynatrace]
++      exporters: [otlphttp/dynatrace]
++
++    # Receiver list matches the upstream full-demo metrics pipeline
++    # (otelcol-config-full.yml).
++    metrics/coralogix:
++      receivers: [docker_stats, http_check/frontend-proxy, host_metrics, nginx, otlp, redis, postgresql, span_metrics, kafkametrics]
++      processors: [resource_detection, memory_limiter, filter/drop_self_telemetry, filter/hide_flagd_metrics]
++      exporters: [coralogix]
++    metrics/datadog:
++      receivers: [docker_stats, http_check/frontend-proxy, host_metrics, nginx, otlp, redis, postgresql, span_metrics, kafkametrics]
++      processors: [resource_detection, memory_limiter, filter/drop_self_telemetry, filter/hide_flagd_metrics, filter/cut_cardinality_datadog]
++      exporters: [datadog]
++    metrics/grafana:
++      receivers: [docker_stats, http_check/frontend-proxy, host_metrics, nginx, otlp, redis, postgresql, span_metrics, kafkametrics]
++      processors: [resource_detection, memory_limiter, filter/drop_self_telemetry, filter/hide_flagd_metrics, filter/cut_cardinality]
++      exporters: [otlphttp/grafana]
++    metrics/newrelic:
++      receivers: [docker_stats, http_check/frontend-proxy, host_metrics, nginx, otlp, redis, postgresql, span_metrics, kafkametrics]
++      processors: [resource_detection, memory_limiter, filter/drop_self_telemetry, filter/hide_flagd_metrics, filter/cut_cardinality, interval/newrelic]
++      exporters: [otlphttp/newrelic]
++    metrics/dynatrace:
++      receivers: [docker_stats, http_check/frontend-proxy, host_metrics, nginx, otlp, redis, postgresql, span_metrics, kafkametrics]
++      processors: [resource_detection, memory_limiter, filter/drop_self_telemetry, filter/hide_flagd_metrics, filter/cut_cardinality, filter/trim_dynatrace, interval/dynatrace, cumulativetodelta/dynatrace]
++      exporters: [otlphttp/dynatrace]
++
++    logs/coralogix:
++      receivers: [otlp]
++      processors: [resource_detection, memory_limiter, transform/sanitize_logs, filter/drop_universal_noncritical_logs, filter/drop_fault_announcement_logs, filter/hide_flagd_logs]
++      exporters: [coralogix]
++    logs/dynatrace:
++      receivers: [otlp]
++      processors: [resource_detection, memory_limiter, transform/sanitize_logs, filter/drop_universal_noncritical_logs, filter/drop_fault_announcement_logs, filter/hide_flagd_logs]
++      exporters: [otlphttp/dynatrace]
++    logs/newrelic:
++      receivers: [otlp]
++      processors: [resource_detection, memory_limiter, transform/sanitize_logs, filter/drop_universal_noncritical_logs, filter/exclude_noncritical_services_logs, filter/drop_fault_announcement_logs, filter/hide_flagd_logs]
++      exporters: [otlphttp/newrelic]
++    logs/grafana:
++      receivers: [otlp]
++      processors: [resource_detection, memory_limiter, transform/sanitize_logs, filter/drop_universal_noncritical_logs, filter/exclude_noncritical_services_logs, filter/drop_fault_announcement_logs, filter/hide_flagd_logs]
++      exporters: [otlphttp/grafana]
++    logs/datadog:
++      receivers: [otlp]
++      processors: [resource_detection, memory_limiter, transform/sanitize_logs, filter/drop_universal_noncritical_logs, filter/exclude_noncritical_services_logs, filter/drop_proxy_success_logs, filter/drop_fault_announcement_logs, filter/hide_flagd_logs]
++      exporters: [datadog]
++
++# --- Fault scenarios (agents/custom/): hide the harness helper containers
++# from docker_stats, and enable the CPU limit and throttling series
++# (identical for every platform; Datadog drops container.* anyway).
++receivers:
++  docker_stats:
++    # The latency helper (harness-nettools image) shares valkey-cart's
++    # network namespace, and agents/ops.sh runs Kafka admin commands in
++    # harness-kafka-admin containers; hide both like flagd, so agents can't
++    # see the harness.
++    excluded_images:
++      - "harness-nettools*"
++      - "harness-kafka-admin*"
++    # CPU limit and throttling series, off by default in the receiver. The
++    # CPU throttle scenario's evidence includes them. Datadog drops
++    # container.* anyway, so they don't touch its budget.
++    metrics:
++      container.cpu.limit:
++        enabled: true
++      container.cpu.throttling_data.periods:
++        enabled: true
++      container.cpu.throttling_data.throttled_periods:
++        enabled: true
++      container.cpu.throttling_data.throttled_time:
++        enabled: true

@@ -1,0 +1,30 @@
+{
+  "_comment": "Production overrides. Applied when NODE_ENV=production. Secrets here are placeholders; real ones come from Vault (they don't, see PLAT-311). The bench supervisor does NOT set NODE_ENV.",
+  "data": {
+    "dir": "/var/lib/larder/{service}"
+  },
+  "db": {
+    "poolSize": 64,
+    "acquireTimeoutMs": 30000
+  },
+  "psp": {
+    "url": "https://psp.internal.larder.example",
+    "timeoutMs": 8000,
+    "retries": 2
+  },
+  "webhooks": {
+    "tickMs": 1000,
+    "hmac_secret": "whsec_larder_partner_2019_rotated",
+    "signRequests": true
+  },
+  "bus": {
+    "deliveryTimeoutMs": 5000
+  },
+  "log": {
+    "level": "warn",
+    "json": true
+  },
+  "internalAuth": {
+    "enabled": true
+  }
+}

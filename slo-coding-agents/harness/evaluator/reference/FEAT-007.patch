@@ -1,0 +1,103 @@
+diff --git a/services/edge_api/receipts.py b/services/edge_api/receipts.py
+new file mode 100644
+index 0000000..d2f2560
+--- /dev/null
++++ b/services/edge_api/receipts.py
+@@ -0,0 +1,79 @@
++"""
++FEAT-007: VAT receipts. GET /api/orders/<ref>/receipt
++
++Prices are VAT inclusive. The order discount is spread over the lines in
++proportion to their totals (floored; leftover pence go to the largest line),
++then each line's VAT is round-half-up(discounted total x rate / (100 + rate)).
++Delivery is standard rated. Everything is integer pence.
++"""
++from larder_common.errors import NotFound, UpstreamError
++from larder_common.http import client
++from services.edge_api import upstreams
++
++RATES = {"zero": 0, "reduced": 5, "standard": 20}
++
++
++def _vat(gross, rate):
++    # round half up of gross * rate / (100 + rate), integers only
++    return (2 * gross * rate + (100 + rate)) // (2 * (100 + rate))
++
++
++def _product(sku):
++    try:
++        res = client(upstreams.CATALOG).get("/internal/products/%s" % sku)
++    except Exception:  # noqa
++        return {}
++    return res.body if res.ok and isinstance(res.body, dict) else {}
++
++
++def allocate(discount, totals):
++    sub = sum(totals)
++    if not totals or not sub or not discount:
++        return [0] * len(totals)
++    shares = [discount * t // sub for t in totals]
++    shares[totals.index(max(totals))] += discount - sum(shares)
++    return shares
++
++
++def receipt(order_ref):
++    res = upstreams.order(order_ref)
++    if res.status == 404:
++        raise NotFound("order_not_found")
++    if not res.ok:
++        raise UpstreamError("orders_unavailable")
++    o = res.body
++    items = o.get("items") or []
++    totals = [int(i["unit_price_pence"]) * int(i["qty"]) for i in items]
++    discount = int(o.get("discount_pence") or 0)
++    delivery = int(o.get("delivery_fee_pence") or 0)
++    shares = allocate(discount, totals)
++    breakdown = {"zero": 0, "reduced": 0, "standard": 0}
++    lines = []
++    for it, total, share in zip(items, totals, shares):
++        p = _product(it["sku"])
++        band = it.get("vat_band") or p.get("vat_band") or "standard"
++        rate = RATES.get(band, 20)
++        net_total = total - share
++        vat = _vat(net_total, rate)
++        breakdown[band] = breakdown.get(band, 0) + vat
++        lines.append({
++            "sku": it["sku"],
++            "name": p.get("name"),
++            "qty": int(it["qty"]),
++            "unit_price_pence": int(it["unit_price_pence"]),
++            "line_total_pence": net_total,
++            "vat_band": band,
++            "vat_rate": rate,
++            "vat_pence": vat,
++        })
++    breakdown["standard"] += _vat(delivery, 20)
++    return {
++        "order_ref": o.get("order_ref", order_ref),
++        "lines": lines,
++        "subtotal_pence": int(o.get("subtotal_pence") or 0),
++        "discount_pence": discount,
++        "delivery_fee_pence": delivery,
++        "total_pence": int(o.get("total_pence") or 0),
++        "vat_total_pence": sum(breakdown.values()),
++        "vat_breakdown": breakdown,
++    }
+diff --git a/services/edge_api/views/checkout.py b/services/edge_api/views/checkout.py
+index c4f59da..1515115 100644
+--- a/services/edge_api/views/checkout.py
++++ b/services/edge_api/views/checkout.py
+@@ -24,6 +24,13 @@ def do_checkout():
+     return passthrough(res)
+ 
+ 
++@bp.route("/api/orders/<order_ref>/receipt")
++def get_receipt(order_ref):
++    from services.edge_api import receipts
++
++    return ok(receipts.receipt(order_ref))
++
++
+ @bp.route("/api/orders/<order_ref>")
+ def get_order(order_ref):
+     return ok(orders_view.get_order(order_ref))

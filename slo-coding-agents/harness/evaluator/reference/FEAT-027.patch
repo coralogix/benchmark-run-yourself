@@ -1,0 +1,19 @@
+diff --git a/services/edge_api/orders_view.py b/services/edge_api/orders_view.py
+index b165f6c..a8e6c75 100644
+--- a/services/edge_api/orders_view.py
++++ b/services/edge_api/orders_view.py
+@@ -43,6 +43,8 @@ def get_order(order_ref):
+                 "qty": it.get("qty"),
+                 "unit_price": pence_to_pounds(upp),
+                 "unit_price_pence": upp,
++                # FEAT-027
++                "line_total_pence": (upp or 0) * int(it.get("qty") or 0),
+             }
+         )
+     total_pence = o.get("total_pence")
+@@ -60,4 +62,5 @@ def get_order(order_ref):
+         "hold_id": o.get("hold_id"),
+         "charge_id": o.get("charge_id"),
+         "created_at": o.get("created_at"),
++        "item_count": sum(int(i["qty"] or 0) for i in items),
+     }

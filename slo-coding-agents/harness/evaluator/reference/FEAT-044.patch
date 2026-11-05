@@ -1,0 +1,27 @@
+diff --git a/services/edge_api/views/catalogue.py b/services/edge_api/views/catalogue.py
+index 79a9c7a..0a9e509 100644
+--- a/services/edge_api/views/catalogue.py
++++ b/services/edge_api/views/catalogue.py
+@@ -53,6 +53,22 @@ def product_detail(sku):
+     return ok(item)
+ 
+ 
++@bp.route("/api/products/<sku>/also-bought")
++def also_bought(sku):
++    """FEAT-044: recommendations without the product (default 6, max 12)."""
++    from larder_common.http import client
++
++    limit = parse_int(request.args.get("limit"), 6, lo=1, hi=12)
++    res = client(upstreams.RECOMMENDATIONS).get("/internal/recommendations/%s" % sku, params={"limit": limit})
++    if res.status == 404:
++        raise NotFound("not_found")
++    if not res.ok:
++        raise PassThrough(res.status, res.body if isinstance(res.body, dict) else {})
++    items = shaping.products((res.body or {}).get("also_bought") or [])[:limit]
++    stock.attach_stock(items)
++    return ok({"products": items})
++
++
+ @bp.route("/api/categories")
+ def categories():
+     return ok({"categories": upstreams.categories()})

@@ -1,0 +1,45 @@
+# SF-5 reference fix. Repo: commerce (apply inside the commerce/ directory: git apply SF-5.patch)
+diff --git a/services/recommendations/engine.py b/services/recommendations/engine.py
+index 2172e4f..7230a94 100644
+--- a/services/recommendations/engine.py
++++ b/services/recommendations/engine.py
+@@ -20,6 +20,7 @@ calls - started in bulk_v2.py behind featureflags "recs_bulk_lookup", never
+ finished.
+ """
+ from larder_common import settings
++from larder_common.cache import TTLCache
+ from larder_common.helpers.strings import category_terms
+ from larder_common.log import get_logger
+ from services.recommendations import scoring
+@@ -32,6 +33,13 @@ class NotFound(Exception):
+     pass
+ 
+ 
++# (sku, limit) -> (base, [P]). Catalog only changes when merch edits it, so a
++# short TTL is plenty; it turns the 1 + 1 + 12 calls per product view into one
++# computation per sku per minute.
++RECS_CACHE_TTL = 60.0
++_CACHE = TTLCache(maxsize=4096, ttl=RECS_CACHE_TTL)
++
++
+ def _product(sku):
+     res = catalog_client().get("/internal/products/%s" % sku)
+     if res.status == 404:
+@@ -55,6 +63,17 @@ def _candidates(base):
+ 
+ def also_bought(sku, limit=None):
+     limit = limit or settings.RECS_LIMIT
++    key = (sku, limit)
++    hit = _CACHE.get(key)
++    if hit is not None:
++        return hit
++    result = _also_bought_uncached(sku, limit)
++    if result[1]:  # don't pin an empty answer (search down) for a minute
++        _CACHE.set(key, result)
++    return result
++
++
++def _also_bought_uncached(sku, limit):
+     base = _product(sku)
+     if base is None:
+         raise NotFound(sku)

@@ -1,0 +1,55 @@
+# FF-2 reference fix. Repo: ops (apply inside the ops/ directory: git apply FF-2.patch)
+diff --git a/services/payments/psp/adapter.js b/services/payments/psp/adapter.js
+index ac618a5..7d4da70 100644
+--- a/services/payments/psp/adapter.js
++++ b/services/payments/psp/adapter.js
+@@ -14,9 +14,8 @@
+  *
+  * Retry policy: the PSP's load balancer drops idle connections and sometimes
+  * just doesn't answer, so we retry timeouts / resets a few times. Charges are
+- * safe to retry because the PSP de-duplicates on order_ref.
+- *   ^ NOTE(a.mensah 2023-05): is that true? Their docs mention an
+- *     Idempotency-Key header, not order_ref. Need to check with them.
++ * safe to retry because every attempt carries Idempotency-Key "charge:<order_ref>"
++ * (the PSP de-duplicates on that header, NOT on order_ref).
+  *
+  * Timeout comes from config psp.timeoutMs (config/local.js sets 4000, which
+  * wins over PSP_TIMEOUT_MS in the env because local.js is applied last).
+@@ -66,7 +65,15 @@ function outcomeFor(err) {
+   return 'error';
+ }
+ 
+-function post(path, body, timeout) {
++function post(path, body, timeout, idempotencyKey) {
++  var headers = {
++    'User-Agent': 'larder-payments/3 (+request)',
++    'X-Merchant-Id': config.get('psp.merchantId')
++  };
++  // REL-3: the PSP de-duplicates on Idempotency-Key (not on order_ref), so every
++  // retry of the same charge must carry the same key or a slow-but-successful
++  // first attempt plus a retry captures twice.
++  if (idempotencyKey) headers['Idempotency-Key'] = idempotencyKey;
+   return rp({
+     method: 'POST',
+     uri: baseUrl() + path,
+@@ -75,10 +82,7 @@ function post(path, body, timeout) {
+     timeout: timeout,
+     resolveWithFullResponse: true,
+     simple: false,
+-    headers: {
+-      'User-Agent': 'larder-payments/3 (+request)',
+-      'X-Merchant-Id': config.get('psp.merchantId')
+-    }
++    headers: headers
+   });
+ }
+ 
+@@ -100,7 +104,7 @@ async function charge(params) {
+   for (var attempt = 1; attempt <= maxAttempts; attempt++) {
+     var started = Date.now();
+     try {
+-      var res = await post('/v1/charges', body, s.timeout);
++      var res = await post('/v1/charges', body, s.timeout, 'charge:' + params.order_ref);
+       var took = Date.now() - started;
+ 
+       if (res.statusCode === 201 || res.statusCode === 200) {

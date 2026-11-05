@@ -1,0 +1,30 @@
+Reference implementation for FEAT-064 (evaluator-only).
+Repo: ops. Apply from a fresh copy of baseline/ops:  git apply FEAT-064.patch
+
+diff --git a/services/payments/routes/charges.js b/services/payments/routes/charges.js
+index 8361af1..4229180 100644
+--- a/services/payments/routes/charges.js
++++ b/services/payments/routes/charges.js
+@@ -44,6 +44,22 @@ router.get('/payments', asyncRoute(async function (req, res) {
+   res.json({ payments: recent.map(store.view) });
+ }));
+ 
++// FEAT-064: everything finance needs for one order
++router.get('/payments/orders/:order_ref', asyncRoute(async function (req, res) {
++  var ref = String(req.params.order_ref);
++  var list = (await store.byOrderRef(ref)).reverse();
++  var charges = list.filter(function (p) { return p.charge_id; }).map(function (p) {
++    return { charge_id: p.charge_id, amount_pence: p.amount_pence, at: p.updated_at || p.created_at, status: p.status };
++  });
++  var refunds = [];
++  list.forEach(function (p) {
++    (p.refunds || []).forEach(function (r) {
++      refunds.push({ refund_id: r.refund_id, charge_id: p.charge_id, amount_pence: r.amount_pence, at: r.at });
++    });
++  });
++  res.json({ order_ref: ref, charges: charges, refunds: refunds });
++}));
++
+ router.get('/payments/:payment_id', asyncRoute(async function (req, res) {
+   var rec = await store.get(req.params.payment_id);
+   if (!rec) return res.status(404).json({ error: 'payment_not_found' });

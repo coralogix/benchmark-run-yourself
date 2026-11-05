@@ -1,0 +1,34 @@
+diff --git a/services/edge_api/views/catalogue.py b/services/edge_api/views/catalogue.py
+index 79a9c7a..a116f3f 100644
+--- a/services/edge_api/views/catalogue.py
++++ b/services/edge_api/views/catalogue.py
+@@ -4,7 +4,7 @@ GET /api/products, /api/products/<sku>, /api/categories, /api/search
+ from flask import Blueprint, request
+ 
+ from larder_common import settings
+-from larder_common.errors import NotFound, PassThrough
++from larder_common.errors import BadRequest, NotFound, PassThrough
+ from larder_common.log import get_logger
+ from larder_common.utils import parse_int
+ from larder_common.web import ok
+@@ -19,6 +19,7 @@ MAX_PER_PAGE = settings.CATALOG_MAX_PER_PAGE
+ 
+ # DP 2023: search is capped at 50 by search itself (40 on prod, settings_local)
+ MAX_SEARCH_QUERY = 200
++MAX_QUERY_CHARS = 100
+ 
+ 
+ @bp.route("/api/products")
+@@ -60,7 +61,11 @@ def categories():
+ 
+ @bp.route("/api/search")
+ def do_search():
+-    q = (request.args.get("q", "") or "")[:MAX_SEARCH_QUERY]
++    raw_q = request.args.get("q", "") or ""
++    if len(raw_q) > MAX_QUERY_CHARS:
++        # FEAT-032: bots send megabyte-long queries
++        raise BadRequest("query_too_long")
++    q = raw_q[:MAX_SEARCH_QUERY]
+     uid = request.args.get("uid") or None
+     data = upstreams.search(q, uid=uid)
+     results = shaping.products(data.get("results"))

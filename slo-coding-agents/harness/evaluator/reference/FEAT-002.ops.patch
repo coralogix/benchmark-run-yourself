@@ -1,0 +1,190 @@
+diff --git a/services/orders/create.js b/services/orders/create.js
+index 08766d9..dfdbbbf 100644
+--- a/services/orders/create.js
++++ b/services/orders/create.js
+@@ -294,7 +294,63 @@ function setStatus(ref, change) {
+   });
+ }
+ 
++/**
++ * FEAT-002 cancelOrder(ref) -> { status, body }
++ *   200 { order_ref, status: "cancelled", refund_pence }  (also for a repeat)
++ *   409 already_dispatched | not_cancellable, 404 order_not_found, 502 refund_failed
++ * Calls for the same ref are serialised so a double click refunds once.
++ */
++var cancelChains = {};
++
++function cancelOrder(ref) {
++  ref = String(ref);
++  var prev = cancelChains[ref] || Promise.resolve();
++  var next = prev.then(function () { return doCancel(ref); });
++  var tail = next.catch(function () {});
++  cancelChains[ref] = tail;
++  tail.then(function () { if (cancelChains[ref] === tail) delete cancelChains[ref]; });
++  return next;
++}
++
++function cancelledBody(o) {
++  return { order_ref: o.order_ref, status: STATUS.CANCELLED, refund_pence: o.refund_pence };
++}
++
++async function doCancel(ref) {
++  var list = await store.findAllByRef(ref);
++  if (!list.length) return { status: 404, body: { error: 'order_not_found' } };
++  var o = _.find(list, { status: STATUS.CANCELLED }) || _.find(list, { status: STATUS.DISPATCHED }) ||
++    _.find(list, { status: STATUS.CONFIRMED }) || list[0];
++  if (o.status === STATUS.CANCELLED) return { status: 200, body: cancelledBody(o) };
++  if (o.status === STATUS.DISPATCHED) return { status: 409, body: { error: 'already_dispatched' } };
++  if (o.status !== STATUS.CONFIRMED) return { status: 409, body: { error: 'not_cancellable' } };
++
++  var r = await peers.refund({ order_ref: o.order_ref, charge_id: o.charge_id, amount_pence: o.total_pence });
++  if (r.status !== 201) return { status: 502, body: { error: 'refund_failed' } };
++
++  await peers.releaseReservations((o.items || []).map(function (l) { return { sku: l.sku, qty: l.qty }; }), ref);
++  if (o.hold_id) await peers.releaseHold(o.hold_id, 'cancelled');
++
++  o.status = STATUS.CANCELLED;
++  o.cancelled_at = new Date().toISOString();
++  o.refund_pence = o.total_pence;
++  o.refund_id = r.body && r.body.refund_id;
++  await store.save(o);
++
++  await peers.ledgerEntry({
++    order_ref: ref, kind: 'refund', amount_pence: o.total_pence, charge_id: o.charge_id,
++    user_id: o.user_id, meta: { source: 'orders', refund_id: o.refund_id }
++  });
++  await busClient.publish('order.cancelled', ref, {
++    order_ref: ref, user_id: o.user_id, email: o.email, status: STATUS.CANCELLED,
++    refund_pence: o.refund_pence, items: o.items, coupon: o.coupon, cancelled_at: o.cancelled_at
++  });
++  logger.info('orders: cancelled', { order_ref: ref, refund_pence: o.refund_pence });
++  return { status: 200, body: cancelledBody(o) };
++}
++
+ module.exports = {
++  cancelOrder: cancelOrder,
+   createOrder: createOrder,
+   setStatus: setStatus,
+   mergeLines: mergeLines,
+diff --git a/services/orders/peers.js b/services/orders/peers.js
+index 5776df1..eb17229 100644
+--- a/services/orders/peers.js
++++ b/services/orders/peers.js
+@@ -133,6 +133,17 @@ function charge(params) {
+   });
+ }
+ 
++// FEAT-002: refund for a cancelled order -> { status: 201, body } | { status: 502 }
++function refund(params) {
++  return rq('payments').post('/internal/payments/refund', params).then(function (res) {
++    if (res.statusCode === 201 || res.statusCode === 200) return { status: 201, body: res.body };
++    return { status: 502, body: res.body };
++  }, function (err) {
++    logger.error('orders: refund call failed', { order_ref: params.order_ref, err: err.message });
++    return { status: 502, body: { error: 'refund_failed' } };
++  });
++}
++
+ // ---- tax -----------------------------------------------------------------------
+ 
+ /**
+@@ -175,6 +186,7 @@ module.exports = {
+   confirmHold: confirmHold,
+   releaseHold: releaseHold,
+   charge: charge,
++  refund: refund,
+   totals: totals,
+   ledgerEntry: ledgerEntry,
+   _clients: clients
+diff --git a/services/orders/routes/orders.js b/services/orders/routes/orders.js
+index cce4780..974172d 100644
+--- a/services/orders/routes/orders.js
++++ b/services/orders/routes/orders.js
+@@ -92,6 +92,12 @@ router.patch('/orders/:ref/status', asyncRoute(async function (req, res) {
+   res.json({ order_ref: o.order_ref, status: o.status, dispatched_at: o.dispatched_at || null });
+ }));
+ 
++// FEAT-002: customer cancellation (refund, stock + slot back)
++router.post('/orders/:ref/cancel', asyncRoute(async function (req, res) {
++  var result = await create.cancelOrder(req.params.ref);
++  res.status(result.status).json(result.body);
++}));
++
+ // Fulfilment-era alias: POST /internal/orders/:ref/dispatch used to do the
+ // whole dispatch in-process. Now it only flips the status - stock, the
+ // pick list and order.dispatched are warehouse's job (POST
+diff --git a/services/payments/psp/adapter.js b/services/payments/psp/adapter.js
+index ac618a5..2214cee 100644
+--- a/services/payments/psp/adapter.js
++++ b/services/payments/psp/adapter.js
+@@ -66,7 +66,7 @@ function outcomeFor(err) {
+   return 'error';
+ }
+ 
+-function post(path, body, timeout) {
++function post(path, body, timeout, extraHeaders) {
+   return rp({
+     method: 'POST',
+     uri: baseUrl() + path,
+@@ -75,10 +75,10 @@ function post(path, body, timeout) {
+     timeout: timeout,
+     resolveWithFullResponse: true,
+     simple: false,
+-    headers: {
++    headers: Object.assign({
+       'User-Agent': 'larder-payments/3 (+request)',
+       'X-Merchant-Id': config.get('psp.merchantId')
+-    }
++    }, extraHeaders || {})
+   });
+ }
+ 
+@@ -163,7 +163,9 @@ async function refund(chargeId, amountPence, ctx) {
+   var lastErr;
+   for (var attempt = 1; attempt <= maxAttempts; attempt++) {
+     try {
+-      var res = await post('/v1/refunds', { charge_id: chargeId, amount_pence: amountPence }, s.timeout);
++      // FEAT-002: one Idempotency-Key per order, so retries (ours or the caller's) never refund twice
++      var headers = ctx && ctx.idempotency_key ? { 'Idempotency-Key': ctx.idempotency_key } : null;
++      var res = await post('/v1/refunds', { charge_id: chargeId, amount_pence: amountPence }, s.timeout, headers);
+       if (res.statusCode === 201 || res.statusCode === 200) {
+         return { refund_id: res.body.refund_id, attempts: attempt };
+       }
+diff --git a/services/payments/routes/charges.js b/services/payments/routes/charges.js
+index b89fd36..5a0b15c 100644
+--- a/services/payments/routes/charges.js
++++ b/services/payments/routes/charges.js
+@@ -16,6 +16,7 @@
+ var express = require('express');
+ var charges = require('../charges');
+ var store = require('../store');
++var psp = require('../psp/adapter');
+ var asyncRoute = require('../../../lib/util/asyncRoute');
+ var telemetry = require('../../../lib/telemetry');
+ 
+@@ -28,6 +29,25 @@ router.post('/payments/charge', asyncRoute(async function (req, res) {
+   res.status(result.status).json(result.body);
+ }));
+ 
++// FEAT-002: refund a captured charge (order cancellation).
++//   POST /internal/payments/refund { order_ref, charge_id, amount_pence }
++//     201 { refund_id, charge_id, amount_pence } | 400 | 502 { error: "refund_failed" }
++router.post('/payments/refund', asyncRoute(async function (req, res) {
++  var b = req.body || {};
++  if (!b.charge_id || !b.order_ref || !(Number(b.amount_pence) > 0)) {
++    return res.status(400).json({ error: 'charge_id, order_ref and amount_pence required' });
++  }
++  try {
++    var r = await psp.refund(b.charge_id, Number(b.amount_pence), {
++      order_ref: b.order_ref,
++      idempotency_key: 'refund:' + b.order_ref
++    });
++    res.status(201).json({ refund_id: r.refund_id, charge_id: b.charge_id, amount_pence: Number(b.amount_pence) });
++  } catch (e) {
++    res.status(502).json({ error: 'refund_failed' });
++  }
++}));
++
+ router.get('/payments', asyncRoute(async function (req, res) {
+   if (req.query.order_ref) {
+     var list = await store.byOrderRef(req.query.order_ref);

@@ -1,0 +1,76 @@
+Reference implementation for FEAT-086 (evaluator-only).
+Repo: commerce. Apply from a fresh copy of baseline/commerce:  git apply FEAT-086.patch
+
+diff --git a/legacy/promo_dates.py b/legacy/promo_dates.py
+index b94d747..4835c1a 100644
+--- a/legacy/promo_dates.py
++++ b/legacy/promo_dates.py
+@@ -24,7 +24,7 @@ _MONTHS = {
+     "dec": 12,
+ }
+ 
+-_NO_EXPIRY = ("none", "n/a", "-", "")
++_NO_EXPIRY = ("none", "n/a", "-", "", "never")
+ 
+ _SPLIT = re.compile(r"[/\-\s]+")
+ 
+@@ -34,7 +34,7 @@ def parse_promo_date(raw):
+     if s in _NO_EXPIRY:
+         return None
+     day, mon, year = _SPLIT.split(s)
+-    month = _MONTHS[mon[:3]]
++    month = int(mon) if mon.isdigit() else _MONTHS[mon[:3]]
+     if len(year) == 2:
+         year = "20" + year
+     legacy_log("debug", "legacy promo date %s", raw)
+diff --git a/services/edge_api/views/cart.py b/services/edge_api/views/cart.py
+index d012a55..641f4c6 100644
+--- a/services/edge_api/views/cart.py
++++ b/services/edge_api/views/cart.py
+@@ -59,3 +59,12 @@ def apply_coupon(cart_id):
+ @bp.route("/api/carts/<cart_id>/coupon", methods=["DELETE"])
+ def remove_coupon(cart_id):
+     return ok(upstreams.remove_coupon(cart_id))
++
++
++@bp.route("/api/carts/<cart_id>/eligible-coupons")
++def eligible_coupons(cart_id):
++    # FEAT-086
++    cart = upstreams.cart(cart_id)
++    res = upstreams.get("promotions", "/internal/coupons/eligible",
++                        params={"subtotal_pence": cart.get("subtotal_pence") or 0})
++    return ok({"coupons": res.get("coupons", [])})
+diff --git a/services/promotions/routes.py b/services/promotions/routes.py
+index 507a475..9424813 100644
+--- a/services/promotions/routes.py
++++ b/services/promotions/routes.py
+@@ -9,7 +9,7 @@ promotions routes (internal).
+ 
+ Called by pricing (cart -> pricing -> promotions) and by edge-api's /v1 API.
+ """
+-from flask import Blueprint
++from flask import Blueprint, request
+ 
+ from larder_common.errors import NotFound
+ from larder_common.utils import safe_int
+@@ -24,6 +24,20 @@ def list_coupons():
+     return ok({"coupons": [c.as_dict() for c in coupons.list_visible()]})
+ 
+ 
++@bp.route("/internal/coupons/eligible")
++def eligible():
++    # FEAT-086: unexpired visible coupons whose minimum spend a basket of subtotal_pence meets
++    subtotal = safe_int(request.args.get("subtotal_pence"), 0)
++    out = []
++    for c in coupons.list_visible():
++        if coupons.is_expired(c):
++            continue
++        if int(round((c.min_spend or 0) * 100)) > subtotal:
++            continue
++        out.append(c.code)
++    return ok({"coupons": out})
++
++
+ @bp.route("/internal/coupons/validate", methods=["POST"])
+ def validate():
+     data = body()

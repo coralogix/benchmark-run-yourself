@@ -1,0 +1,82 @@
+Reference implementation for FEAT-093 (evaluator-only), ops half.
+Repo: ops. Apply from a fresh copy of baseline/ops:  git apply FEAT-093.ops.patch (the feature needs both halves)
+
+diff --git a/services/orders/create.js b/services/orders/create.js
+index 08766d9..0d9beea 100644
+--- a/services/orders/create.js
++++ b/services/orders/create.js
+@@ -287,6 +287,7 @@ function setStatus(ref, change) {
+       o.status = STATUS.DISPATCHED;
+       o.dispatched_at = change.dispatched_at || new Date().toISOString();
+       o.carrier = change.carrier || null;
++      o.driver_id = change.driver_id || null; // FEAT-093
+       return store.save(o);
+     }).then(function (saved) {
+       return _.first(saved);
+diff --git a/services/orders/routes/orders.js b/services/orders/routes/orders.js
+index cce4780..3837c15 100644
+--- a/services/orders/routes/orders.js
++++ b/services/orders/routes/orders.js
+@@ -88,7 +88,7 @@ router.get('/orders/:ref', asyncRoute(async function (req, res) {
+ router.patch('/orders/:ref/status', asyncRoute(async function (req, res) {
+   var body = req.body || {};
+   if (!body.status) throw new errors.BadRequest('status required');
+-  var o = await create.setStatus(req.params.ref, _.pick(body, ['status', 'dispatched_at', 'carrier']));
++  var o = await create.setStatus(req.params.ref, _.pick(body, ['status', 'dispatched_at', 'carrier', 'driver_id']));
+   res.json({ order_ref: o.order_ref, status: o.status, dispatched_at: o.dispatched_at || null });
+ }));
+ 
+diff --git a/services/orders/views.js b/services/orders/views.js
+index 4dbe913..814c556 100644
+--- a/services/orders/views.js
++++ b/services/orders/views.js
+@@ -36,7 +36,8 @@ function publicView(o) {
+     hold_id: o.hold_id || null,
+     slot: o.slot || null,
+     created_at: o.created_at,
+-    dispatched_at: o.dispatched_at || null
++    dispatched_at: o.dispatched_at || null,
++    driver_id: o.driver_id || null
+   };
+ }
+ 
+diff --git a/services/warehouse/dispatch.js b/services/warehouse/dispatch.js
+index 5ffeedb..7d419ff 100644
+--- a/services/warehouse/dispatch.js
++++ b/services/warehouse/dispatch.js
+@@ -81,10 +81,10 @@ function commitStock(order, cb) {
+   });
+ }
+ 
+-function patchStatus(ref, at, carrier, cb) {
++function patchStatus(ref, at, carrier, driverId, cb) {
+   fetchClient.fetchJson(ordersUrl('/internal/orders/' + encodeURIComponent(ref) + '/status'), {
+     method: 'PATCH',
+-    body: { status: 'dispatched', dispatched_at: at, carrier: carrier }
++    body: { status: 'dispatched', dispatched_at: at, carrier: carrier, driver_id: driverId || null }
+   }).then(function (res) {
+     if (res.status === 404) return cb(new errors.NotFound('order not found'));
+     if (res.status === 409) return cb(notConfirmed(res.body && res.body.status || 'not confirmed'));
+@@ -133,7 +133,7 @@ function run(ref, opts, cb) {
+       commitStock(ctx.order, next);
+     },
+     function (next) {
+-      patchStatus(ref, at, carrier, next);
++      patchStatus(ref, at, carrier, (opts && opts.driver_id) || null, next);  // FEAT-093
+     },
+     function (body, next) {
+       picklists.markDispatched(ctx.pl, at, carrier).asCallback(function (err) {
+diff --git a/services/warehouse/routes/dispatch.js b/services/warehouse/routes/dispatch.js
+index 3b36e3d..753fc2b 100644
+--- a/services/warehouse/routes/dispatch.js
++++ b/services/warehouse/routes/dispatch.js
+@@ -17,7 +17,8 @@ var router = express.Router();
+ router.post('/dispatch/:ref', function (req, res, next) {
+   var ref = req.params.ref;
+   telemetry.setAttr('larder.order_ref', ref);
+-  dispatch.dispatch(ref, { carrier: req.body && req.body.carrier }).then(function (r) {
++  var b = req.body || {};
++  dispatch.dispatch(ref, { carrier: b.carrier, driver_id: b.driver_id == null ? null : String(b.driver_id) }).then(function (r) {
+     res.json({ order_ref: r.order_ref, status: r.status });
+   }, next);
+ });

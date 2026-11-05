@@ -1,0 +1,86 @@
+# Larder synthetic workload scenario.
+#
+# All times are SCENARIO minutes measured from workload start. `--time-scale`
+# compresses wall-clock time (scenario minute = 60 * time_scale wall seconds)
+# while keeping sessions/min per WALL minute at the rates below.
+#
+# Phase windows: warmup is 0..W (W = --warmup-min); the run phases follow it
+# back to back with the durations given here and are truncated at --run-min.
+
+defaults:
+  warmup_min: 15
+  run_min: 60
+
+params:
+  max_inflight_sessions: 64
+  client_timeout_s: 30
+  think_time_s: [0.3, 2.0]       # uniform, between steps (scaled by time_scale)
+  browse_pages: [1, 3]            # inclusive
+  product_details: [1, 3]        # spread across the whole catalogue: per-SKU SLIs need traffic on every product
+  regular_customer_weight: 10     # session share of the 120 "regular" customers vs everyone else (seed: users.json `regular`)
+  popular_product_weight: 10      # detail-view share of the 60 "popular" SKUs (seed: skus.json `popular`)
+  searches: [0, 2]
+  cart_items: [1, 6]
+  item_qty_weights: {1: 60, 2: 30, 3: 10}
+  multibuy_qty3_rate: 0.35        # when a 3for2 SKU is added, qty=3 at this rate (exercises the multibuy probe)
+  browse_category_rate: 0.30
+  catalogue_pages: 15
+  per_page: 20
+  categories: [produce, pantry, dairy, bakery, drinks, meat, frozen, household, health_beauty, baby]
+  search_suffix_rate: 0.30        # long-tail queries with a session-unique suffix
+  checkout_rate: 0.55             # of sessions that hold a slot
+  decline_token_rate: 0.02        # tok_decline instead of tok_ok
+  stale_slot_rate: 0.025          # pick a FULL slot (stale UI) -> slot_full path
+  dispatch_rate: 0.70
+  dispatch_delay_min: 3.0
+  dispatch_jitter_min: 0.5        # +/- uniform
+  # feature probes
+  search_filter_probe_rate: 0.15  # of searches
+  search_filter_diets: [vegan, vegetarian, gluten_free]
+  search_filter_sorts: [price_asc, price_desc, name]
+  search_filter_max_price_pence: [150, 900]
+  slots_next_probe_rate: 0.10     # of sessions that view slots
+  receipt_probe_rate: 0.20        # of confirmed orders
+  cancel_probe_rate: 0.08         # of confirmed orders
+  substitutions_rate: 0.30        # of checkouts: body carries allow_substitutions=true (FEAT-9 probe)
+  order_history_probe_rate: 0.25  # of sessions that view the account page (FEAT-8 probe)
+  # FEAT-11 probe: every product detail view (live if `low_stock` / `only_n_left` is present)
+  # FEAT-10 / FEAT-12: no client probe (FEAT-10 is read from email-sim stats)
+
+mixes:
+  baseline:
+    coupon_rate: 0.20
+    featured_cart_rate: 0.0       # extra forcing on top of uniform SKU choice
+  promo:
+    coupon_rate: 0.45
+    featured_cart_rate: 0.60      # carts that include featured / 3for2 SKUs
+
+faults:
+  normal:
+    psp: {preset: normal}
+    partner: {failure_rate: 0.10}
+    email: {preset: normal}
+  psp_degraded:
+    psp: {latency_p50_ms: 1500, latency_p99_ms: 6000, slow_success_rate: 0.06, slow_success_ms: 9000, error_rate: 0.01}
+    partner: {failure_rate: 0.10}
+    email: {preset: normal}
+  evening:
+    psp: {preset: normal}
+    partner: {failure_rate: 0.35}
+    email: {latency_p50_ms: 2500, latency_p99_ms: 8000}
+
+phases:
+  - {name: warmup,       duration_min: warmup, rate: 40, mix: baseline, faults: normal}
+  - {name: run-steady,   duration_min: 10,     rate: 40, mix: baseline, faults: normal}
+  - {name: promo,        duration_min: 10,     rate: 80, mix: promo,    faults: normal}
+  - {name: psp-degraded, duration_min: 15,     rate: 45, mix: baseline, faults: psp_degraded}
+  - {name: evening,      duration_min: 25,     rate: 55, mix: baseline, faults: evening}
+  # cycles 2 and 3 for 3-hour runs (truncated away at --run-min 60)
+  - {name: run-steady-2,   duration_min: 10, rate: 40, mix: baseline, faults: normal}
+  - {name: promo-2,        duration_min: 10, rate: 80, mix: promo,    faults: normal}
+  - {name: psp-degraded-2, duration_min: 15, rate: 45, mix: baseline, faults: psp_degraded}
+  - {name: evening-2,      duration_min: 25, rate: 55, mix: baseline, faults: evening}
+  - {name: run-steady-3,   duration_min: 10, rate: 40, mix: baseline, faults: normal}
+  - {name: promo-3,        duration_min: 10, rate: 80, mix: promo,    faults: normal}
+  - {name: psp-degraded-3, duration_min: 15, rate: 45, mix: baseline, faults: psp_degraded}
+  - {name: evening-3,      duration_min: 25, rate: 55, mix: baseline, faults: evening}

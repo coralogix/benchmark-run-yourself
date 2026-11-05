@@ -1,0 +1,17 @@
+{
+  "_comment": "Bus topic -> ordered list of subscribers. Delivery is in THIS order, one subscriber at a time (services/bus/worker.js). url_env names the env var holding the base URL; config peers.<name> is the dev fallback.",
+  "order.confirmed": [
+    { "name": "webhooks", "url_env": "WEBHOOKS_URL", "peer": "webhooks", "path": "/internal/events" },
+    { "name": "notifications", "url_env": "NOTIFICATIONS_URL", "peer": "notifications", "path": "/internal/events" },
+    { "name": "warehouse", "url_env": "WAREHOUSE_URL", "peer": "warehouse", "path": "/internal/events" },
+    { "name": "ledger", "url_env": "LEDGER_URL", "peer": "ledger", "path": "/internal/events" },
+    { "name": "loyalty", "url_env": "LOYALTY_URL", "peer": "loyalty", "path": "/internal/events" }
+  ],
+  "cart.updated": [
+    { "name": "webhooks", "url_env": "WEBHOOKS_URL", "peer": "webhooks", "path": "/internal/events" }
+  ],
+  "order.dispatched": [
+    { "name": "webhooks", "url_env": "WEBHOOKS_URL", "peer": "webhooks", "path": "/internal/events" },
+    { "name": "notifications", "url_env": "NOTIFICATIONS_URL", "peer": "notifications", "path": "/internal/events" }
+  ]
+}

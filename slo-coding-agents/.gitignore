@@ -1,0 +1,28 @@
+# secrets and local settings
+.env
+harness/config/accounts.env
+harness/config/batch_teams.json
+key.txt
+*.key
+*.pem
+
+# runs, results and generated outputs
+runs/
+results/
+docs/slo-hc-diagnostics-cohort.json
+docs/slo-hc-diagnostics-audit-01-10.json
+docs/slo-hc-diagnostics-audit-11-20.json
+
+# environments and caches
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+node_modules/
+*.db
+*.db-*
+.DS_Store
+
+# infrastructure state
+*.tfstate*
+.terraform/

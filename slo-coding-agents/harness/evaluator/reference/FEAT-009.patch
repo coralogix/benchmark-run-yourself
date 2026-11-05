@@ -1,0 +1,166 @@
+diff --git a/services/checkout/checkout.py b/services/checkout/checkout.py
+index 3c39e3c..23be77d 100644
+--- a/services/checkout/checkout.py
++++ b/services/checkout/checkout.py
+@@ -73,7 +73,7 @@ def _validate_request(cart_id, payment_token):
+         log.info("odd looking payment token for cart %s: %s", cart_id, tokens.mask(payment_token))
+ 
+ 
+-def checkout(cart_id, hold_id, payment_token):
++def checkout(cart_id, hold_id, payment_token, allow_substitutions=False):
+     if not cart_id:
+         raise BadRequest("cart_id_required")
+     cart = peers.get_cart(cart_id)
+@@ -87,6 +87,11 @@ def checkout(cart_id, hold_id, payment_token):
+     lines = cart.get("lines") or []
+     if not lines:
+         raise BadRequest("empty_cart")
++    subs = None
++    if allow_substitutions:
++        from services.checkout import substitutions
++
++        lines, subs = substitutions.substitute(lines)
+     breakdown = peers.price(lines, cart.get("coupon"))
+     if not breakdown.get("lines"):
+         raise BadRequest("empty_cart")
+@@ -119,12 +124,15 @@ def checkout(cart_id, hold_id, payment_token):
+         telemetry.record_checkout(outcomes.CONFIRMED)
+         log.info("order %s confirmed total_pence=%s", order_ref, record.total_pence)
+         hooks.run("order_confirmed", checkout=record, cart=cart, breakdown=breakdown, body=body)
+-        return {
++        out = {
+             "order_ref": order_ref,
+             "status": "confirmed",
+             "total_pence": record.total_pence,
+             "total": record.total,
+         }
++        if subs is not None:
++            out["substitutions"] = subs
++        return out
+ 
+     mapped = outcomes.map_error(res)
+     if mapped is None:
+diff --git a/services/checkout/routes.py b/services/checkout/routes.py
+index 4ce3a4c..0366dc9 100644
+--- a/services/checkout/routes.py
++++ b/services/checkout/routes.py
+@@ -19,7 +19,8 @@ bp = Blueprint("checkout", __name__)
+ @bp.route("/internal/checkout", methods=["POST"])
+ def do_checkout():
+     data = body()
+-    result = checkout.checkout(data.get("cart_id"), data.get("hold_id"), data.get("payment_token"))
++    result = checkout.checkout(data.get("cart_id"), data.get("hold_id"), data.get("payment_token"),
++                               allow_substitutions=data.get("allow_substitutions") is True)
+     return ok(result, 201)
+ 
+ 
+diff --git a/services/checkout/substitutions.py b/services/checkout/substitutions.py
+new file mode 100644
+index 0000000..59b1543
+--- /dev/null
++++ b/services/checkout/substitutions.py
+@@ -0,0 +1,67 @@
++"""
++FEAT-009: substitutions at checkout.
++
++An out-of-stock line is replaced by an in-stock product of the same category
++that carries every dietary tag the original had and costs no more than 110% of
++it; the cheapest such product wins. No acceptable substitute -> the checkout
++fails with 409 out_of_stock as before.
++"""
++from larder_common.errors import Conflict
++from larder_common.http import client
++from larder_common.log import get_logger
++
++log = get_logger("checkout.substitutions")
++
++
++def _availability(skus):
++    if not skus:
++        return {}
++    res = client("inventory").post("/internal/inventory/availability", json={"skus": list(skus)})
++    if not res.ok:
++        return {}
++    return {k: (v or {}).get("available", 0) for k, v in (res.body or {}).items()}
++
++
++def _product(sku):
++    res = client("catalog").get("/internal/products/%s" % sku)
++    return res.body if res.ok else None
++
++
++def _category(category):
++    out, page = [], 1
++    while True:
++        res = client("catalog").get("/internal/products", params={"category": category, "page": page, "per_page": 100})
++        if not res.ok:
++            return out
++        items = res.body.get("items") or []
++        out += items
++        if not items or len(out) >= res.body.get("total", 0):
++            return out
++        page += 1
++
++
++def substitute(lines):
++    """lines [{sku, qty}] -> (new lines, [{sku, substitute_sku, qty}])."""
++    avail = _availability([l["sku"] for l in lines])
++    new_lines, subs = [], []
++    for l in lines:
++        qty = int(l["qty"])
++        if avail.get(l["sku"], 0) >= qty:
++            new_lines.append(l)
++            continue
++        orig = _product(l["sku"])
++        if orig is None:
++            raise Conflict("out_of_stock", sku=l["sku"])
++        diet = set(orig.get("diet") or [])
++        limit = orig["price_pence"] * 11  # price * 10 <= orig * 11
++        cands = [p for p in _category(orig.get("category"))
++                 if p["sku"] != orig["sku"] and diet <= set(p.get("diet") or []) and p["price_pence"] * 10 <= limit]
++        stock = _availability([p["sku"] for p in cands])
++        cands = [p for p in cands if stock.get(p["sku"], 0) >= qty]
++        if not cands:
++            raise Conflict("out_of_stock", sku=l["sku"])
++        best = min(cands, key=lambda p: (p["price_pence"], p["sku"]))
++        new_lines.append({"sku": best["sku"], "qty": qty})
++        subs.append({"sku": l["sku"], "substitute_sku": best["sku"], "qty": qty})
++        log.info("substituting %s -> %s x%d", l["sku"], best["sku"], qty)
++    return new_lines, subs
+diff --git a/services/edge_api/upstreams.py b/services/edge_api/upstreams.py
+index 5fd77bc..a8cd93d 100644
+--- a/services/edge_api/upstreams.py
++++ b/services/edge_api/upstreams.py
+@@ -159,13 +159,16 @@ def set_hold(cart_id, hold_id, slot_id, expires_at):
+     ).body
+ 
+ 
+-def checkout(cart_id, hold_id, payment_token):
++def checkout(cart_id, hold_id, payment_token, allow_substitutions=None):
+     # whatever checkout answers (201 / 4xx / 5xx), the customer gets
++    body = {"cart_id": cart_id, "hold_id": hold_id, "payment_token": payment_token}
++    if allow_substitutions is not None:
++        body["allow_substitutions"] = allow_substitutions
+     return call(
+         CHECKOUT,
+         "POST",
+         "/internal/checkout",
+-        json={"cart_id": cart_id, "hold_id": hold_id, "payment_token": payment_token},
++        json=body,
+         raise_errors=False,
+     )
+ 
+diff --git a/services/edge_api/views/checkout.py b/services/edge_api/views/checkout.py
+index c4f59da..93e2950 100644
+--- a/services/edge_api/views/checkout.py
++++ b/services/edge_api/views/checkout.py
+@@ -20,7 +20,8 @@ def do_checkout():
+     data = body()
+     if not data.get("cart_id"):
+         raise BadRequest("cart_id_required")
+-    res = upstreams.checkout(data.get("cart_id"), data.get("hold_id"), data.get("payment_token"))
++    res = upstreams.checkout(data.get("cart_id"), data.get("hold_id"), data.get("payment_token"),
++                             allow_substitutions=data.get("allow_substitutions"))
+     return passthrough(res)
+ 
+ 

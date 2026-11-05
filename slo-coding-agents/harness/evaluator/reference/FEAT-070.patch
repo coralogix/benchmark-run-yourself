@@ -1,0 +1,28 @@
+Reference implementation for FEAT-070 (evaluator-only).
+Repo: ops. Apply from a fresh copy of baseline/ops:  git apply FEAT-070.patch
+
+diff --git a/services/tax/routes/totals.js b/services/tax/routes/totals.js
+index 27d27da..67d13d2 100644
+--- a/services/tax/routes/totals.js
++++ b/services/tax/routes/totals.js
+@@ -38,6 +38,7 @@ function handle(req, res) {
+     subtotal_pence: t.subtotal_pence,
+     discount_pence: t.discount_pence,
+     delivery_fee_pence: t.delivery_fee_pence,
++    delivery_vat_pence: t.delivery_vat_pence,
+     total_pence: t.total_pence
+   };
+   if (req.body.client_total_pence !== undefined && req.body.client_total_pence !== null) {
+diff --git a/services/tax/totals.js b/services/tax/totals.js
+index e4f5a2f..cf4371c 100644
+--- a/services/tax/totals.js
++++ b/services/tax/totals.js
+@@ -66,6 +66,8 @@ function computeTotals(lines, coupon) {
+     subtotal_pence: sub,
+     discount_pence: discount,
+     delivery_fee_pence: delivery,
++    // FEAT-070: delivery is standard-rated, VAT-inclusive: round-half-up(fee * 20 / 120)
++    delivery_vat_pence: roundHalfUpDiv(delivery * 20, 120),
+     total_pence: sub - discount + delivery
+   };
+ }

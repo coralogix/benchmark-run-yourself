@@ -1,0 +1,43 @@
+diff --git a/services/orders/create.js b/services/orders/create.js
+index 08766d9..670ddbe 100644
+--- a/services/orders/create.js
++++ b/services/orders/create.js
+@@ -226,6 +226,7 @@ async function createOrder(body) {
+   }
+ 
+   order.status = STATUS.CONFIRMED;
++  order.history = [{ status: STATUS.CONFIRMED, at: new Date().toISOString() }]; // FEAT-042
+   order.charge_id = c.body.charge_id;
+   order.payment_id = c.body.payment_id || null;
+   order.payment_attempts = c.body.attempts || 1;
+@@ -286,6 +287,7 @@ function setStatus(ref, change) {
+       if (o.status === STATUS.DISPATCHED) return o;
+       o.status = STATUS.DISPATCHED;
+       o.dispatched_at = change.dispatched_at || new Date().toISOString();
++      o.history = (o.history || []).concat([{ status: STATUS.DISPATCHED, at: new Date().toISOString() }]);
+       o.carrier = change.carrier || null;
+       return store.save(o);
+     }).then(function (saved) {
+diff --git a/services/orders/routes/orders.js b/services/orders/routes/orders.js
+index cce4780..dbabaf8 100644
+--- a/services/orders/routes/orders.js
++++ b/services/orders/routes/orders.js
+@@ -79,6 +79,18 @@ router.get('/orders', asyncRoute(async function (req, res) {
+   });
+ }));
+ 
++// FEAT-042: status changes, oldest first
++router.get('/orders/:ref/history', asyncRoute(async function (req, res) {
++  var o = await store.findByRef(req.params.ref);
++  if (!o) throw new errors.NotFound('order not found');
++  var history = o.history;
++  if (!history) {
++    history = [{ status: 'confirmed', at: o.created_at }];
++    if (o.dispatched_at) history.push({ status: 'dispatched', at: o.dispatched_at });
++  }
++  res.json({ order_ref: o.order_ref, history: history });
++}));
++
+ router.get('/orders/:ref', asyncRoute(async function (req, res) {
+   var o = await store.findByRef(req.params.ref);
+   if (!o) throw new errors.NotFound('order not found');

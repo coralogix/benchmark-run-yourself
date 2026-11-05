@@ -1,0 +1,52 @@
+diff --git a/services/edge_api/upstreams.py b/services/edge_api/upstreams.py
+index 5fd77bc..dede726 100644
+--- a/services/edge_api/upstreams.py
++++ b/services/edge_api/upstreams.py
+@@ -174,6 +174,14 @@ def account(user_id):
+     return get(ACCOUNTS, "/internal/accounts/%s" % user_id)
+ 
+ 
++def user(user_id):
++    return get(ACCOUNTS, "/internal/users/%s" % user_id)
++
++
++def user_orders(user_id, page, per_page):
++    return get(ORDERS, "/internal/orders", params={"user_id": user_id, "page": page, "per_page": per_page})
++
++
+ # --- slots / orders (ops) ---------------------------------------------------------
+ 
+ 
+diff --git a/services/edge_api/views/account.py b/services/edge_api/views/account.py
+index bed22e6..ecac15e 100644
+--- a/services/edge_api/views/account.py
++++ b/services/edge_api/views/account.py
+@@ -1,5 +1,6 @@
+-from flask import Blueprint
++from flask import Blueprint, request
+ 
++from larder_common.utils import parse_int
+ from larder_common.web import ok
+ from services.edge_api import upstreams
+ 
+@@ -13,3 +14,20 @@ ACCOUNT_FIELDS = ("user_id", "name", "email", "postcode", "orders_count", "last_
+ @bp.route("/api/account/<user_id>")
+ def account(user_id):
+     return ok(upstreams.account(user_id))
++
++
++# FEAT-008: paginated order history (only this user's orders, newest first)
++HISTORY_DEFAULT_PER_PAGE = 10
++HISTORY_MAX_PER_PAGE = 50
++
++
++@bp.route("/api/account/<user_id>/orders")
++def order_history(user_id):
++    u = upstreams.user(user_id)  # 404 user_not_found passes through
++    page = parse_int(request.args.get("page"), 1, lo=1)
++    per_page = parse_int(request.args.get("per_page"), HISTORY_DEFAULT_PER_PAGE, lo=1, hi=HISTORY_MAX_PER_PAGE)
++    data = upstreams.user_orders(u.get("user_id") or user_id, page, per_page)
++    orders = [{"order_ref": o.get("order_ref"), "status": o.get("status"), "total_pence": o.get("total_pence"),
++               "created_at": o.get("created_at")} for o in data.get("orders") or []]
++    return ok({"orders": orders, "page": data.get("page", page), "per_page": data.get("per_page", per_page),
++               "total": data.get("total", len(orders))})

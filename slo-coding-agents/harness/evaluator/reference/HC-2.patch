@@ -1,0 +1,18 @@
+# HC-2 reference fix. Repo: commerce (apply inside the commerce/ directory: git apply HC-2.patch)
+diff --git a/services/accounts/users.py b/services/accounts/users.py
+index 9c473d6..16d81dd 100644
+--- a/services/accounts/users.py
++++ b/services/accounts/users.py
+@@ -40,9 +40,10 @@ def _canonical(user):
+ 
+     Raw SQL because Model.filter() couldn't ORDER BY two columns in 2019.
+     """
++    # HC-2: bound parameters (names like O'Neill broke the string-built query)
+     rows = User.raw(
+-        "SELECT * FROM users WHERE name = '%s' AND email = '%s' ORDER BY created, user_id LIMIT 1"
+-        % (user.name, user.email)
++        "SELECT * FROM users WHERE name = ? AND email = ? ORDER BY created, user_id LIMIT 1",
++        (user.name, user.email),
+     )
+     if rows and rows[0].user_id != user.user_id:
+         log.info("user %s is a duplicate of %s (PM-640)", user.user_id, rows[0].user_id)

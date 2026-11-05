@@ -1,0 +1,143 @@
+{
+  "app": {
+    "name": "larder-ops",
+    "service": null,
+    "port": null,
+    "version": "3.2.0",
+    "trustProxy": true,
+    "bodyLimit": "1mb",
+    "keepAliveTimeoutMs": 65000
+  },
+  "ports": {
+    "_comment": "dev defaults only - the supervisor always sets PORT. app port = 8100 + i",
+    "orders": 8111,
+    "inventory": 8112,
+    "slots": 8113,
+    "payments": 8114,
+    "fraud": 8115,
+    "ledger": 8116,
+    "tax": 8117,
+    "webhooks": 8118,
+    "warehouse": 8119,
+    "notifications": 8120,
+    "bus": 8121
+  },
+  "peers": {
+    "_comment": "dev defaults = mesh ports (8200 + i). Overridden by <NAME>_URL env vars.",
+    "orders": "http://127.0.0.1:8211",
+    "inventory": "http://127.0.0.1:8212",
+    "slots": "http://127.0.0.1:8213",
+    "payments": "http://127.0.0.1:8214",
+    "fraud": "http://127.0.0.1:8215",
+    "ledger": "http://127.0.0.1:8216",
+    "tax": "http://127.0.0.1:8217",
+    "webhooks": "http://127.0.0.1:8218",
+    "warehouse": "http://127.0.0.1:8219",
+    "notifications": "http://127.0.0.1:8220",
+    "bus": "http://127.0.0.1:8221",
+    "loyalty": "http://127.0.0.1:8209",
+    "accounts": "http://127.0.0.1:8208",
+    "checkout": "http://127.0.0.1:8207",
+    "edge_api": "http://127.0.0.1:8000"
+  },
+  "data": {
+    "dir": "./data/{service}",
+    "pretty": false,
+    "flushDelayMs": 25
+  },
+  "http": {
+    "timeoutMs": 30000,
+    "getRetries": 2,
+    "userAgent": "larder-ops/3"
+  },
+  "db": {
+    "poolSize": 32,
+    "acquireTimeoutMs": 10000
+  },
+  "orders": {
+    "maxItems": 100,
+    "defaultPerPage": 20,
+    "maxPerPage": 100,
+    "publishOnConfirm": true,
+    "ledgerOnConfirm": true,
+    "legacyListLimit": 0
+  },
+  "inventory": {
+    "sanityIntervalMs": 60000,
+    "auditFile": "audit.log",
+    "auditEnabled": true,
+    "lowStockThreshold": 10
+  },
+  "slots": {
+    "holdTtlMinutes": 15,
+    "sweepIntervalMs": 60000,
+    "maxHoldsPerCart": 3
+  },
+  "psp": {
+    "url": "http://127.0.0.1:8090",
+    "timeoutMs": 10000,
+    "retries": 1,
+    "currency": "GBP",
+    "merchantId": "larder-uk-01"
+  },
+  "fraud": {
+    "historyFile": "fraud_history.json",
+    "velocityWindowMinutes": 60,
+    "velocityReviewAt": 12,
+    "velocityBlockAt": 40,
+    "reviewAmountPence": 25000,
+    "blockAmountPence": 500000,
+    "blockedDomains": ["mailinator.example", "fraud.example"],
+    "failOpen": true
+  },
+  "ledger": {
+    "file": "ledger.json",
+    "currency": "GBP"
+  },
+  "tax": {
+    "rates": { "zero": 0, "reduced": 5, "standard": 20 },
+    "pricesIncludeVat": true
+  },
+  "partner": {
+    "url": "http://127.0.0.1:8091/hooks",
+    "webhook_secret": "whsec_larder_partner_2019",
+    "schemaVersion": 1
+  },
+  "webhooks": {
+    "tickMs": 5000,
+    "batchSize": 40,
+    "timeoutMs": 3000,
+    "persist": true,
+    "queueFile": "webhook_queue.json"
+  },
+  "email": {
+    "url": "http://127.0.0.1:8092",
+    "timeoutMs": 10000,
+    "from": "orders@larder.example",
+    "enabled": true
+  },
+  "warehouse": {
+    "defaultCarrier": "larder-vans",
+    "pickListFile": "warehouse"
+  },
+  "bus": {
+    "subscriptionsFile": "bus-subscriptions.json",
+    "deliveryTimeoutMs": 30000,
+    "retrySleepMs": 1000,
+    "idleSleepMs": 200,
+    "stateFile": "bus.json"
+  },
+  "legacy": {
+    "v1Enabled": true,
+    "dateFormat": false
+  },
+  "log": {
+    "level": "info",
+    "json": false
+  },
+  "internalAuth": {
+    "enabled": false,
+    "header": "x-larder-internal",
+    "token": "changeme"
+  }
+}

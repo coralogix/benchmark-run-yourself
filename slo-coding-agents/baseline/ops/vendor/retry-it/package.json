@@ -1,0 +1,7 @@
+{
+  "name": "retry-it",
+  "version": "1.2.0-larder",
+  "description": "retry a function with exponential backoff (vendored, modified)",
+  "main": "index.js",
+  "license": "Apache-2.0"
+}

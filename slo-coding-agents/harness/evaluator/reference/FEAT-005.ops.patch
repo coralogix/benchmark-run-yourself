@@ -1,0 +1,14 @@
+diff --git a/config/bus-subscriptions.json b/config/bus-subscriptions.json
+index de177b8..4420a85 100644
+--- a/config/bus-subscriptions.json
++++ b/config/bus-subscriptions.json
+@@ -7,6 +7,9 @@
+     { "name": "ledger", "url_env": "LEDGER_URL", "peer": "ledger", "path": "/internal/events" },
+     { "name": "loyalty", "url_env": "LOYALTY_URL", "peer": "loyalty", "path": "/internal/events" }
+   ],
++  "order.cancelled": [
++    { "name": "loyalty", "url_env": "LOYALTY_URL", "peer": "loyalty", "path": "/internal/events" }
++  ],
+   "order.dispatched": [
+     { "name": "webhooks", "url_env": "WEBHOOKS_URL", "peer": "webhooks", "path": "/internal/events" },
+     { "name": "notifications", "url_env": "NOTIFICATIONS_URL", "peer": "notifications", "path": "/internal/events" }

@@ -1,0 +1,33 @@
+diff --git a/services/edge_api/stock.py b/services/edge_api/stock.py
+index c85a8e5..b502d84 100644
+--- a/services/edge_api/stock.py
++++ b/services/edge_api/stock.py
+@@ -13,6 +13,8 @@ log = get_logger("edge.stock")
+ 
+ # FEAT-11 will want "only N left". Threshold agreed with merch, not used yet.
+ LOW_STOCK_THRESHOLD = 5
++# FEAT-011 shipped with merch's final number
++ONLY_N_LEFT_THRESHOLD = 10
+ 
+ 
+ def stock_lookup(skus):
+diff --git a/services/edge_api/views/catalogue.py b/services/edge_api/views/catalogue.py
+index 79a9c7a..2831dfe 100644
+--- a/services/edge_api/views/catalogue.py
++++ b/services/edge_api/views/catalogue.py
+@@ -42,6 +42,15 @@ def product_detail(sku):
+             raise NotFound("not_found")
+         raise
+     item = shaping.product(raw, detail=True)
++    # FEAT-011: "only N left" (one extra bulk availability call, detail page only)
++    try:
++        avail = upstreams.availability([sku]).get(sku)
++    except Exception as e:  # noqa - the badge is optional
++        log.info("availability for %s failed: %s", sku, e)
++        avail = None
++    low = avail is not None and avail <= stock.ONLY_N_LEFT_THRESHOLD
++    item["low_stock"] = bool(low)
++    item["only_n_left"] = max(0, avail) if low else None
+     # "customers also bought" (PM-990). Omitted if recommendations fails.
+     also = upstreams.also_bought(sku)
+     if also is not None:

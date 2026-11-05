@@ -1,0 +1,50 @@
+# FF-4 reference fix. Repo: ops (apply inside the ops/ directory: git apply FF-4.patch)
+diff --git a/services/webhooks/dispatcher.js b/services/webhooks/dispatcher.js
+index 26c1276..54c2f25 100644
+--- a/services/webhooks/dispatcher.js
++++ b/services/webhooks/dispatcher.js
+@@ -44,6 +44,13 @@ var instruments = require('../../lib/telemetry/instruments');
+ var globals = require('../../lib/globals');
+ 
+ var BATCH_SIZE = 40;
++// Retry backoff per item: 2s, 4s, 8s, ... capped at 30s, so a partner outage
++// costs a handful of attempts per event instead of one every tick, and events
++// still go out within ~30s of the partner coming back. Attempt history is
++// capped (the TODO below) so the persisted queue stops growing per attempt.
++var RETRY_BASE_MS = 2000;
++var RETRY_MAX_MS = 30000;
++var MAX_ATTEMPT_HISTORY = 20;
+ var DEFAULT_TICK_MS = 2000;
+ var STATUS = { PENDING: 'pending', RETRY: 'retry', DELIVERED: 'delivered' };
+ 
+@@ -107,6 +114,16 @@ function recordFailure(item, err) {
+     requestBody: _.cloneDeep(item.payload),
+     stack: err && err.stack ? String(err.stack) : null
+   });
++  item.failures = (item.failures || 0) + 1;
++  if (item.attempts.length > MAX_ATTEMPT_HISTORY) {
++    item.attempts.splice(0, item.attempts.length - MAX_ATTEMPT_HISTORY);
++  }
++  var delay = Math.min(RETRY_MAX_MS, RETRY_BASE_MS * Math.pow(2, item.failures - 1));
++  item.next_attempt_at = new Date(Date.now() + delay).toISOString();
++}
++
++function due(item, now) {
++  return !item.next_attempt_at || Date.parse(item.next_attempt_at) <= now;
+ }
+ 
+ function send(item) {
+@@ -150,10 +167,11 @@ function deliverPending() {
+ }
+ 
+ // --- 2. retries (t.berg 2021) -----------------------------------------------
+-// No backoff on purpose: partner outages are short and they want events ASAP.
++// Each failed item is retried when its backoff (next_attempt_at) is due.
+ 
+ function retryFailed() {
+-  var retrying = queue.filter(function (i) { return i.status === STATUS.RETRY; });
++  var now = Date.now();
++  var retrying = queue.filter(function (i) { return i.status === STATUS.RETRY && due(i, now); });
+   if (!retrying.length) return Promise.resolve();
+   return Promise.all(retrying.map(function (item) {
+     return send(item).then(function (r) {

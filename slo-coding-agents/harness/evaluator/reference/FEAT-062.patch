@@ -1,0 +1,20 @@
+Reference implementation for FEAT-062 (evaluator-only).
+Repo: ops. Apply from a fresh copy of baseline/ops:  git apply FEAT-062.patch
+
+diff --git a/services/inventory/stock.js b/services/inventory/stock.js
+index 97edfc8..58bf70f 100644
+--- a/services/inventory/stock.js
++++ b/services/inventory/stock.js
+@@ -230,7 +230,11 @@ function negativeSkus() {
+ 
+ function lowStock(threshold) {
+   return col().all().then(function (all) {
+-    return _.sortBy(all.filter(function (r) { return r.on_hand - r.reserved <= threshold; }), 'sku').map(view);
++    // FEAT-062: lowest availability first (ties by sku)
++    var low = all.filter(function (r) { return r.on_hand - r.reserved <= threshold; });
++    return _.sortBy(low, [function (r) { return r.on_hand - r.reserved; }, 'sku']).map(function (r) {
++      return { sku: r.sku, available: r.on_hand - r.reserved };
++    });
+   });
+ }
+ 

@@ -1,0 +1,60 @@
+diff --git a/services/edge_api/delivery.py b/services/edge_api/delivery.py
+index 18b686d..cea702d 100644
+--- a/services/edge_api/delivery.py
++++ b/services/edge_api/delivery.py
+@@ -84,6 +84,20 @@ def list_slots(postcode):
+     return {"zone": zone, "slots": slots}
+ 
+ 
++def release(hold_id):
++    """FEAT-035: give a held (not yet booked) slot back straight away."""
++    res = upstreams.get_hold(hold_id)
++    if res.status == 404 or (res.ok and (res.body or {}).get("status") != "held"):
++        raise NotFound("hold_not_found")
++    if not res.ok:
++        raise UpstreamError("slots_unavailable")
++    res = upstreams.release_hold(hold_id)
++    if res.status == 404:
++        raise NotFound("hold_not_found")
++    if not res.ok:
++        raise UpstreamError("slots_unavailable")
++
++
+ def hold(cart_id, slot_id):
+     if not cart_id:
+         raise BadRequest("cart_id_required")
+diff --git a/services/edge_api/upstreams.py b/services/edge_api/upstreams.py
+index 5fd77bc..56a8297 100644
+--- a/services/edge_api/upstreams.py
++++ b/services/edge_api/upstreams.py
+@@ -196,5 +196,13 @@ def hold_slot(slot_id, cart_ref):
+                 raise_errors=False)
+ 
+ 
++def get_hold(hold_id):
++    return call(SLOTS, "GET", "/internal/slot-holds/%s" % hold_id, raise_errors=False)
++
++
++def release_hold(hold_id):
++    return call(SLOTS, "DELETE", "/internal/slot-holds/%s" % hold_id, raise_errors=False)
++
++
+ def order(order_ref):
+     return call(ORDERS, "GET", "/internal/orders/%s" % order_ref, raise_errors=False)
+diff --git a/services/edge_api/views/delivery.py b/services/edge_api/views/delivery.py
+index bf2f976..1542914 100644
+--- a/services/edge_api/views/delivery.py
++++ b/services/edge_api/views/delivery.py
+@@ -11,6 +11,12 @@ def slots():
+     return ok(delivery.list_slots(request.args.get("postcode", "")))
+ 
+ 
++@bp.route("/api/delivery/holds/<hold_id>", methods=["DELETE"])
++def release_hold(hold_id):
++    delivery.release(hold_id)
++    return "", 204
++
++
+ @bp.route("/api/delivery/holds", methods=["POST"])
+ def hold():
+     data = body()

@@ -1,0 +1,47 @@
+# Larder service registry. Read by the supervisor, the mesh and loadgen.
+#
+# index i: app port 8100+i, mesh port 8200+i (edge-api additionally behind the edge on 8000).
+# All ports add LARDER_PORT_OFFSET.
+# stage: start order. Services in the same stage start together; each stage waits for health
+# (bounded by a timeout) before the next. Group restarts (commerce|ops|all) use the same order.
+#   commerce: python -m services.<module>                       (cwd = <ws>/commerce)
+#   ops:      node --require ./lib/telemetry/otel.js <path>      (cwd = <ws>/ops)
+
+repos:
+  commerce: {dir: commerce, data_dir: "var/{name}"}
+  ops: {dir: ops, data_dir: "data/{name}"}
+
+# group start order across repos: ops first, then commerce
+repo_order: [ops, commerce]
+
+services:
+  - {index: 1,  name: edge-api,        repo: commerce, module: edge_api,        stage: 5, edge: true}
+  - {index: 2,  name: catalog,         repo: commerce, module: catalog,         stage: 3}
+  - {index: 3,  name: search,          repo: commerce, module: search,          stage: 4}
+  - {index: 4,  name: pricing,         repo: commerce, module: pricing,         stage: 4}
+  - {index: 5,  name: promotions,      repo: commerce, module: promotions,      stage: 4}
+  - {index: 6,  name: cart,            repo: commerce, module: cart,            stage: 4}
+  - {index: 7,  name: checkout,        repo: commerce, module: checkout,        stage: 4}
+  - {index: 8,  name: accounts,        repo: commerce, module: accounts,        stage: 4}
+  - {index: 9,  name: loyalty,         repo: commerce, module: loyalty,         stage: 4}
+  - {index: 10, name: recommendations, repo: commerce, module: recommendations, stage: 4}
+  - {index: 11, name: orders,          repo: ops, path: services/orders/server.js,        stage: 2}
+  - {index: 12, name: inventory,       repo: ops, path: services/inventory/server.js,     stage: 2}
+  - {index: 13, name: slots,           repo: ops, path: services/slots/server.js,         stage: 2}
+  - {index: 14, name: payments,        repo: ops, path: services/payments/server.js,      stage: 2}
+  - {index: 15, name: fraud,           repo: ops, path: services/fraud/server.js,         stage: 2}
+  - {index: 16, name: ledger,          repo: ops, path: services/ledger/server.js,        stage: 2}
+  - {index: 17, name: tax,             repo: ops, path: services/tax/server.js,           stage: 2}
+  - {index: 18, name: webhooks,        repo: ops, path: services/webhooks/server.js,      stage: 2}
+  - {index: 19, name: warehouse,       repo: ops, path: services/warehouse/server.js,     stage: 2}
+  - {index: 20, name: notifications,   repo: ops, path: services/notifications/server.js, stage: 2}
+  - {index: 21, name: bus,             repo: ops, path: services/bus/server.js,           stage: 1}
+
+# health path for every service
+health: /healthz
+
+# harness-owned third-party simulators (started before the mesh)
+sims:
+  - {name: psp-sim,     module: harness.sims.psp_sim,     port: psp,     admin_port: psp_admin,     url_env: PSP_URL}
+  - {name: partner-sim, module: harness.sims.partner_sim, port: partner, admin_port: partner_admin, url_env: PARTNER_WEBHOOK_URL, url_path: /hooks}
+  - {name: email-sim,   module: harness.sims.email_sim,   port: email,   admin_port: email_admin,   url_env: EMAIL_URL}

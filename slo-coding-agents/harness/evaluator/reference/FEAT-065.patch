@@ -1,0 +1,161 @@
+Reference implementation for FEAT-065 (evaluator-only).
+Repo: ops. Apply from a fresh copy of baseline/ops:  git apply FEAT-065.patch
+
+diff --git a/services/payments/psp/adapter.js b/services/payments/psp/adapter.js
+index ac618a5..0358149 100644
+--- a/services/payments/psp/adapter.js
++++ b/services/payments/psp/adapter.js
+@@ -66,7 +66,7 @@ function outcomeFor(err) {
+   return 'error';
+ }
+ 
+-function post(path, body, timeout) {
++function post(path, body, timeout, extraHeaders) {
+   return rp({
+     method: 'POST',
+     uri: baseUrl() + path,
+@@ -77,7 +77,8 @@ function post(path, body, timeout) {
+     simple: false,
+     headers: {
+       'User-Agent': 'larder-payments/3 (+request)',
+-      'X-Merchant-Id': config.get('psp.merchantId')
++      'X-Merchant-Id': config.get('psp.merchantId'),
++      ...(extraHeaders || {})
+     }
+   });
+ }
+@@ -163,7 +164,8 @@ async function refund(chargeId, amountPence, ctx) {
+   var lastErr;
+   for (var attempt = 1; attempt <= maxAttempts; attempt++) {
+     try {
+-      var res = await post('/v1/refunds', { charge_id: chargeId, amount_pence: amountPence }, s.timeout);
++      var headers = ctx && ctx.idempotency_key ? { 'Idempotency-Key': ctx.idempotency_key } : null;
++      var res = await post('/v1/refunds', { charge_id: chargeId, amount_pence: amountPence }, s.timeout, headers);
+       if (res.statusCode === 201 || res.statusCode === 200) {
+         return { refund_id: res.body.refund_id, attempts: attempt };
+       }
+diff --git a/services/payments/refunds.js b/services/payments/refunds.js
+new file mode 100644
+index 0000000..7b1aca0
+--- /dev/null
++++ b/services/payments/refunds.js
+@@ -0,0 +1,94 @@
++'use strict';
++
++/*
++ * FEAT-065: refunds through the PSP.
++ *
++ *   refund({ order_ref, amount_pence }, idempotencyKey) -> { status, body }
++ *
++ * - never more than was captured for the order (409 exceeds_captured)
++ * - a retried request (same Idempotency-Key) returns the first result and does
++ *   not refund again; refunds for one order are serialised so two concurrent
++ *   retries can't both pass the "how much is left" check
++ * - the PSP call carries an Idempotency-Key too, so the adapter's own retries
++ *   can't double-refund
++ */
++
++var crypto = require('crypto');
++var _ = require('lodash');
++var errors = require('../../lib/errors');
++var logger = require('../../lib/logger');
++var psp = require('./psp');
++var store = require('./store');
++
++var perOrder = {};
++
++function refundsOf(p) {
++  return p.refunds || [];
++}
++
++function refundedOf(p) {
++  return _.sumBy(refundsOf(p), 'amount_pence') || 0;
++}
++
++function view(ref, r) {
++  return { refund_id: r.refund_id, order_ref: ref, charge_id: r.charge_id, amount_pence: r.amount_pence, at: r.at };
++}
++
++async function doRefund(ref, amount, key) {
++  var payments = (await store.byOrderRef(ref)).filter(function (p) {
++    return p.charge_id && (p.status === store.STATUS.CAPTURED || p.status === store.STATUS.REFUNDED);
++  });
++  if (!payments.length) return { status: 404, body: { error: 'no_captured_payment' } };
++
++  if (key) {
++    for (var i = 0; i < payments.length; i++) {
++      var hit = _.find(refundsOf(payments[i]), { idempotency_key: key });
++      if (hit) return { status: 201, body: view(ref, hit) };
++    }
++  }
++
++  var captured = _.sumBy(payments, 'amount_pence');
++  var refunded = _.sumBy(payments, refundedOf);
++  if (amount > captured - refunded) {
++    return { status: 409, body: { error: 'exceeds_captured', refundable_pence: captured - refunded } };
++  }
++  var target = _.find(payments, function (p) { return p.amount_pence - refundedOf(p) >= amount; });
++  if (!target) return { status: 409, body: { error: 'exceeds_captured', refundable_pence: captured - refunded } };
++
++  var pspKey = key ? 'refund:' + ref + ':' + key : 'refund:' + ref + ':' + crypto.randomBytes(8).toString('hex');
++  var r;
++  try {
++    r = await psp.refund(target.charge_id, amount, { order_ref: ref, idempotency_key: pspKey });
++  } catch (e) {
++    logger.error('payments: refund failed', { order_ref: ref, err: e.message });
++    return { status: 502, body: { error: 'refund_error' } };
++  }
++  var rec = { refund_id: r.refund_id, charge_id: target.charge_id, amount_pence: amount, idempotency_key: key,
++    at: new Date().toISOString() };
++  var all = refundsOf(target).concat([rec]);
++  var patch = { refunds: all };
++  if (_.sumBy(all, 'amount_pence') >= target.amount_pence) patch.status = store.STATUS.REFUNDED;
++  await store.update(target, patch);
++  logger.info('payments: refunded', { order_ref: ref, amount_pence: amount, refund_id: r.refund_id });
++  return { status: 201, body: view(ref, rec) };
++}
++
++async function refund(body, idemKey) {
++  body = body || {};
++  if (!body.order_ref) throw new errors.BadRequest('order_ref required');
++  var amount = body.amount_pence;
++  if (typeof amount !== 'number' || !Number.isInteger(amount) || amount <= 0) {
++    throw new errors.BadRequest('amount_pence must be a positive integer');
++  }
++  var ref = String(body.order_ref);
++  var prev = perOrder[ref] || Promise.resolve();
++  var p = prev.catch(function () {}).then(function () { return doRefund(ref, amount, idemKey ? String(idemKey) : null); });
++  perOrder[ref] = p;
++  try {
++    return await p;
++  } finally {
++    if (perOrder[ref] === p) delete perOrder[ref];
++  }
++}
++
++module.exports = { refund: refund, refundedOf: refundedOf };
+diff --git a/services/payments/routes/charges.js b/services/payments/routes/charges.js
+index b89fd36..8361af1 100644
+--- a/services/payments/routes/charges.js
++++ b/services/payments/routes/charges.js
+@@ -15,6 +15,7 @@
+ 
+ var express = require('express');
+ var charges = require('../charges');
++var refunds = require('../refunds');
+ var store = require('../store');
+ var asyncRoute = require('../../../lib/util/asyncRoute');
+ var telemetry = require('../../../lib/telemetry');
+@@ -28,6 +29,12 @@ router.post('/payments/charge', asyncRoute(async function (req, res) {
+   res.status(result.status).json(result.body);
+ }));
+ 
++// FEAT-065: POST /internal/payments/refunds { order_ref, amount_pence } (Idempotency-Key honoured)
++router.post('/payments/refunds', asyncRoute(async function (req, res) {
++  var result = await refunds.refund(req.body, req.get('Idempotency-Key'));
++  res.status(result.status).json(result.body);
++}));
++
+ router.get('/payments', asyncRoute(async function (req, res) {
+   if (req.query.order_ref) {
+     var list = await store.byOrderRef(req.query.order_ref);

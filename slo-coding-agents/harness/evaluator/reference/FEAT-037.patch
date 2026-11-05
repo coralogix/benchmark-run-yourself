@@ -1,0 +1,77 @@
+diff --git a/services/checkout/checkout.py b/services/checkout/checkout.py
+index 3c39e3c..5091d9d 100644
+--- a/services/checkout/checkout.py
++++ b/services/checkout/checkout.py
+@@ -16,7 +16,7 @@ import time
+ from larder_common import settings, telemetry, utils
+ from larder_common.errors import BadRequest, Conflict, LarderError
+ from larder_common.log import get_logger
+-from services.checkout import hooks, orders_client, outcomes, payload, peers, tokens, totals
++from services.checkout import hooks, orders_client, outcomes, payload, peers, prescreen, tokens, totals
+ from services.checkout.models import Checkout
+ 
+ log = get_logger("checkout")
+@@ -93,6 +93,7 @@ def checkout(cart_id, hold_id, payment_token):
+ 
+     email = peers.user_email(cart.get("user_id"))
+     order_ref = new_order_ref()
++    prescreen.prescreen(order_ref, cart, breakdown, email, payment_token)
+     totals.check(order_ref, breakdown)
+     record = _save_pending(order_ref, cart, breakdown, hold_id)
+     body = payload.build_order_body(order_ref, cart, breakdown, email, hold_id, payment_token)
+diff --git a/services/checkout/prescreen.py b/services/checkout/prescreen.py
+new file mode 100644
+index 0000000..8e0a5e1
+--- /dev/null
++++ b/services/checkout/prescreen.py
+@@ -0,0 +1,36 @@
++"""
++Fraud pre-screen (FEAT-037, FRAUD-52).
++
++Every checkout attempt is scored by fraud before we create the order, so a
++blocked customer never reaches the PSP. Finance's rule since FRAUD-52: an
++attempt fraud cannot score is not taken.
++"""
++from larder_common.http import client
++from larder_common.log import get_logger
++
++log = get_logger("checkout.prescreen")
++
++
++def prescreen(order_ref, cart, breakdown, email, payment_token):
++    """-> None when the attempt may proceed; raises CheckoutError otherwise."""
++    from services.checkout.checkout import CheckoutError
++
++    body = {
++        "stage": "prescreen",
++        "order_ref": order_ref,
++        "email": email,
++        "user_id": cart.get("user_id"),
++        "amount_pence": breakdown.get("total_pence"),
++        "token": payment_token,
++    }
++    try:
++        res = client("fraud").post("/internal/fraud/score", json=body)
++    except Exception as e:  # noqa
++        log.error("fraud pre-screen failed for %s: %s", order_ref, e)
++        raise CheckoutError("fraud_unavailable", status=503)
++    if not res.ok or not isinstance(res.body, dict) or not res.body.get("decision"):
++        log.error("fraud pre-screen for %s returned %r", order_ref, res)
++        raise CheckoutError("fraud_unavailable", status=503)
++    if res.body.get("decision") == "block":
++        log.info("checkout %s blocked by fraud pre-screen: %s", order_ref, res.body.get("reasons"))
++        raise CheckoutError("payment_declined", status=402, reason="fraud")
+diff --git a/services/edge_api/views/checkout.py b/services/edge_api/views/checkout.py
+index c4f59da..6b3cae0 100644
+--- a/services/edge_api/views/checkout.py
++++ b/services/edge_api/views/checkout.py
+@@ -20,6 +20,9 @@ def do_checkout():
+     data = body()
+     if not data.get("cart_id"):
+         raise BadRequest("cart_id_required")
++    if not data.get("payment_token"):
++        # FEAT-037: refuse before touching cart/pricing/orders/PSP
++        raise BadRequest("missing_payment_token")
+     res = upstreams.checkout(data.get("cart_id"), data.get("hold_id"), data.get("payment_token"))
+     return passthrough(res)
+ 

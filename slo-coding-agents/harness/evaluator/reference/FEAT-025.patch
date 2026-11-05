@@ -1,0 +1,40 @@
+diff --git a/services/edge_api/views/internal.py b/services/edge_api/views/internal.py
+index 854f324..cc50a86 100644
+--- a/services/edge_api/views/internal.py
++++ b/services/edge_api/views/internal.py
+@@ -17,6 +17,35 @@ from services.edge_api import upstreams
+ bp = Blueprint("edge_internal", __name__)
+ 
+ 
++# FEAT-025: every dependency in parallel, each with a short timeout
++DEEP_TIMEOUT_S = 1.5
++_POOL = None
++
++
++def _probe(target):
++    import requests
++
++    from larder_common import discovery
++
++    try:
++        return requests.get(discovery.peer_url(target) + "/healthz", timeout=DEEP_TIMEOUT_S).status_code == 200
++    except Exception:  # noqa
++        return False
++
++
++@bp.route("/api/healthz/deep")
++def deep_health():
++    global _POOL
++    from concurrent.futures import ThreadPoolExecutor, wait
++
++    if _POOL is None:
++        _POOL = ThreadPoolExecutor(max_workers=len(upstreams.ALL) * 2, thread_name_prefix="deep-health")
++    futs = {t: _POOL.submit(_probe, t) for t in upstreams.ALL}
++    wait(list(futs.values()), timeout=DEEP_TIMEOUT_S + 0.3)
++    services = {t: bool(f.done() and f.result()) for t, f in futs.items()}
++    return ok({"ok": all(services.values()), "services": services})
++
++
+ @bp.route("/_debug/upstreams")
+ def show_upstreams():
+     return ok(upstreams.describe())

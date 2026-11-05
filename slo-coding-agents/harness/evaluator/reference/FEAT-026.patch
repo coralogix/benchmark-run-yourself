@@ -1,0 +1,12 @@
+diff --git a/services/edge_api/orders_view.py b/services/edge_api/orders_view.py
+index b165f6c..b596e74 100644
+--- a/services/edge_api/orders_view.py
++++ b/services/edge_api/orders_view.py
+@@ -60,4 +60,7 @@ def get_order(order_ref):
+         "hold_id": o.get("hold_id"),
+         "charge_id": o.get("charge_id"),
+         "created_at": o.get("created_at"),
++        # FEAT-026: the booked slot
++        "delivery": ({"date": (o.get("slot") or {}).get("date"), "window": (o.get("slot") or {}).get("window")}
++                     if o.get("slot") else None),
+     }

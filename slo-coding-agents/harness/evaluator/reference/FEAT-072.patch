@@ -1,0 +1,155 @@
+Reference implementation for FEAT-072 (evaluator-only).
+Repo: ops. Apply from a fresh copy of baseline/ops:  git apply FEAT-072.patch
+
+diff --git a/services/bus/routes/admin.js b/services/bus/routes/admin.js
+index c6adcbc..6842b38 100644
+--- a/services/bus/routes/admin.js
++++ b/services/bus/routes/admin.js
+@@ -45,6 +45,11 @@ router.get('/bus/messages', function (req, res) {
+   res.json({ topic: topic, depth: store.depth(topic), messages: store.peek(topic, limit) });
+ });
+ 
++// FEAT-072: deliveries that failed 5 times for a subscriber
++router.get('/bus/dead-letters', function (req, res) {
++  res.json({ dead_letters: store.deadLetters() });
++});
++
+ router.get('/bus/state', function (req, res) {
+   res.json(store.snapshot());
+ });
+diff --git a/services/bus/store.js b/services/bus/store.js
+index ece1229..855c61c 100644
+--- a/services/bus/store.js
++++ b/services/bus/store.js
+@@ -42,7 +42,7 @@ var ids = require('../../lib/util/ids');
+ 
+ var VERSION = 2;
+ 
+-var state = { version: VERSION, topics: {}, dropped: 0, saved_at: null };
++var state = { version: VERSION, topics: {}, dropped: 0, saved_at: null, dead_letters: [] };
+ var fileOverride = null;
+ var stats = { saves: 0, last_save_ms: 0, last_save_bytes: 0, loads: 0 };
+ 
+@@ -85,7 +85,7 @@ function load() {
+     raw = fs.readFileSync(file, 'utf8');
+   } catch (e) {
+     if (e.code !== 'ENOENT') logger.error('bus: could not read state file, starting empty', { err: e.message, file: file });
+-    state = { version: VERSION, topics: {}, dropped: 0, saved_at: null };
++    state = { version: VERSION, topics: {}, dropped: 0, saved_at: null, dead_letters: [] };
+     return state;
+   }
+   try {
+@@ -95,12 +95,13 @@ function load() {
+       version: VERSION,
+       topics: parsed.topics || {},
+       dropped: parsed.dropped || 0,
+-      saved_at: parsed.saved_at || null
++      saved_at: parsed.saved_at || null,
++      dead_letters: parsed.dead_letters || []
+     };
+   } catch (e) {
+     // truncated write (see header). Everything in flight is lost.
+     logger.error('bus: state file corrupt, starting empty', { err: e.message, file: file, bytes: raw.length });
+-    state = { version: VERSION, topics: {}, dropped: 0, saved_at: null };
++    state = { version: VERSION, topics: {}, dropped: 0, saved_at: null, dead_letters: [] };
+   }
+   _.forEach(state.topics, function (t) {
+     t.queue = (t.queue || []).map(function (m) {
+@@ -174,6 +175,33 @@ function markFailed(msg, subscriber, err) {
+   // once a second per stuck message was showing up in iostat, 2023-09).
+ }
+ 
++/**
++ * FEAT-072: give up on one subscriber for this message. The message stays at the
++ * head until the remaining subscribers have it, but this subscriber is skipped.
++ */
++function deadLetter(msg, subscriber, lastError) {
++  msg.dead = msg.dead || {};
++  msg.dead[subscriber] = new Date().toISOString();
++  state.dead_letters = state.dead_letters || [];
++  state.dead_letters.push({
++    topic: msg.topic,
++    subscriber: subscriber,
++    key: msg.key,
++    message_id: msg.id,
++    seq: msg.seq,
++    attempts: msg.attempts[subscriber] || 0,
++    last_error: lastError || (msg.last_error && msg.last_error.error) || 'unknown',
++    payload: msg.payload,
++    published_at: msg.published_at,
++    dead_lettered_at: msg.dead[subscriber]
++  });
++  safeSave();
++}
++
++function deadLetters() {
++  return state.dead_letters || [];
++}
++
+ /**
+  * ack(topic, id) - remove a fully delivered message. Only ever the head in
+  * practice, but searches the queue in case.
+@@ -217,7 +245,7 @@ function snapshot() {
+ // tests
+ function _reset(file) {
+   fileOverride = file || null;
+-  state = { version: VERSION, topics: {}, dropped: 0, saved_at: null };
++  state = { version: VERSION, topics: {}, dropped: 0, saved_at: null, dead_letters: [] };
+ }
+ 
+ module.exports = {
+@@ -228,6 +256,8 @@ module.exports = {
+   ack: ack,
+   markDelivered: markDelivered,
+   markFailed: markFailed,
++  deadLetter: deadLetter,
++  deadLetters: deadLetters,
+   noteDropped: noteDropped,
+   depth: depth,
+   peek: peek,
+diff --git a/services/bus/worker.js b/services/bus/worker.js
+index 96d7b81..5555a27 100644
+--- a/services/bus/worker.js
++++ b/services/bus/worker.js
+@@ -48,6 +48,7 @@ var subscriptions = require('./subscriptions');
+ var DEFAULT_TIMEOUT_MS = 10000;
+ var DEFAULT_RETRY_SLEEP_MS = 1000;
+ var DEFAULT_IDLE_SLEEP_MS = 200;
++var DEFAULT_MAX_ATTEMPTS = 5; // FEAT-072
+ var SLOW_DELIVERY_WARN_MS = 2000;
+ var LOG_EVERY_N_FAILURES = 10;
+ 
+@@ -75,6 +76,7 @@ function TopicWorker(topic, opts) {
+   this.timeoutMs = opts.timeoutMs || config.get('bus.deliveryTimeoutMs') || DEFAULT_TIMEOUT_MS;
+   this.retrySleepMs = opts.retrySleepMs != null ? opts.retrySleepMs : (config.get('bus.retrySleepMs') || DEFAULT_RETRY_SLEEP_MS);
+   this.idleSleepMs = opts.idleSleepMs || config.get('bus.idleSleepMs') || DEFAULT_IDLE_SLEEP_MS;
++  this.maxAttempts = opts.maxAttempts || config.get('bus.maxAttempts') || DEFAULT_MAX_ATTEMPTS;
+   this.client = axiosClient(function () { return 'http://unused'; }, {
+     timeout: this.timeoutMs,
+     // anything but 2xx is a failed delivery (axios-client's default lets 4xx through)
+@@ -153,6 +155,16 @@ TopicWorker.prototype.deliverUntilDone = function (sub, msg) {
+       self.failures++;
+       globals.counters.busRetries++;
+       var n = msg.attempts[sub.name] || 0;
++      // FEAT-072: after MAX_ATTEMPTS failures the delivery goes to the dead-letter list and
++      // stops blocking the topic
++      if (n >= self.maxAttempts) {
++        telemetry.inc('busDeliveries', { subscriber: sub.name, outcome: 'dead_lettered' });
++        self.store.deadLetter(msg, sub.name, outcome + (r.err && r.err.message ? ': ' + r.err.message : ''));
++        logger.error('bus: delivery dead-lettered', {
++          topic: msg.topic, subscriber: sub.name, delivery_id: msg.id, attempts: n, outcome: outcome
++        });
++        return true;
++      }
+       if (n === 1 || n % LOG_EVERY_N_FAILURES === 0) {
+         logger.warn('bus: delivery failed, retrying', {
+           topic: msg.topic,
+@@ -178,7 +190,7 @@ TopicWorker.prototype.processHead = function () {
+ 
+   return Promise.each(self.subscribers, function (sub) {
+     if (self.stopped) return null;
+-    if (msg.delivered[sub.name]) return null;
++    if (msg.delivered[sub.name] || (msg.dead && msg.dead[sub.name])) return null;
+     return self.deliverUntilDone(sub, msg);
+   }).then(function () {
+     self.current = null;

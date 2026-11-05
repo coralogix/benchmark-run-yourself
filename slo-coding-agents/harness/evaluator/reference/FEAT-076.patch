@@ -1,0 +1,44 @@
+Reference implementation for FEAT-076 (evaluator-only).
+Repo: commerce. Apply from a fresh copy of baseline/commerce:  git apply FEAT-076.patch
+
+diff --git a/services/cart/carts.py b/services/cart/carts.py
+index e28452d..8f3074b 100644
+--- a/services/cart/carts.py
++++ b/services/cart/carts.py
+@@ -5,9 +5,11 @@ A cart stores skus and quantities only. Prices are looked up by pricing
+ every time the cart is priced (i.e. on every read), so the cart always shows
+ today's price. The previous prices live in CartState.snapshots.
+ """
++import datetime
++
+ from larder_common import settings, utils
+ from larder_common.errors import BadRequest, Conflict, NotFound
+-from larder_common.helpers.dates import iso_now
++from larder_common.helpers.dates import iso_now, parse_iso, utcnow
+ from larder_common.log import get_logger
+ from services.cart import pricing_client, state, store
+ 
+@@ -32,10 +34,23 @@ def create_cart(user_id):
+     return st
+ 
+ 
++# FEAT-076: open carts untouched (no write) for this long are expired
++CART_TTL = datetime.timedelta(hours=24)
++
++
++def is_expired(st, now=None):
++    if not st.is_open:
++        return False
++    touched = parse_iso(st.updated_at) or parse_iso(st.created_at)
++    return touched is not None and touched < (now or utcnow()) - CART_TTL
++
++
+ def get_cart(cart_id):
+     st = state.get(cart_id) if cart_id else None
+     if st is None:
+         raise NotFound("cart_not_found")
++    if is_expired(st):
++        raise NotFound("cart_expired")
+     return st
+ 
+ 

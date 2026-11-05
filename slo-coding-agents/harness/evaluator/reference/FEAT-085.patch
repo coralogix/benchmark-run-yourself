@@ -1,0 +1,38 @@
+Reference implementation for FEAT-085 (evaluator-only).
+Repo: commerce. Apply from a fresh copy of baseline/commerce:  git apply FEAT-085.patch
+
+diff --git a/services/edge_api/views/cart.py b/services/edge_api/views/cart.py
+index cfe044f..d012a55 100644
+--- a/services/edge_api/views/cart.py
++++ b/services/edge_api/views/cart.py
+@@ -5,7 +5,7 @@ The cart service prices the cart itself (via pricing), so whatever it returns
+ is what the customer sees, including its errors (e.g. coupon errors come from
+ promotions, through pricing, through cart, through here).
+ """
+-from flask import Blueprint
++from flask import Blueprint, request
+ 
+ from larder_common.errors import BadRequest
+ from larder_common.web import body, ok
+@@ -23,9 +23,20 @@ def create_cart():
+     return ok({"cart_id": res.body.get("cart_id")}, 201)
+ 
+ 
++# FEAT-085: euro estimate. 1 GBP = 1.17 EUR, integer maths so x.5 rounds up exactly.
++EUR_PER_GBP_X100 = 117
++
++
+ @bp.route("/api/carts/<cart_id>", methods=["GET"])
+ def get_cart(cart_id):
+-    return ok(upstreams.cart(cart_id))
++    currency = request.args.get("currency")
++    if currency is not None and currency.upper() not in ("EUR", "GBP"):
++        raise BadRequest("unsupported_currency")
++    cart = upstreams.cart(cart_id)
++    if currency is not None and currency.upper() == "EUR" and cart.get("total_pence") is not None:
++        n = int(cart["total_pence"]) * EUR_PER_GBP_X100
++        cart["total_eur_cents"] = (2 * n + 100) // 200
++    return ok(cart)
+ 
+ 
+ @bp.route("/api/carts/<cart_id>/items", methods=["POST"])

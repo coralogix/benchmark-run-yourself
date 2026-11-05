@@ -1,0 +1,128 @@
+diff --git a/.env.override b/.env.override
+index 809187d..750a590 100644
+--- a/.env.override
++++ b/.env.override
+@@ -13,3 +13,11 @@
+ #LLM_BASE_URL=https://api.openai.com/v1
+ #LLM_MODEL=gpt-4o-mini
+ #OPENAI_API_KEY=<replace with API key>
++
++# Benchmark: load level. Platform endpoints and keys come from the
++# benchmark folder's .env (agents/ops.sh passes it to Compose).
++LOCUST_USERS=10
++
++# Benchmark: pin the shop's images to the release built from the pinned
++# commit (tag 3.1.0) instead of `latest`.
++DEMO_VERSION=3.1.0
+diff --git a/src/load-generator/locustfile.py b/src/load-generator/locustfile.py
+index 7ee941b..d9f3658 100644
+--- a/src/load-generator/locustfile.py
++++ b/src/load-generator/locustfile.py
+@@ -130,6 +130,11 @@ agent_prompts = [
+     "What currencies are supported by the Astronomy Shop?",
+     "What current promotions are available on binoculars?",
+ ]
++# Benchmark: share of assistant requests that use the
++# "compare products" feature (POST /compare) instead of a chat prompt. The
++# total assistant request rate is unchanged.
++agent_compare_share = float(os.environ.get("AGENT_COMPARE_SHARE", "0.25"))
++agent_compare_categories = ["telescopes", "accessories"]
+ agent_endpoint = os.environ.get("AGENT_ENDPOINT", "agent")
+ agent_port = os.environ.get("AGENT_PORT", "8010")
+ 
+@@ -147,13 +152,56 @@ class WebsiteUser(HttpUser):
+             logging.info("User accessing index page")
+             self.client.get("/")
+ 
+-    @task(10)
++    # Benchmark: browse_product has weight 5 (upstream 10); the other 5 go to
++    # search_products below, so the total task weight and load match upstream
++    # and about 30% of product-discovery journeys start with a search.
++    @task(5)
+     def browse_product(self):
+         product = random.choice(products)
+         with self.tracer.start_as_current_span("user_browse_product", context=context.get_current(), attributes={"demo.product.id": product}):
+             logging.info(f"User browsing product: {product}")
+             self.client.get("/api/products/" + product)
+ 
++    # Shopper search queries with relative weights: one-word terms and the
++    # multi-word phrases people actually type.
++    SEARCH_QUERIES = {
++        "telescope": 10, "telescopes": 6, "binoculars": 8, "flashlight": 5,
++        "solar": 5, "filter": 4, "lens": 3, "book": 3, "comet": 2,
++        "accessories": 3, "refractor": 2, "camera": 2, "tripod": 1,
++        "astrophotography": 1,
++        "solar telescope": 5, "travel telescope": 4, "beginner telescope": 4,
++        "telescope for beginners": 3, "bird watching binoculars": 4,
++        "smartphone telescope": 2, "telescope eyepiece": 2, "moon telescope": 2,
++        "solar eclipse glasses": 2, "red light": 2, "deep sky camera": 2,
++        "telescope cleaning": 1, "travel scope": 1, "red flashlight": 3,
++        "solar filter": 3, "lens cleaning kit": 2, "comet book": 1,
++        "roof binoculars": 2,
++    }
++
++    @task(5)
++    def search_products(self):
++        query = random.choices(list(self.SEARCH_QUERIES), weights=list(self.SEARCH_QUERIES.values()))[0]
++        user = str(uuid.uuid1())
++        with self.tracer.start_as_current_span("user_search_products", context=context.get_current(), attributes={"user.id": user}):
++            resp = self.client.post("/api/search", json={"query": query})
++            try:
++                results = resp.json().get("results", [])
++            except Exception:
++                results = []
++            if not results:
++                return  # nothing relevant came back: the shopper leaves
++            product = random.choice(results[:3])["id"]
++            self.client.get("/api/products/" + product)
++            # Searchers know what they want: they add to cart and buy more
++            # often than browsers.
++            if random.random() < 0.6:
++                quantity = random.choice([1, 1, 2, 3])
++                self.client.post("/api/cart", json={"item": {"productId": product, "quantity": quantity}, "userId": user})
++                if random.random() < 0.6:
++                    checkout_person = dict(random.choice(people))
++                    checkout_person["userId"] = user
++                    self.client.post("/api/checkout", json=checkout_person)
++
+     @task(3)
+     def get_recommendations(self):
+         product = random.choice(products)
+@@ -198,7 +246,10 @@ class WebsiteUser(HttpUser):
+             }
+             self.client.post("/api/cart", json=cart_item)
+ 
+-    @task(1)
++    # Benchmark: weight 2 (upstream 1), so the checkout chain (checkout,
++    # payment, shipping, currency, product-catalog) carries enough traffic to
++    # show in telemetry, while accounting's Kafka consumer keeps up.
++    @task(2)
+     def checkout(self):
+         user = str(uuid.uuid1())
+         with self.tracer.start_as_current_span("user_checkout_single", context=context.get_current(), attributes={"user.id": user}):
+@@ -208,7 +259,8 @@ class WebsiteUser(HttpUser):
+             self.client.post("/api/checkout", json=checkout_person)
+             logging.info(f"Checkout completed for user {user}")
+ 
+-    @task(1)
++    # Benchmark: weight 2 (upstream 1), as checkout() above.
++    @task(2)
+     def checkout_multi(self):
+         user = str(uuid.uuid1())
+         item_count = random.choice([2, 3, 4])
+@@ -232,6 +284,15 @@ class WebsiteUser(HttpUser):
+ 
+     @task(3)
+     def ask_agent(self):
++        if random.random() < agent_compare_share:
++            category = random.choice(agent_compare_categories)
++            with self.tracer.start_as_current_span("user_compare_products", context=context.get_current(), attributes={"app.compare.category": category}):
++                logging.info(f"User comparing products: {category}")
++                self.client.post(
++                    f"http://{agent_endpoint}:{agent_port}/compare",
++                    json={"category": category},
++                )
++            return
+         prompt = random.choice(agent_prompts)
+         input_messages = json.dumps([{"role": "user", "parts": [{"type": "text", "content": prompt}]}])
+         with self.tracer.start_as_current_span("user_ask_agent", context=context.get_current(), attributes={"gen_ai.input.messages": input_messages}):

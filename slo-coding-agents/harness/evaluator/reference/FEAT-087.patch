@@ -1,0 +1,19 @@
+Reference implementation for FEAT-087 (evaluator-only).
+Repo: ops. Apply from a fresh copy of baseline/ops:  git apply FEAT-087.patch
+
+diff --git a/services/orders/routes/orders.js b/services/orders/routes/orders.js
+index cce4780..6c0c0f5 100644
+--- a/services/orders/routes/orders.js
++++ b/services/orders/routes/orders.js
+@@ -79,6 +79,11 @@ router.get('/orders', asyncRoute(async function (req, res) {
+   });
+ }));
+ 
++// FEAT-087: { "<status>": count } for every status present
++router.get('/orders/stats', asyncRoute(async function (req, res) {
++  res.json(_.countBy(await store.all(), 'status'));
++}));
++
+ router.get('/orders/:ref', asyncRoute(async function (req, res) {
+   var o = await store.findByRef(req.params.ref);
+   if (!o) throw new errors.NotFound('order not found');

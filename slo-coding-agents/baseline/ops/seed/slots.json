@@ -1,0 +1,1346 @@
+[
+ {
+  "booked": 80,
+  "capacity": 80,
+  "day_offset": 0,
+  "slot_id": "SL-0001",
+  "window": "08:00-10:00",
+  "zone": "Z1"
+ },
+ {
+  "booked": 40,
+  "capacity": 40,
+  "day_offset": 0,
+  "slot_id": "SL-0002",
+  "window": "10:00-12:00",
+  "zone": "Z1"
+ },
+ {
+  "booked": 60,
+  "capacity": 60,
+  "day_offset": 0,
+  "slot_id": "SL-0003",
+  "window": "14:00-16:00",
+  "zone": "Z1"
+ },
+ {
+  "booked": 80,
+  "capacity": 80,
+  "day_offset": 0,
+  "slot_id": "SL-0004",
+  "window": "18:00-20:00",
+  "zone": "Z1"
+ },
+ {
+  "booked": 7,
+  "capacity": 80,
+  "day_offset": 1,
+  "slot_id": "SL-0005",
+  "window": "08:00-10:00",
+  "zone": "Z1"
+ },
+ {
+  "booked": 12,
+  "capacity": 40,
+  "day_offset": 1,
+  "slot_id": "SL-0006",
+  "window": "10:00-12:00",
+  "zone": "Z1"
+ },
+ {
+  "booked": 6,
+  "capacity": 30,
+  "day_offset": 1,
+  "slot_id": "SL-0007",
+  "window": "14:00-16:00",
+  "zone": "Z1"
+ },
+ {
+  "booked": 14,
+  "capacity": 40,
+  "day_offset": 1,
+  "slot_id": "SL-0008",
+  "window": "18:00-20:00",
+  "zone": "Z1"
+ },
+ {
+  "booked": 16,
+  "capacity": 50,
+  "day_offset": 2,
+  "slot_id": "SL-0009",
+  "window": "08:00-10:00",
+  "zone": "Z1"
+ },
+ {
+  "booked": 3,
+  "capacity": 40,
+  "day_offset": 2,
+  "slot_id": "SL-0010",
+  "window": "10:00-12:00",
+  "zone": "Z1"
+ },
+ {
+  "booked": 10,
+  "capacity": 30,
+  "day_offset": 2,
+  "slot_id": "SL-0011",
+  "window": "14:00-16:00",
+  "zone": "Z1"
+ },
+ {
+  "booked": 0,
+  "capacity": 40,
+  "day_offset": 2,
+  "slot_id": "SL-0012",
+  "window": "18:00-20:00",
+  "zone": "Z1"
+ },
+ {
+  "booked": 13,
+  "capacity": 30,
+  "day_offset": 3,
+  "slot_id": "SL-0013",
+  "window": "08:00-10:00",
+  "zone": "Z1"
+ },
+ {
+  "booked": 17,
+  "capacity": 40,
+  "day_offset": 3,
+  "slot_id": "SL-0014",
+  "window": "10:00-12:00",
+  "zone": "Z1"
+ },
+ {
+  "booked": 11,
+  "capacity": 40,
+  "day_offset": 3,
+  "slot_id": "SL-0015",
+  "window": "14:00-16:00",
+  "zone": "Z1"
+ },
+ {
+  "booked": 14,
+  "capacity": 30,
+  "day_offset": 3,
+  "slot_id": "SL-0016",
+  "window": "18:00-20:00",
+  "zone": "Z1"
+ },
+ {
+  "booked": 9,
+  "capacity": 60,
+  "day_offset": 4,
+  "slot_id": "SL-0017",
+  "window": "08:00-10:00",
+  "zone": "Z1"
+ },
+ {
+  "booked": 24,
+  "capacity": 80,
+  "day_offset": 4,
+  "slot_id": "SL-0018",
+  "window": "10:00-12:00",
+  "zone": "Z1"
+ },
+ {
+  "booked": 5,
+  "capacity": 40,
+  "day_offset": 4,
+  "slot_id": "SL-0019",
+  "window": "14:00-16:00",
+  "zone": "Z1"
+ },
+ {
+  "booked": 8,
+  "capacity": 30,
+  "day_offset": 4,
+  "slot_id": "SL-0020",
+  "window": "18:00-20:00",
+  "zone": "Z1"
+ },
+ {
+  "booked": 11,
+  "capacity": 50,
+  "day_offset": 5,
+  "slot_id": "SL-0021",
+  "window": "08:00-10:00",
+  "zone": "Z1"
+ },
+ {
+  "booked": 8,
+  "capacity": 30,
+  "day_offset": 5,
+  "slot_id": "SL-0022",
+  "window": "10:00-12:00",
+  "zone": "Z1"
+ },
+ {
+  "booked": 17,
+  "capacity": 50,
+  "day_offset": 5,
+  "slot_id": "SL-0023",
+  "window": "14:00-16:00",
+  "zone": "Z1"
+ },
+ {
+  "booked": 28,
+  "capacity": 60,
+  "day_offset": 5,
+  "slot_id": "SL-0024",
+  "window": "18:00-20:00",
+  "zone": "Z1"
+ },
+ {
+  "booked": 9,
+  "capacity": 40,
+  "day_offset": 6,
+  "slot_id": "SL-0025",
+  "window": "08:00-10:00",
+  "zone": "Z1"
+ },
+ {
+  "booked": 15,
+  "capacity": 60,
+  "day_offset": 6,
+  "slot_id": "SL-0026",
+  "window": "10:00-12:00",
+  "zone": "Z1"
+ },
+ {
+  "booked": 23,
+  "capacity": 60,
+  "day_offset": 6,
+  "slot_id": "SL-0027",
+  "window": "14:00-16:00",
+  "zone": "Z1"
+ },
+ {
+  "booked": 18,
+  "capacity": 80,
+  "day_offset": 6,
+  "slot_id": "SL-0028",
+  "window": "18:00-20:00",
+  "zone": "Z1"
+ },
+ {
+  "booked": 30,
+  "capacity": 30,
+  "day_offset": 0,
+  "slot_id": "SL-0029",
+  "window": "08:00-10:00",
+  "zone": "Z2"
+ },
+ {
+  "booked": 40,
+  "capacity": 40,
+  "day_offset": 0,
+  "slot_id": "SL-0030",
+  "window": "10:00-12:00",
+  "zone": "Z2"
+ },
+ {
+  "booked": 30,
+  "capacity": 30,
+  "day_offset": 0,
+  "slot_id": "SL-0031",
+  "window": "14:00-16:00",
+  "zone": "Z2"
+ },
+ {
+  "booked": 80,
+  "capacity": 80,
+  "day_offset": 0,
+  "slot_id": "SL-0032",
+  "window": "18:00-20:00",
+  "zone": "Z2"
+ },
+ {
+  "booked": 16,
+  "capacity": 30,
+  "day_offset": 1,
+  "slot_id": "SL-0033",
+  "window": "08:00-10:00",
+  "zone": "Z2"
+ },
+ {
+  "booked": 6,
+  "capacity": 60,
+  "day_offset": 1,
+  "slot_id": "SL-0034",
+  "window": "10:00-12:00",
+  "zone": "Z2"
+ },
+ {
+  "booked": 13,
+  "capacity": 50,
+  "day_offset": 1,
+  "slot_id": "SL-0035",
+  "window": "14:00-16:00",
+  "zone": "Z2"
+ },
+ {
+  "booked": 39,
+  "capacity": 80,
+  "day_offset": 1,
+  "slot_id": "SL-0036",
+  "window": "18:00-20:00",
+  "zone": "Z2"
+ },
+ {
+  "booked": 45,
+  "capacity": 80,
+  "day_offset": 2,
+  "slot_id": "SL-0037",
+  "window": "08:00-10:00",
+  "zone": "Z2"
+ },
+ {
+  "booked": 14,
+  "capacity": 60,
+  "day_offset": 2,
+  "slot_id": "SL-0038",
+  "window": "10:00-12:00",
+  "zone": "Z2"
+ },
+ {
+  "booked": 26,
+  "capacity": 50,
+  "day_offset": 2,
+  "slot_id": "SL-0039",
+  "window": "14:00-16:00",
+  "zone": "Z2"
+ },
+ {
+  "booked": 30,
+  "capacity": 80,
+  "day_offset": 2,
+  "slot_id": "SL-0040",
+  "window": "18:00-20:00",
+  "zone": "Z2"
+ },
+ {
+  "booked": 9,
+  "capacity": 40,
+  "day_offset": 3,
+  "slot_id": "SL-0041",
+  "window": "08:00-10:00",
+  "zone": "Z2"
+ },
+ {
+  "booked": 22,
+  "capacity": 40,
+  "day_offset": 3,
+  "slot_id": "SL-0042",
+  "window": "10:00-12:00",
+  "zone": "Z2"
+ },
+ {
+  "booked": 2,
+  "capacity": 30,
+  "day_offset": 3,
+  "slot_id": "SL-0043",
+  "window": "14:00-16:00",
+  "zone": "Z2"
+ },
+ {
+  "booked": 13,
+  "capacity": 60,
+  "day_offset": 3,
+  "slot_id": "SL-0044",
+  "window": "18:00-20:00",
+  "zone": "Z2"
+ },
+ {
+  "booked": 4,
+  "capacity": 40,
+  "day_offset": 4,
+  "slot_id": "SL-0045",
+  "window": "08:00-10:00",
+  "zone": "Z2"
+ },
+ {
+  "booked": 21,
+  "capacity": 80,
+  "day_offset": 4,
+  "slot_id": "SL-0046",
+  "window": "10:00-12:00",
+  "zone": "Z2"
+ },
+ {
+  "booked": 14,
+  "capacity": 30,
+  "day_offset": 4,
+  "slot_id": "SL-0047",
+  "window": "14:00-16:00",
+  "zone": "Z2"
+ },
+ {
+  "booked": 15,
+  "capacity": 30,
+  "day_offset": 4,
+  "slot_id": "SL-0048",
+  "window": "18:00-20:00",
+  "zone": "Z2"
+ },
+ {
+  "booked": 0,
+  "capacity": 30,
+  "day_offset": 5,
+  "slot_id": "SL-0049",
+  "window": "08:00-10:00",
+  "zone": "Z2"
+ },
+ {
+  "booked": 28,
+  "capacity": 80,
+  "day_offset": 5,
+  "slot_id": "SL-0050",
+  "window": "10:00-12:00",
+  "zone": "Z2"
+ },
+ {
+  "booked": 11,
+  "capacity": 30,
+  "day_offset": 5,
+  "slot_id": "SL-0051",
+  "window": "14:00-16:00",
+  "zone": "Z2"
+ },
+ {
+  "booked": 22,
+  "capacity": 60,
+  "day_offset": 5,
+  "slot_id": "SL-0052",
+  "window": "18:00-20:00",
+  "zone": "Z2"
+ },
+ {
+  "booked": 33,
+  "capacity": 80,
+  "day_offset": 6,
+  "slot_id": "SL-0053",
+  "window": "08:00-10:00",
+  "zone": "Z2"
+ },
+ {
+  "booked": 12,
+  "capacity": 40,
+  "day_offset": 6,
+  "slot_id": "SL-0054",
+  "window": "10:00-12:00",
+  "zone": "Z2"
+ },
+ {
+  "booked": 18,
+  "capacity": 50,
+  "day_offset": 6,
+  "slot_id": "SL-0055",
+  "window": "14:00-16:00",
+  "zone": "Z2"
+ },
+ {
+  "booked": 15,
+  "capacity": 80,
+  "day_offset": 6,
+  "slot_id": "SL-0056",
+  "window": "18:00-20:00",
+  "zone": "Z2"
+ },
+ {
+  "booked": 50,
+  "capacity": 50,
+  "day_offset": 0,
+  "slot_id": "SL-0057",
+  "window": "08:00-10:00",
+  "zone": "Z3"
+ },
+ {
+  "booked": 40,
+  "capacity": 40,
+  "day_offset": 0,
+  "slot_id": "SL-0058",
+  "window": "10:00-12:00",
+  "zone": "Z3"
+ },
+ {
+  "booked": 60,
+  "capacity": 60,
+  "day_offset": 0,
+  "slot_id": "SL-0059",
+  "window": "14:00-16:00",
+  "zone": "Z3"
+ },
+ {
+  "booked": 80,
+  "capacity": 80,
+  "day_offset": 0,
+  "slot_id": "SL-0060",
+  "window": "18:00-20:00",
+  "zone": "Z3"
+ },
+ {
+  "booked": 0,
+  "capacity": 30,
+  "day_offset": 1,
+  "slot_id": "SL-0061",
+  "window": "08:00-10:00",
+  "zone": "Z3"
+ },
+ {
+  "booked": 6,
+  "capacity": 40,
+  "day_offset": 1,
+  "slot_id": "SL-0062",
+  "window": "10:00-12:00",
+  "zone": "Z3"
+ },
+ {
+  "booked": 9,
+  "capacity": 80,
+  "day_offset": 1,
+  "slot_id": "SL-0063",
+  "window": "14:00-16:00",
+  "zone": "Z3"
+ },
+ {
+  "booked": 24,
+  "capacity": 80,
+  "day_offset": 1,
+  "slot_id": "SL-0064",
+  "window": "18:00-20:00",
+  "zone": "Z3"
+ },
+ {
+  "booked": 28,
+  "capacity": 50,
+  "day_offset": 2,
+  "slot_id": "SL-0065",
+  "window": "08:00-10:00",
+  "zone": "Z3"
+ },
+ {
+  "booked": 0,
+  "capacity": 60,
+  "day_offset": 2,
+  "slot_id": "SL-0066",
+  "window": "10:00-12:00",
+  "zone": "Z3"
+ },
+ {
+  "booked": 23,
+  "capacity": 50,
+  "day_offset": 2,
+  "slot_id": "SL-0067",
+  "window": "14:00-16:00",
+  "zone": "Z3"
+ },
+ {
+  "booked": 18,
+  "capacity": 40,
+  "day_offset": 2,
+  "slot_id": "SL-0068",
+  "window": "18:00-20:00",
+  "zone": "Z3"
+ },
+ {
+  "booked": 13,
+  "capacity": 40,
+  "day_offset": 3,
+  "slot_id": "SL-0069",
+  "window": "08:00-10:00",
+  "zone": "Z3"
+ },
+ {
+  "booked": 10,
+  "capacity": 40,
+  "day_offset": 3,
+  "slot_id": "SL-0070",
+  "window": "10:00-12:00",
+  "zone": "Z3"
+ },
+ {
+  "booked": 21,
+  "capacity": 50,
+  "day_offset": 3,
+  "slot_id": "SL-0071",
+  "window": "14:00-16:00",
+  "zone": "Z3"
+ },
+ {
+  "booked": 17,
+  "capacity": 40,
+  "day_offset": 3,
+  "slot_id": "SL-0072",
+  "window": "18:00-20:00",
+  "zone": "Z3"
+ },
+ {
+  "booked": 14,
+  "capacity": 50,
+  "day_offset": 4,
+  "slot_id": "SL-0073",
+  "window": "08:00-10:00",
+  "zone": "Z3"
+ },
+ {
+  "booked": 4,
+  "capacity": 30,
+  "day_offset": 4,
+  "slot_id": "SL-0074",
+  "window": "10:00-12:00",
+  "zone": "Z3"
+ },
+ {
+  "booked": 8,
+  "capacity": 60,
+  "day_offset": 4,
+  "slot_id": "SL-0075",
+  "window": "14:00-16:00",
+  "zone": "Z3"
+ },
+ {
+  "booked": 4,
+  "capacity": 60,
+  "day_offset": 4,
+  "slot_id": "SL-0076",
+  "window": "18:00-20:00",
+  "zone": "Z3"
+ },
+ {
+  "booked": 44,
+  "capacity": 80,
+  "day_offset": 5,
+  "slot_id": "SL-0077",
+  "window": "08:00-10:00",
+  "zone": "Z3"
+ },
+ {
+  "booked": 18,
+  "capacity": 40,
+  "day_offset": 5,
+  "slot_id": "SL-0078",
+  "window": "10:00-12:00",
+  "zone": "Z3"
+ },
+ {
+  "booked": 17,
+  "capacity": 30,
+  "day_offset": 5,
+  "slot_id": "SL-0079",
+  "window": "14:00-16:00",
+  "zone": "Z3"
+ },
+ {
+  "booked": 14,
+  "capacity": 40,
+  "day_offset": 5,
+  "slot_id": "SL-0080",
+  "window": "18:00-20:00",
+  "zone": "Z3"
+ },
+ {
+  "booked": 17,
+  "capacity": 30,
+  "day_offset": 6,
+  "slot_id": "SL-0081",
+  "window": "08:00-10:00",
+  "zone": "Z3"
+ },
+ {
+  "booked": 9,
+  "capacity": 80,
+  "day_offset": 6,
+  "slot_id": "SL-0082",
+  "window": "10:00-12:00",
+  "zone": "Z3"
+ },
+ {
+  "booked": 20,
+  "capacity": 80,
+  "day_offset": 6,
+  "slot_id": "SL-0083",
+  "window": "14:00-16:00",
+  "zone": "Z3"
+ },
+ {
+  "booked": 2,
+  "capacity": 80,
+  "day_offset": 6,
+  "slot_id": "SL-0084",
+  "window": "18:00-20:00",
+  "zone": "Z3"
+ },
+ {
+  "booked": 80,
+  "capacity": 80,
+  "day_offset": 0,
+  "slot_id": "SL-0085",
+  "window": "08:00-10:00",
+  "zone": "Z4"
+ },
+ {
+  "booked": 30,
+  "capacity": 30,
+  "day_offset": 0,
+  "slot_id": "SL-0086",
+  "window": "10:00-12:00",
+  "zone": "Z4"
+ },
+ {
+  "booked": 30,
+  "capacity": 30,
+  "day_offset": 0,
+  "slot_id": "SL-0087",
+  "window": "14:00-16:00",
+  "zone": "Z4"
+ },
+ {
+  "booked": 50,
+  "capacity": 50,
+  "day_offset": 0,
+  "slot_id": "SL-0088",
+  "window": "18:00-20:00",
+  "zone": "Z4"
+ },
+ {
+  "booked": 18,
+  "capacity": 50,
+  "day_offset": 1,
+  "slot_id": "SL-0089",
+  "window": "08:00-10:00",
+  "zone": "Z4"
+ },
+ {
+  "booked": 24,
+  "capacity": 60,
+  "day_offset": 1,
+  "slot_id": "SL-0090",
+  "window": "10:00-12:00",
+  "zone": "Z4"
+ },
+ {
+  "booked": 3,
+  "capacity": 60,
+  "day_offset": 1,
+  "slot_id": "SL-0091",
+  "window": "14:00-16:00",
+  "zone": "Z4"
+ },
+ {
+  "booked": 19,
+  "capacity": 50,
+  "day_offset": 1,
+  "slot_id": "SL-0092",
+  "window": "18:00-20:00",
+  "zone": "Z4"
+ },
+ {
+  "booked": 26,
+  "capacity": 60,
+  "day_offset": 2,
+  "slot_id": "SL-0093",
+  "window": "08:00-10:00",
+  "zone": "Z4"
+ },
+ {
+  "booked": 35,
+  "capacity": 60,
+  "day_offset": 2,
+  "slot_id": "SL-0094",
+  "window": "10:00-12:00",
+  "zone": "Z4"
+ },
+ {
+  "booked": 13,
+  "capacity": 30,
+  "day_offset": 2,
+  "slot_id": "SL-0095",
+  "window": "14:00-16:00",
+  "zone": "Z4"
+ },
+ {
+  "booked": 36,
+  "capacity": 80,
+  "day_offset": 2,
+  "slot_id": "SL-0096",
+  "window": "18:00-20:00",
+  "zone": "Z4"
+ },
+ {
+  "booked": 16,
+  "capacity": 30,
+  "day_offset": 3,
+  "slot_id": "SL-0097",
+  "window": "08:00-10:00",
+  "zone": "Z4"
+ },
+ {
+  "booked": 2,
+  "capacity": 40,
+  "day_offset": 3,
+  "slot_id": "SL-0098",
+  "window": "10:00-12:00",
+  "zone": "Z4"
+ },
+ {
+  "booked": 12,
+  "capacity": 30,
+  "day_offset": 3,
+  "slot_id": "SL-0099",
+  "window": "14:00-16:00",
+  "zone": "Z4"
+ },
+ {
+  "booked": 13,
+  "capacity": 50,
+  "day_offset": 3,
+  "slot_id": "SL-0100",
+  "window": "18:00-20:00",
+  "zone": "Z4"
+ },
+ {
+  "booked": 44,
+  "capacity": 80,
+  "day_offset": 4,
+  "slot_id": "SL-0101",
+  "window": "08:00-10:00",
+  "zone": "Z4"
+ },
+ {
+  "booked": 0,
+  "capacity": 50,
+  "day_offset": 4,
+  "slot_id": "SL-0102",
+  "window": "10:00-12:00",
+  "zone": "Z4"
+ },
+ {
+  "booked": 13,
+  "capacity": 60,
+  "day_offset": 4,
+  "slot_id": "SL-0103",
+  "window": "14:00-16:00",
+  "zone": "Z4"
+ },
+ {
+  "booked": 0,
+  "capacity": 50,
+  "day_offset": 4,
+  "slot_id": "SL-0104",
+  "window": "18:00-20:00",
+  "zone": "Z4"
+ },
+ {
+  "booked": 17,
+  "capacity": 30,
+  "day_offset": 5,
+  "slot_id": "SL-0105",
+  "window": "08:00-10:00",
+  "zone": "Z4"
+ },
+ {
+  "booked": 14,
+  "capacity": 40,
+  "day_offset": 5,
+  "slot_id": "SL-0106",
+  "window": "10:00-12:00",
+  "zone": "Z4"
+ },
+ {
+  "booked": 10,
+  "capacity": 80,
+  "day_offset": 5,
+  "slot_id": "SL-0107",
+  "window": "14:00-16:00",
+  "zone": "Z4"
+ },
+ {
+  "booked": 21,
+  "capacity": 40,
+  "day_offset": 5,
+  "slot_id": "SL-0108",
+  "window": "18:00-20:00",
+  "zone": "Z4"
+ },
+ {
+  "booked": 28,
+  "capacity": 60,
+  "day_offset": 6,
+  "slot_id": "SL-0109",
+  "window": "08:00-10:00",
+  "zone": "Z4"
+ },
+ {
+  "booked": 21,
+  "capacity": 60,
+  "day_offset": 6,
+  "slot_id": "SL-0110",
+  "window": "10:00-12:00",
+  "zone": "Z4"
+ },
+ {
+  "booked": 4,
+  "capacity": 80,
+  "day_offset": 6,
+  "slot_id": "SL-0111",
+  "window": "14:00-16:00",
+  "zone": "Z4"
+ },
+ {
+  "booked": 15,
+  "capacity": 80,
+  "day_offset": 6,
+  "slot_id": "SL-0112",
+  "window": "18:00-20:00",
+  "zone": "Z4"
+ },
+ {
+  "booked": 40,
+  "capacity": 40,
+  "day_offset": 0,
+  "slot_id": "SL-0113",
+  "window": "08:00-10:00",
+  "zone": "Z5"
+ },
+ {
+  "booked": 80,
+  "capacity": 80,
+  "day_offset": 0,
+  "slot_id": "SL-0114",
+  "window": "10:00-12:00",
+  "zone": "Z5"
+ },
+ {
+  "booked": 80,
+  "capacity": 80,
+  "day_offset": 0,
+  "slot_id": "SL-0115",
+  "window": "14:00-16:00",
+  "zone": "Z5"
+ },
+ {
+  "booked": 80,
+  "capacity": 80,
+  "day_offset": 0,
+  "slot_id": "SL-0116",
+  "window": "18:00-20:00",
+  "zone": "Z5"
+ },
+ {
+  "booked": 9,
+  "capacity": 80,
+  "day_offset": 1,
+  "slot_id": "SL-0117",
+  "window": "08:00-10:00",
+  "zone": "Z5"
+ },
+ {
+  "booked": 8,
+  "capacity": 50,
+  "day_offset": 1,
+  "slot_id": "SL-0118",
+  "window": "10:00-12:00",
+  "zone": "Z5"
+ },
+ {
+  "booked": 7,
+  "capacity": 30,
+  "day_offset": 1,
+  "slot_id": "SL-0119",
+  "window": "14:00-16:00",
+  "zone": "Z5"
+ },
+ {
+  "booked": 13,
+  "capacity": 30,
+  "day_offset": 1,
+  "slot_id": "SL-0120",
+  "window": "18:00-20:00",
+  "zone": "Z5"
+ },
+ {
+  "booked": 28,
+  "capacity": 50,
+  "day_offset": 2,
+  "slot_id": "SL-0121",
+  "window": "08:00-10:00",
+  "zone": "Z5"
+ },
+ {
+  "booked": 4,
+  "capacity": 40,
+  "day_offset": 2,
+  "slot_id": "SL-0122",
+  "window": "10:00-12:00",
+  "zone": "Z5"
+ },
+ {
+  "booked": 0,
+  "capacity": 50,
+  "day_offset": 2,
+  "slot_id": "SL-0123",
+  "window": "14:00-16:00",
+  "zone": "Z5"
+ },
+ {
+  "booked": 19,
+  "capacity": 60,
+  "day_offset": 2,
+  "slot_id": "SL-0124",
+  "window": "18:00-20:00",
+  "zone": "Z5"
+ },
+ {
+  "booked": 6,
+  "capacity": 60,
+  "day_offset": 3,
+  "slot_id": "SL-0125",
+  "window": "08:00-10:00",
+  "zone": "Z5"
+ },
+ {
+  "booked": 23,
+  "capacity": 50,
+  "day_offset": 3,
+  "slot_id": "SL-0126",
+  "window": "10:00-12:00",
+  "zone": "Z5"
+ },
+ {
+  "booked": 33,
+  "capacity": 60,
+  "day_offset": 3,
+  "slot_id": "SL-0127",
+  "window": "14:00-16:00",
+  "zone": "Z5"
+ },
+ {
+  "booked": 19,
+  "capacity": 80,
+  "day_offset": 3,
+  "slot_id": "SL-0128",
+  "window": "18:00-20:00",
+  "zone": "Z5"
+ },
+ {
+  "booked": 16,
+  "capacity": 30,
+  "day_offset": 4,
+  "slot_id": "SL-0129",
+  "window": "08:00-10:00",
+  "zone": "Z5"
+ },
+ {
+  "booked": 10,
+  "capacity": 40,
+  "day_offset": 4,
+  "slot_id": "SL-0130",
+  "window": "10:00-12:00",
+  "zone": "Z5"
+ },
+ {
+  "booked": 12,
+  "capacity": 40,
+  "day_offset": 4,
+  "slot_id": "SL-0131",
+  "window": "14:00-16:00",
+  "zone": "Z5"
+ },
+ {
+  "booked": 13,
+  "capacity": 60,
+  "day_offset": 4,
+  "slot_id": "SL-0132",
+  "window": "18:00-20:00",
+  "zone": "Z5"
+ },
+ {
+  "booked": 16,
+  "capacity": 40,
+  "day_offset": 5,
+  "slot_id": "SL-0133",
+  "window": "08:00-10:00",
+  "zone": "Z5"
+ },
+ {
+  "booked": 13,
+  "capacity": 50,
+  "day_offset": 5,
+  "slot_id": "SL-0134",
+  "window": "10:00-12:00",
+  "zone": "Z5"
+ },
+ {
+  "booked": 4,
+  "capacity": 30,
+  "day_offset": 5,
+  "slot_id": "SL-0135",
+  "window": "14:00-16:00",
+  "zone": "Z5"
+ },
+ {
+  "booked": 13,
+  "capacity": 50,
+  "day_offset": 5,
+  "slot_id": "SL-0136",
+  "window": "18:00-20:00",
+  "zone": "Z5"
+ },
+ {
+  "booked": 24,
+  "capacity": 80,
+  "day_offset": 6,
+  "slot_id": "SL-0137",
+  "window": "08:00-10:00",
+  "zone": "Z5"
+ },
+ {
+  "booked": 19,
+  "capacity": 50,
+  "day_offset": 6,
+  "slot_id": "SL-0138",
+  "window": "10:00-12:00",
+  "zone": "Z5"
+ },
+ {
+  "booked": 9,
+  "capacity": 50,
+  "day_offset": 6,
+  "slot_id": "SL-0139",
+  "window": "14:00-16:00",
+  "zone": "Z5"
+ },
+ {
+  "booked": 14,
+  "capacity": 60,
+  "day_offset": 6,
+  "slot_id": "SL-0140",
+  "window": "18:00-20:00",
+  "zone": "Z5"
+ },
+ {
+  "booked": 60,
+  "capacity": 60,
+  "day_offset": 0,
+  "slot_id": "SL-0141",
+  "window": "08:00-10:00",
+  "zone": "Z6"
+ },
+ {
+  "booked": 80,
+  "capacity": 80,
+  "day_offset": 0,
+  "slot_id": "SL-0142",
+  "window": "10:00-12:00",
+  "zone": "Z6"
+ },
+ {
+  "booked": 50,
+  "capacity": 50,
+  "day_offset": 0,
+  "slot_id": "SL-0143",
+  "window": "14:00-16:00",
+  "zone": "Z6"
+ },
+ {
+  "booked": 80,
+  "capacity": 80,
+  "day_offset": 0,
+  "slot_id": "SL-0144",
+  "window": "18:00-20:00",
+  "zone": "Z6"
+ },
+ {
+  "booked": 7,
+  "capacity": 30,
+  "day_offset": 1,
+  "slot_id": "SL-0145",
+  "window": "08:00-10:00",
+  "zone": "Z6"
+ },
+ {
+  "booked": 12,
+  "capacity": 30,
+  "day_offset": 1,
+  "slot_id": "SL-0146",
+  "window": "10:00-12:00",
+  "zone": "Z6"
+ },
+ {
+  "booked": 32,
+  "capacity": 80,
+  "day_offset": 1,
+  "slot_id": "SL-0147",
+  "window": "14:00-16:00",
+  "zone": "Z6"
+ },
+ {
+  "booked": 6,
+  "capacity": 60,
+  "day_offset": 1,
+  "slot_id": "SL-0148",
+  "window": "18:00-20:00",
+  "zone": "Z6"
+ },
+ {
+  "booked": 12,
+  "capacity": 30,
+  "day_offset": 2,
+  "slot_id": "SL-0149",
+  "window": "08:00-10:00",
+  "zone": "Z6"
+ },
+ {
+  "booked": 10,
+  "capacity": 40,
+  "day_offset": 2,
+  "slot_id": "SL-0150",
+  "window": "10:00-12:00",
+  "zone": "Z6"
+ },
+ {
+  "booked": 3,
+  "capacity": 30,
+  "day_offset": 2,
+  "slot_id": "SL-0151",
+  "window": "14:00-16:00",
+  "zone": "Z6"
+ },
+ {
+  "booked": 6,
+  "capacity": 50,
+  "day_offset": 2,
+  "slot_id": "SL-0152",
+  "window": "18:00-20:00",
+  "zone": "Z6"
+ },
+ {
+  "booked": 7,
+  "capacity": 50,
+  "day_offset": 3,
+  "slot_id": "SL-0153",
+  "window": "08:00-10:00",
+  "zone": "Z6"
+ },
+ {
+  "booked": 12,
+  "capacity": 50,
+  "day_offset": 3,
+  "slot_id": "SL-0154",
+  "window": "10:00-12:00",
+  "zone": "Z6"
+ },
+ {
+  "booked": 19,
+  "capacity": 80,
+  "day_offset": 3,
+  "slot_id": "SL-0155",
+  "window": "14:00-16:00",
+  "zone": "Z6"
+ },
+ {
+  "booked": 0,
+  "capacity": 30,
+  "day_offset": 3,
+  "slot_id": "SL-0156",
+  "window": "18:00-20:00",
+  "zone": "Z6"
+ },
+ {
+  "booked": 18,
+  "capacity": 30,
+  "day_offset": 4,
+  "slot_id": "SL-0157",
+  "window": "08:00-10:00",
+  "zone": "Z6"
+ },
+ {
+  "booked": 15,
+  "capacity": 50,
+  "day_offset": 4,
+  "slot_id": "SL-0158",
+  "window": "10:00-12:00",
+  "zone": "Z6"
+ },
+ {
+  "booked": 9,
+  "capacity": 30,
+  "day_offset": 4,
+  "slot_id": "SL-0159",
+  "window": "14:00-16:00",
+  "zone": "Z6"
+ },
+ {
+  "booked": 24,
+  "capacity": 40,
+  "day_offset": 4,
+  "slot_id": "SL-0160",
+  "window": "18:00-20:00",
+  "zone": "Z6"
+ },
+ {
+  "booked": 41,
+  "capacity": 80,
+  "day_offset": 5,
+  "slot_id": "SL-0161",
+  "window": "08:00-10:00",
+  "zone": "Z6"
+ },
+ {
+  "booked": 37,
+  "capacity": 80,
+  "day_offset": 5,
+  "slot_id": "SL-0162",
+  "window": "10:00-12:00",
+  "zone": "Z6"
+ },
+ {
+  "booked": 4,
+  "capacity": 50,
+  "day_offset": 5,
+  "slot_id": "SL-0163",
+  "window": "14:00-16:00",
+  "zone": "Z6"
+ },
+ {
+  "booked": 13,
+  "capacity": 80,
+  "day_offset": 5,
+  "slot_id": "SL-0164",
+  "window": "18:00-20:00",
+  "zone": "Z6"
+ },
+ {
+  "booked": 10,
+  "capacity": 60,
+  "day_offset": 6,
+  "slot_id": "SL-0165",
+  "window": "08:00-10:00",
+  "zone": "Z6"
+ },
+ {
+  "booked": 27,
+  "capacity": 50,
+  "day_offset": 6,
+  "slot_id": "SL-0166",
+  "window": "10:00-12:00",
+  "zone": "Z6"
+ },
+ {
+  "booked": 10,
+  "capacity": 60,
+  "day_offset": 6,
+  "slot_id": "SL-0167",
+  "window": "14:00-16:00",
+  "zone": "Z6"
+ },
+ {
+  "booked": 4,
+  "capacity": 40,
+  "day_offset": 6,
+  "slot_id": "SL-0168",
+  "window": "18:00-20:00",
+  "zone": "Z6"
+ }
+]

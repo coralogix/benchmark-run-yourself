@@ -1,0 +1,41 @@
+Reference implementation for FEAT-055 (evaluator-only).
+Repo: ops. Apply from a fresh copy of baseline/ops:  git apply FEAT-055.patch
+
+diff --git a/services/notifications/handlers.js b/services/notifications/handlers.js
+index b73b254..fac6dc8 100644
+--- a/services/notifications/handlers.js
++++ b/services/notifications/handlers.js
+@@ -19,6 +19,9 @@ var templates = require('./templates');
+ var mailer = require('./mailer');
+ var store = require('./store');
+ 
++var SUPPRESSED_DOMAINS = ['larder-mail.test'];
++var suppressedTotal = 0;
++
+ function handlerFor(topic) {
+   return function (payload, msg) {
+     payload = payload || {};
+@@ -39,6 +42,15 @@ function handlerFor(topic) {
+       return store.record(Object.assign(base, { status: 'skipped', error: 'no_email' })).return({ skipped: true });
+     }
+ 
++    // FEAT-055: suppression list - mail to these domains bounces
++    var domain = String(payload.email).split('@').pop().toLowerCase();
++    if (SUPPRESSED_DOMAINS.indexOf(domain) !== -1) {
++      suppressedTotal++;
++      logger.info('notifications: suppressed email', { order_ref: payload.order_ref, template: template, domain: domain,
++        suppressed_total: suppressedTotal });
++      return store.record(Object.assign(base, { status: 'suppressed', error: 'suppressed_domain' })).return({ suppressed: true });
++    }
++
+     var data = templates.dataFor(template, payload);
+     return Promise.resolve(mailer.send({ to: payload.email, template: template, data: data })).then(function (r) {
+       return store.record(Object.assign(base, {
+@@ -56,5 +68,6 @@ function handlerFor(topic) {
+ module.exports = {
+   'order.confirmed': handlerFor('order.confirmed'),
+   'order.dispatched': handlerFor('order.dispatched'),
+-  handlerFor: handlerFor
++  handlerFor: handlerFor,
++  suppressed: function () { return suppressedTotal; }
+ };

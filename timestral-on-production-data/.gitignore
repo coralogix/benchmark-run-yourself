@@ -1,0 +1,10 @@
+results/
+data/
+envs/
+.env
+__pycache__/
+*.pyc
+*.pem
+infra/instance.env
+config/series.json
+config/demo-series.json

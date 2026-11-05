@@ -1,0 +1,13 @@
+Reference implementation for FEAT-093 (evaluator-only), commerce half.
+Repo: commerce. Apply from a fresh copy of baseline/commerce:  git apply FEAT-093.commerce.patch (the feature needs both halves)
+
+diff --git a/services/edge_api/orders_view.py b/services/edge_api/orders_view.py
+index b165f6c..02f70cf 100644
+--- a/services/edge_api/orders_view.py
++++ b/services/edge_api/orders_view.py
+@@ -60,4 +60,5 @@ def get_order(order_ref):
+         "hold_id": o.get("hold_id"),
+         "charge_id": o.get("charge_id"),
+         "created_at": o.get("created_at"),
++        "driver_id": o.get("driver_id"),  # FEAT-093
+     }

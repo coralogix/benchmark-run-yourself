@@ -1,0 +1,67 @@
+diff --git a/services/cart/carts.py b/services/cart/carts.py
+index e28452d..4c108f3 100644
+--- a/services/cart/carts.py
++++ b/services/cart/carts.py
+@@ -175,6 +175,8 @@ def serialise(st, breakdown=None):
+         "total_pence": breakdown["total_pence"],
+         "total": breakdown["total"],
+         "coupon": st.coupon_code,
++        # FEAT-049
++        "coupon_expires": ((breakdown.get("coupon") or {}).get("expires_date") if st.coupon_code else None),
+         "hold_id": st.hold_id,
+         "prices_changed": prices_changed(st),
+     }
+diff --git a/services/pricing/coupons_client.py b/services/pricing/coupons_client.py
+index d1df229..06db58e 100644
+--- a/services/pricing/coupons_client.py
++++ b/services/pricing/coupons_client.py
+@@ -30,6 +30,7 @@ def resolve(code):
+         "code": c.get("code"),
+         "percent_off": c.get("percent_off") or 0,
+         "free_delivery": bool(c.get("free_delivery")),
++        "expires_date": c.get("expires_date"),
+     }
+ 
+ 
+diff --git a/services/promotions/coupons.py b/services/promotions/coupons.py
+index 4405f91..8aaf118 100644
+--- a/services/promotions/coupons.py
++++ b/services/promotions/coupons.py
+@@ -128,3 +128,22 @@ def expiry_display(coupon):
+     """For the marketing export. NB: blows up on the same rows validate() does."""
+     exp = parse_expiry(coupon.expires)
+     return exp.strftime("%d %b %Y") if exp else "No expiry"
++
++
++# FEAT-049: expiry as YYYY-MM-DD (None = never expires) for the cart
++_DMY = re.compile(r"^(\d{1,2})/(\d{1,2})/(\d{4})$")
++
++
++def expiry_iso(raw):
++    s = str(raw or "").strip()
++    if s.lower() in ("", "never", "none", "n/a", "-"):
++        return None
++    m = _DMY.match(s)
++    if m:
++        return datetime.date(int(m.group(3)), int(m.group(2)), int(m.group(1))).isoformat()
++    try:
++        exp = parse_expiry(s)
++    except Exception:  # noqa
++        log.warning("unreadable expiry %r", raw)
++        return None
++    return exp.date().isoformat() if exp else None
+diff --git a/services/promotions/routes.py b/services/promotions/routes.py
+index 507a475..235ca44 100644
+--- a/services/promotions/routes.py
++++ b/services/promotions/routes.py
+@@ -36,7 +36,9 @@ def get_coupon(code):
+     c = coupons.lookup(code)
+     if c is None:
+         raise NotFound("invalid_coupon")
+-    return ok(c.as_dict())
++    out = c.as_dict()
++    out["expires_date"] = coupons.expiry_iso(c.expires)  # FEAT-049
++    return ok(out)
+ 
+ 
+ @bp.route("/internal/coupons/<code>/describe")

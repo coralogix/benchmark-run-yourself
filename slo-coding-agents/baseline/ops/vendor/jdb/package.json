@@ -1,0 +1,8 @@
+{
+  "name": "jdb",
+  "version": "0.4.2-larder.3",
+  "description": "Tiny JSON-file document store (vendored + patched by Larder, upstream is gone)",
+  "main": "index.js",
+  "license": "Apache-2.0",
+  "_vendored": "2018-03-14 by m.okafor from github.com/hollowtree/jdb@0.4.2 (repo deleted 2019)"
+}

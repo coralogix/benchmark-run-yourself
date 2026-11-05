@@ -1,0 +1,29 @@
+Reference implementation for FEAT-059 (evaluator-only).
+Repo: ops. Apply from a fresh copy of baseline/ops:  git apply FEAT-059.patch
+
+diff --git a/services/warehouse/routes/pickLists.js b/services/warehouse/routes/pickLists.js
+index 197a1b7..667380a 100644
+--- a/services/warehouse/routes/pickLists.js
++++ b/services/warehouse/routes/pickLists.js
+@@ -11,6 +11,21 @@ var picklists = require('../picklists');
+ 
+ var router = express.Router();
+ 
++// FEAT-059: GET /internal/picklists?date=YYYY-MM-DD -> total qty per SKU for open
++// (confirmed, not yet dispatched) orders delivering that date
++router.get('/picklists', function (req, res, next) {
++  var date = String(req.query.date || '');
++  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return res.status(400).json({ error: 'invalid_date' });
++  picklists.list(picklists.STATUS.OPEN, 1000000).then(function (list) {
++    var totals = {};
++    list.forEach(function (pl) {
++      if (!pl.slot || pl.slot.date !== date) return;
++      pl.lines.forEach(function (l) { totals[l.sku] = (totals[l.sku] || 0) + l.qty; });
++    });
++    res.json({ date: date, lines: Object.keys(totals).sort().map(function (sku) { return { sku: sku, qty: totals[sku] }; }) });
++  }, next);
++});
++
+ router.get('/pick-lists', function (req, res, next) {
+   var limit = Math.min(parseInt(req.query.limit, 10) || 100, 1000);
+   picklists.list(req.query.status, limit).then(function (list) {

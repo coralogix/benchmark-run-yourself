@@ -1,0 +1,43 @@
+[project]
+name = "larder-commerce"
+version = "4.2.0"
+description = "Larder commerce services (edge-api, catalog, search, pricing, promotions, cart, checkout, accounts, loyalty, recommendations)"
+readme = "README.md"
+requires-python = ">=3.11,<3.12"
+dependencies = [
+    # pinned in 2023 when the storefront was split. DO NOT bump Flask/Werkzeug
+    # without testing the /v1 routes (simplejson + Response subclassing) - TH
+    "Flask==2.2.5",
+    "Werkzeug==2.2.3",
+    "waitress==2.1.2",
+    "requests==2.28.2",
+    "urllib3<2",
+    "arrow==0.15.5",
+    "python-dateutil==2.8.1",
+    "simplejson==3.17.6",
+    "six==1.16.0",
+    # platform team owns everything below this line (see libs/larder_common/telemetry.py)
+    "opentelemetry-api",
+    "opentelemetry-sdk",
+    "opentelemetry-exporter-otlp-proto-http",
+    "opentelemetry-instrumentation-flask",
+    "opentelemetry-instrumentation-requests",
+    "opentelemetry-instrumentation-sqlite3",
+    "opentelemetry-instrumentation-logging",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=7",
+]
+
+[tool.uv]
+package = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+# libs/ is also put on sys.path by services/__init__.py; this is for tests that
+# import larder_common before any service package
+pythonpath = [".", "libs"]
+addopts = "-p no:cacheprovider"
+filterwarnings = ["ignore::DeprecationWarning"]

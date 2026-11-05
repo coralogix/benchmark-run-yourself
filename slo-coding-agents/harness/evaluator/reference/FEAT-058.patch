@@ -1,0 +1,24 @@
+Reference implementation for FEAT-058 (evaluator-only).
+Repo: ops. Apply from a fresh copy of baseline/ops:  git apply FEAT-058.patch
+
+diff --git a/services/webhooks/routes/queue.js b/services/webhooks/routes/queue.js
+index ddab0ae..2d4f79e 100644
+--- a/services/webhooks/routes/queue.js
++++ b/services/webhooks/routes/queue.js
+@@ -19,6 +19,16 @@ router.get('/webhooks/queue', function (req, res) {
+   res.json(_.assign(dispatcher.snapshot(), { handled: handlers.stats() }));
+ });
+ 
++// FEAT-058
++router.get('/webhooks/stats', function (req, res) {
++  var snap = dispatcher.snapshot();
++  res.json({
++    queue_depth: snap.depth,
++    delivered_total: snap.stats.delivered,
++    failed_attempts_total: snap.stats.failed
++  });
++});
++
+ router.get('/webhooks/queue/items', function (req, res) {
+   var limit = Math.min(parseInt(req.query.limit, 10) || 20, 500);
+   res.json({ depth: dispatcher.depth(), items: dispatcher.items().slice(0, limit) });

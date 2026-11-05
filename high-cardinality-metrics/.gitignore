@@ -1,0 +1,14 @@
+results/
+.env
+.venv/
+__pycache__/
+*.pyc
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
+tfplan
+generator/metricgen
+*.jsonl
+*.tgz
+.DS_Store

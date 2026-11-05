@@ -1,0 +1,43 @@
+# HC-3 reference fix (edge-api falls back to its zone table when slots 404s a postcode it knows).
+# Repo: commerce (apply inside the commerce/ directory: git apply HC-3.patch)
+diff --git a/services/edge_api/delivery.py b/services/edge_api/delivery.py
+index 69a38bd..5569cac 100644
+--- a/services/edge_api/delivery.py
++++ b/services/edge_api/delivery.py
+@@ -64,6 +64,10 @@ def resolve_zone(postcode):
+     if _fallback_zone(pc) is None:
+         raise NotFound("unknown_postcode")  # PM-1712
+     zone = _lookup(pc)
++    if zone is None:
++        # HC-3: our zone table knows the postcode but slots doesn't (yet): use our zone
++        zone = _fallback_zone(pc)
++        log.warning("slots has no zone for %s, using the zone table's %s", pc, zone)
+     if zone is None:
+         raise NotFound("unknown_postcode")
+     return zone
+diff --git a/services/edge_api/upstreams.py b/services/edge_api/upstreams.py
+index 429cf7a..a786951 100644
+--- a/services/edge_api/upstreams.py
++++ b/services/edge_api/upstreams.py
+@@ -178,15 +178,14 @@ def account(user_id):
+ 
+ 
+ def zone_lookup(postcode):
+-    """zone for a postcode. Raises UpstreamError if slots can't answer.
+-
+-    delivery.resolve_zone only asks about postcodes in our zone table (PM-1712),
+-    and slots has every one of those, so there's no 404 case any more.
+-    """
++    """zone for a postcode, or None if slots doesn't know it (404). Raises UpstreamError
++    if slots can't answer."""
+     res = call(SLOTS, "GET", "/internal/zones/lookup", params={"postcode": postcode}, raise_errors=False)
+-    if res.status >= 500:
++    if res.status == 404:
++        return None
++    if not res.ok:
+         raise UpstreamError("slots_unavailable")
+-    return res.body["zone"]
++    return res.body.get("zone")
+ 
+ 
+ def slots(zone):

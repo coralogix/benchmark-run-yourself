@@ -1,0 +1,13 @@
+diff --git a/services/cart/carts.py b/services/cart/carts.py
+index e28452d..21f0e20 100644
+--- a/services/cart/carts.py
++++ b/services/cart/carts.py
+@@ -177,6 +177,8 @@ def serialise(st, breakdown=None):
+         "coupon": st.coupon_code,
+         "hold_id": st.hold_id,
+         "prices_changed": prices_changed(st),
++        # FEAT-021: basket badge
++        "item_count": sum(int(i["qty"]) for i in items),
+     }
+ 
+ 

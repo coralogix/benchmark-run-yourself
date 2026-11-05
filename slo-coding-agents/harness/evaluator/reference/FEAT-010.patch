@@ -1,0 +1,62 @@
+diff --git a/services/notifications/handlers.js b/services/notifications/handlers.js
+index b73b254..de31047 100644
+--- a/services/notifications/handlers.js
++++ b/services/notifications/handlers.js
+@@ -39,8 +39,9 @@ function handlerFor(topic) {
+       return store.record(Object.assign(base, { status: 'skipped', error: 'no_email' })).return({ skipped: true });
+     }
+ 
+-    var data = templates.dataFor(template, payload);
+-    return Promise.resolve(mailer.send({ to: payload.email, template: template, data: data })).then(function (r) {
++    return Promise.resolve(templates.dataFor(template, payload)).then(function (data) {
++      return mailer.send({ to: payload.email, template: template, data: data });
++    }).then(function (r) {
+       return store.record(Object.assign(base, {
+         status: r.ok ? 'sent' : 'failed',
+         message_id: r.message_id || null,
+diff --git a/services/notifications/templates.js b/services/notifications/templates.js
+index f2c318b..55e257d 100644
+--- a/services/notifications/templates.js
++++ b/services/notifications/templates.js
+@@ -18,16 +18,40 @@
+ var _ = require('lodash');
+ var money = require('../../lib/money');
+ 
++var fetchClient = require('../../lib/http/fetch-client');
++
+ var BY_TOPIC = {
+-  'order.confirmed': 'order_confirmation',
++  // FEAT-010: richer confirmation (items with names, total, delivery slot)
++  'order.confirmed': 'order_confirmation_v2',
+   'order.dispatched': 'order_dispatched'
+ };
+ 
+ // template -> data builder
++function catalogUrl(path) {
++  var base = process.env.CATALOG_URL ? String(process.env.CATALOG_URL).replace(/\/+$/, '') : fetchClient.peerUrl('catalog', '');
++  return base + path;
++}
++
++function productName(sku) {
++  return fetchClient.fetchJson(catalogUrl('/internal/products/' + encodeURIComponent(sku)), { timeout: 3000 })
++    .then(function (res) { return res.status === 200 && res.body ? res.body.name || null : null; }, function () { return null; });
++}
++
+ var BUILDERS = {
+   order_confirmation: function (p) {
+     return { order_ref: p.order_ref };
+   },
++  order_confirmation_v2: function (p) {
++    var items = p.items || [];
++    return Promise.all(items.map(function (l) { return productName(l.sku); })).then(function (names) {
++      return {
++        order_ref: p.order_ref,
++        items: items.map(function (l, i) { return { sku: l.sku, name: names[i], qty: l.qty }; }),
++        total_pence: p.total_pence,
++        delivery: p.slot ? { date: p.slot.date, window: p.slot.window } : null
++      };
++    });
++  },
+   order_dispatched: function (p) {
+     return { order_ref: p.order_ref };
+   }

@@ -1,0 +1,57 @@
+diff --git a/services/edge_api/delivery.py b/services/edge_api/delivery.py
+index 18b686d..ee5b08a 100644
+--- a/services/edge_api/delivery.py
++++ b/services/edge_api/delivery.py
+@@ -84,6 +84,36 @@ def list_slots(postcode):
+     return {"zone": zone, "slots": slots}
+ 
+ 
++def _window_start(window):
++    return (window or "").split("-")[0].strip()
++
++
++def next_slot(postcode):
++    """FEAT-003: earliest slot (date, then window start) with capacity left in the zone."""
++    try:
++        zone = resolve_zone(postcode)
++    except NotFound:
++        raise BadRequest("unknown_postcode")
++    try:
++        raw = upstreams.slots(zone)
++    except Exception as e:
++        log.error("slot lookup failed for %s: %s", zone, e)
++        raise UpstreamError("slots_unavailable")
++    best = None
++    for s in raw:
++        left = (s.get("capacity") or 0) - (s.get("booked") or 0)
++        if left <= 0:
++            continue
++        key = (s.get("date") or "", _window_start(s.get("window")))
++        if best is None or key < best[0]:
++            best = (key, s, left)
++    if best is None:
++        raise NotFound("no_slots")
++    _, s, left = best
++    return {"zone": zone, "slot": {"slot_id": s.get("slot_id"), "date": s.get("date"), "window": s.get("window"),
++                                   "available": left}}
++
++
+ def hold(cart_id, slot_id):
+     if not cart_id:
+         raise BadRequest("cart_id_required")
+diff --git a/services/edge_api/views/delivery.py b/services/edge_api/views/delivery.py
+index bf2f976..0e14c79 100644
+--- a/services/edge_api/views/delivery.py
++++ b/services/edge_api/views/delivery.py
+@@ -11,6 +11,11 @@ def slots():
+     return ok(delivery.list_slots(request.args.get("postcode", "")))
+ 
+ 
++@bp.route("/api/delivery/slots/next")
++def next_slot():
++    return ok(delivery.next_slot(request.args.get("postcode", "")))
++
++
+ @bp.route("/api/delivery/holds", methods=["POST"])
+ def hold():
+     data = body()

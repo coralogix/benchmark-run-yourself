@@ -1,0 +1,112 @@
+# SF-1 reference fix. Repo: commerce (apply inside the commerce/ directory: git apply SF-1.patch)
+diff --git a/libs/larder_common/settings_local.py b/libs/larder_common/settings_local.py
+index b9a87b0..9ccad27 100644
+--- a/libs/larder_common/settings_local.py
++++ b/libs/larder_common/settings_local.py
+@@ -6,9 +6,9 @@
+ # EVERY commerce service.
+ # Anything UPPERCASE here is applied on top of larder_common/settings.py.
+ 
+-# KP 2020-02-11: v2 pricing rollout paused after the FAMILY12 complaints,
+-# keep prod on the old engine until finance signs off. See OPS-1182.
+-PRICING_ENGINE = "v1"
++# KP 2020-02-11: v2 pricing rollout paused after the FAMILY12 complaints (OPS-1182).
++# REL-1: v2 now prices in integer pence with the same rules as ops' tax service,
++# so production runs v2 (the ini default) again.
+ 
+ # DP 2019-08-30: smaller result pages on prod, the old mobile app chokes
+ SEARCH_RESULTS_LIMIT = 40
+diff --git a/services/pricing/engine_v2.py b/services/pricing/engine_v2.py
+index cfd24c0..613e944 100644
+--- a/services/pricing/engine_v2.py
++++ b/services/pricing/engine_v2.py
+@@ -8,6 +8,8 @@ This is the engine everyone *thinks* production runs. Which engine is
+ actually used is decided by settings.PRICING_ENGINE, see engines.get_engine().
+ (moved from larder/pricing.py in the 2023 split)
+ """
++import math
++
+ from larder_common.log import get_logger
+ 
+ log = get_logger("pricing.v2")
+@@ -27,6 +29,20 @@ def line_total(unit_price, qty):
+     return round(unit_price * qty, 2)
+ 
+ 
++def _pence(pounds):
++    # catalogue prices are whole pence stored as REAL pounds; recover the integer exactly
++    return int(round(float(pounds) * 100))
++
++
++def _discount_pence(subtotal_pence, pct):
++    """Same rule as ops' tax service (FIN-102): half-up rounding of subtotal * pct / 100."""
++    if not pct or pct <= 0:
++        return 0
++    if pct == int(pct):
++        return (2 * subtotal_pence * int(pct) + 100) // 200
++    return int(math.floor(subtotal_pence * pct / 100.0 + 0.5))
++
++
+ def delivery_fee_for(amount, free_delivery=False):
+     from larder_common import settings
+ 
+@@ -42,34 +58,39 @@ def price_cart(lines, coupon=None):
+     lines: [{"sku", "name", "unit_price" (pounds), "qty"}]
+     coupon: Coupon model / dict / None
+ 
+-    Returns a dict with pounds and pence for subtotal, discount, delivery and
+-    total, plus the priced lines.
++    All arithmetic is in integer pence and matches the canonical totals in ops
++    (tax service): subtotal = sum(unit_price_pence * qty); discount rounded half-up;
++    delivery if (subtotal - discount) < threshold. Pounds are derived for display.
+     """
++    from larder_common import settings
++
+     pct, free_delivery = _coupon_fields(coupon)
+     priced = []
+-    subtotal = 0.0
++    subtotal_pence = 0
+     for line in lines:
+-        lt = line_total(line["unit_price"], line["qty"])
+-        subtotal += lt
+-        priced.append(dict(line, line_total=lt, line_total_pence=int(round(lt * 100))))
+-    subtotal = round(subtotal, 2)
+-
+-    discount = round(subtotal * pct / 100.0, 2) if pct else 0.0
+-    after_discount = subtotal - discount
+-    delivery = delivery_fee_for(after_discount, free_delivery)
+-    total = round(after_discount + delivery, 2)
++        lt_pence = _pence(line["unit_price"]) * int(line["qty"])
++        subtotal_pence += lt_pence
++        priced.append(dict(line, line_total=lt_pence / 100.0, line_total_pence=lt_pence))
++
++    discount_pence = _discount_pence(subtotal_pence, pct)
++    after_discount = subtotal_pence - discount_pence
++    if free_delivery or after_discount >= _pence(settings.FREE_DELIVERY_THRESHOLD):
++        delivery_pence = 0
++    else:
++        delivery_pence = _pence(settings.DELIVERY_FEE)
++    total_pence = after_discount + delivery_pence
+ 
+     return {
+         "engine": ENGINE_NAME,
+         "lines": priced,
+-        "subtotal": subtotal,
+-        "discount": discount,
+-        "delivery_fee": delivery,
+-        "total": total,
+-        "subtotal_pence": int(round(subtotal * 100)),
+-        "discount_pence": int(round(discount * 100)),
+-        "delivery_fee_pence": int(round(delivery * 100)),
+-        "total_pence": int(round(total * 100)),
++        "subtotal": subtotal_pence / 100.0,
++        "discount": discount_pence / 100.0,
++        "delivery_fee": delivery_pence / 100.0,
++        "total": total_pence / 100.0,
++        "subtotal_pence": subtotal_pence,
++        "discount_pence": discount_pence,
++        "delivery_fee_pence": delivery_pence,
++        "total_pence": total_pence,
+     }
+ 
+ 

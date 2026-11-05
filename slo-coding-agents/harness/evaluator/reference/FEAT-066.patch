@@ -1,0 +1,51 @@
+Reference implementation for FEAT-066 (evaluator-only).
+Repo: ops. Apply from a fresh copy of baseline/ops:  git apply FEAT-066.patch
+
+diff --git a/services/fraud/routes/score.js b/services/fraud/routes/score.js
+index 94783e0..e8d83f8 100644
+--- a/services/fraud/routes/score.js
++++ b/services/fraud/routes/score.js
+@@ -46,7 +46,7 @@ router.get('/fraud/rules', function (req, res) {
+     ruleset: rules.RULESET_VERSION,
+     review_score: rules.REVIEW_SCORE,
+     block_score: rules.BLOCK_SCORE,
+-    rules: rules.RULES.map(function (r) { return { id: r.id, description: r.description }; })
++    rules: rules.ruleStats()
+   });
+ });
+ 
+diff --git a/services/fraud/rules.js b/services/fraud/rules.js
+index a558c45..ba9062b 100644
+--- a/services/fraud/rules.js
++++ b/services/fraud/rules.js
+@@ -126,6 +126,13 @@ var RULES = [
+   // { id: 'ip_country', ... }  removed with the vendor SDK (no IPs any more)
+ ];
+ 
++// FEAT-066: rule id -> number of scored payments it matched, since process start
++var HITS = {};
++
++function ruleStats() {
++  return RULES.map(function (r) { return { name: r.id, description: r.description, hits: HITS[r.id] || 0 }; });
++}
++
+ function decide(score, blocked) {
+   if (blocked || score >= BLOCK_SCORE) return 'block';
+   if (score >= REVIEW_SCORE) return 'review';
+@@ -181,6 +188,8 @@ function score(body, meta) {
+   var hist = history.load();
+   var velocity = history.count(hist, sig, now);
+   var result = evaluate(sig, velocity);
++  // FEAT-066: hit counts since startup (only real scorings count, not evaluate() calls from tests)
++  result.reasons.forEach(function (id) { HITS[id] = (HITS[id] || 0) + 1; });
+ 
+   history.append(hist, {
+     id: hist.length + 1,
+@@ -215,6 +224,7 @@ function score(body, meta) {
+ 
+ module.exports = {
+   score: score,
++  ruleStats: ruleStats,
+   evaluate: evaluate,
+   decide: decide,
+   RULES: RULES,

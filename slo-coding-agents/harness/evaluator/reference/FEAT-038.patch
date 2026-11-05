@@ -1,0 +1,75 @@
+diff --git a/services/edge_api/views/checkout.py b/services/edge_api/views/checkout.py
+index c4f59da..d7ee7af 100644
+--- a/services/edge_api/views/checkout.py
++++ b/services/edge_api/views/checkout.py
+@@ -6,7 +6,9 @@ Checkout's status + body are returned unchanged:
+     201 {order_ref,status,total_pence,total}
+     409 price_mismatch / out_of_stock, 402 payment_declined, 502 payment_error...
+ """
+-from flask import Blueprint
++import threading
++
++from flask import Blueprint, jsonify, request
+ 
+ from larder_common.errors import BadRequest
+ from larder_common.web import body, ok, passthrough
+@@ -14,14 +16,55 @@ from services.edge_api import orders_view, upstreams
+ 
+ bp = Blueprint("checkout", __name__)
+ 
++# FEAT-038: Idempotency-Key -> (status, body) of the first completed checkout.
++# One lock per key, so concurrent retries wait for the first attempt instead of
++# creating a second order. Server errors (5xx) are not remembered, so a retry
++# after a transient failure runs again.
++_IDEM_RESULTS = {}
++_IDEM_LOCKS = {}
++_IDEM_GUARD = threading.Lock()
++IDEM_MAX_KEYS = 50000
++
++
++def _key_lock(key):
++    with _IDEM_GUARD:
++        lock = _IDEM_LOCKS.get(key)
++        if lock is None:
++            if len(_IDEM_LOCKS) > IDEM_MAX_KEYS:
++                _IDEM_LOCKS.clear()
++                _IDEM_RESULTS.clear()
++            lock = _IDEM_LOCKS[key] = threading.Lock()
++        return lock
++
++
++def _replay(stored):
++    status, payload = stored
++    resp = jsonify(payload)
++    resp.status_code = status
++    return resp
++
++
++def _checkout(data):
++    if not data.get("cart_id"):
++        raise BadRequest("cart_id_required")
++    return upstreams.checkout(data.get("cart_id"), data.get("hold_id"), data.get("payment_token"))
++
+ 
+ @bp.route("/api/checkout", methods=["POST"])
+ def do_checkout():
+     data = body()
+-    if not data.get("cart_id"):
+-        raise BadRequest("cart_id_required")
+-    res = upstreams.checkout(data.get("cart_id"), data.get("hold_id"), data.get("payment_token"))
+-    return passthrough(res)
++    key = (request.headers.get("Idempotency-Key") or "").strip()
++    if not key:
++        return passthrough(_checkout(data))
++    with _key_lock(key):
++        stored = _IDEM_RESULTS.get(key)
++        if stored is not None:
++            return _replay(stored)
++        res = _checkout(data)
++        payload = res.body if isinstance(res.body, (dict, list)) else {"raw": res.body}
++        if res.status < 500:
++            _IDEM_RESULTS[key] = (res.status, payload)
++        return _replay((res.status, payload))
+ 
+ 
+ @bp.route("/api/orders/<order_ref>")

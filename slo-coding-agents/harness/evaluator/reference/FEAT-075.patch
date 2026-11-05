@@ -1,0 +1,139 @@
+Reference implementation for FEAT-075 (evaluator-only).
+Repo: commerce. Apply from a fresh copy of baseline/commerce:  git apply FEAT-075.patch
+
+diff --git a/services/accounts/registration.py b/services/accounts/registration.py
+new file mode 100644
+index 0000000..a124554
+--- /dev/null
++++ b/services/accounts/registration.py
+@@ -0,0 +1,64 @@
++"""
++Customer self-registration (FEAT-075).
++
++    register(name, email, postcode) -> {"user_id"}
++
++Emails are unique case-insensitively. Postcodes must map to a delivery zone
++(asked of ops' slots service, the owner of the zone map).
++"""
++import datetime
++import re
++import threading
++
++from larder_common import dbx
++from larder_common.errors import BadRequest, Conflict, UpstreamError
++from larder_common.http import client
++from larder_common.log import get_logger
++from services.accounts import postcodes
++from services.accounts.models import User
++
++log = get_logger("accounts.registration")
++
++EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s.]+$")
++MAX_EMAIL_LEN = 254
++_LOCK = threading.Lock()
++
++
++def _zone_for(postcode):
++    res = client("slots").get("/internal/zones/lookup", params={"postcode": postcode})
++    if res.status == 404:
++        return None
++    if not res.ok:
++        raise UpstreamError("slots_unavailable")
++    return (res.body or {}).get("zone")
++
++
++def _next_user_id(d):
++    n = 0
++    for r in d.query("SELECT user_id FROM users WHERE user_id LIKE 'u-%'"):
++        try:
++            n = max(n, int(r["user_id"][2:]))
++        except ValueError:
++            continue
++    return "u-%04d" % (n + 1)
++
++
++def register(name, email, postcode):
++    name = (name or "").strip()
++    email = (email or "").strip()
++    if not name:
++        raise BadRequest("name_required")
++    if len(email) > MAX_EMAIL_LEN or not EMAIL_RE.match(email):
++        raise BadRequest("invalid_email")
++    pc = postcodes.normalise(postcode)
++    if not pc or not _zone_for(pc):
++        raise BadRequest("invalid_postcode")
++    d = dbx.db("accounts")
++    with _LOCK:
++        if d.query_one("SELECT user_id FROM users WHERE lower(email) = lower(?)", (email,)):
++            raise Conflict("email_taken")
++        user_id = _next_user_id(d)
++        User.create(user_id=user_id, name=name, email=email, postcode=pc,
++                    created=datetime.date.today().isoformat())
++    log.info("registered %s", user_id)
++    return {"user_id": user_id}
+diff --git a/services/accounts/routes.py b/services/accounts/routes.py
+index 574c3ae..fa3b015 100644
+--- a/services/accounts/routes.py
++++ b/services/accounts/routes.py
+@@ -8,8 +8,8 @@ accounts routes (internal API).
+ from flask import Blueprint
+ 
+ from larder_common.helpers.strings import mask_email
+-from larder_common.web import ok
+-from services.accounts import summary, users
++from larder_common.web import body, ok
++from services.accounts import registration, summary, users
+ 
+ bp = Blueprint("accounts", __name__)
+ 
+@@ -29,3 +29,10 @@ def get_user_masked(user_id):
+ @bp.route("/internal/accounts/<user_id>")
+ def account(user_id):
+     return ok(summary.account_summary(user_id))
++
++
++@bp.route("/internal/accounts", methods=["POST"])
++def register():
++    # FEAT-075: {name, email, postcode} -> 201 {user_id}
++    data = body()
++    return ok(registration.register(data.get("name"), data.get("email"), data.get("postcode")), 201)
+diff --git a/services/edge_api/upstreams.py b/services/edge_api/upstreams.py
+index a2e666d..3504783 100644
+--- a/services/edge_api/upstreams.py
++++ b/services/edge_api/upstreams.py
+@@ -176,6 +176,11 @@ def account(user_id):
+     return get(ACCOUNTS, "/internal/accounts/%s" % user_id)
+ 
+ 
++def register_account(name, email, postcode):
++    return call(ACCOUNTS, "POST", "/internal/accounts", json={"name": name, "email": email, "postcode": postcode},
++                expect=(201,))
++
++
+ # --- slots / orders (ops) ---------------------------------------------------------
+ 
+ 
+diff --git a/services/edge_api/views/account.py b/services/edge_api/views/account.py
+index bed22e6..e788e08 100644
+--- a/services/edge_api/views/account.py
++++ b/services/edge_api/views/account.py
+@@ -1,6 +1,6 @@
+ from flask import Blueprint
+ 
+-from larder_common.web import ok
++from larder_common.web import body, ok
+ from services.edge_api import upstreams
+ 
+ bp = Blueprint("account", __name__)
+@@ -13,3 +13,11 @@ ACCOUNT_FIELDS = ("user_id", "name", "email", "postcode", "orders_count", "last_
+ @bp.route("/api/account/<user_id>")
+ def account(user_id):
+     return ok(upstreams.account(user_id))
++
++
++@bp.route("/api/account", methods=["POST"])
++def register():
++    # FEAT-075 customer registration
++    data = body()
++    res = upstreams.register_account(data.get("name"), data.get("email"), data.get("postcode"))
++    return ok({"user_id": res.body.get("user_id")}, 201)

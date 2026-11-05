@@ -1,0 +1,118 @@
+diff --git a/services/checkout/payload.py b/services/checkout/payload.py
+index 1892088..e5ef78c 100644
+--- a/services/checkout/payload.py
++++ b/services/checkout/payload.py
+@@ -23,6 +23,7 @@ def coupon_payload(breakdown, cart):
+             "code": c.get("code"),
+             "percent_off": c.get("percent_off") or 0,
+             "free_delivery": bool(c.get("free_delivery")),
++            "amount_off_pence": int(c.get("amount_off_pence") or 0),
+         }
+     if cart.get("coupon"):
+         # cart says there's a coupon but pricing didn't apply it (expired since
+diff --git a/services/pricing/coupons_client.py b/services/pricing/coupons_client.py
+index d1df229..77ea937 100644
+--- a/services/pricing/coupons_client.py
++++ b/services/pricing/coupons_client.py
+@@ -30,6 +30,7 @@ def resolve(code):
+         "code": c.get("code"),
+         "percent_off": c.get("percent_off") or 0,
+         "free_delivery": bool(c.get("free_delivery")),
++        "amount_off_pence": int(c.get("amount_off_pence") or 0),
+     }
+ 
+ 
+diff --git a/services/pricing/quote.py b/services/pricing/quote.py
+index 1b1bcf7..3632d5e 100644
+--- a/services/pricing/quote.py
++++ b/services/pricing/quote.py
+@@ -41,8 +41,25 @@ def _shape(breakdown, coupon):
+     return out
+ 
+ 
++def _fixed_amount(breakdown, coupon):
++    """FEAT-050: fixed pence off goods; delivery threshold on goods after the discount."""
++    from services.pricing import rules
++
++    sub = breakdown["subtotal_pence"]
++    disc = min(int(coupon["amount_off_pence"]), sub)
++    deliv = rules.delivery_fee_pence(sub - disc, bool(coupon.get("free_delivery")))
++    total = sub - disc + deliv
++    breakdown.update({
++        "discount_pence": disc, "delivery_fee_pence": deliv, "total_pence": total,
++        "discount": disc / 100.0, "delivery_fee": deliv / 100.0, "total": total / 100.0,
++    })
++    return breakdown
++
++
+ def price_lines(lines, coupon=None):
+     engine = engines.get_engine()
++    if coupon and int(coupon.get("amount_off_pence") or 0) > 0:
++        return _shape(_fixed_amount(engine.price_cart(lines, None), coupon), coupon)
+     return _shape(engine.price_cart(lines, coupon), coupon)
+ 
+ 
+diff --git a/services/promotions/app.py b/services/promotions/app.py
+index d9a22ca..a0aecdc 100644
+--- a/services/promotions/app.py
++++ b/services/promotions/app.py
+@@ -12,6 +12,10 @@ def _bootstrap_db():
+ 
+     migrate.run(dbx.register("promotions"), "services.promotions.migrations", MIGRATIONS)
+     seed.load_if_empty()
++    # FEAT-050: GBP 5 off goods of GBP 30 or more, no expiry
++    dbx.db("promotions").execute(
++        "INSERT OR IGNORE INTO coupons (code, percent_off, min_spend, expires, free_delivery, active, amount_off_pence)"
++        " VALUES ('FIVER', 0, 30.0, NULL, 0, 1, 500)")
+ 
+ 
+ def create_app(bootstrap=True):
+diff --git a/services/promotions/migrations/__init__.py b/services/promotions/migrations/__init__.py
+index a82b0a2..feb7469 100644
+--- a/services/promotions/migrations/__init__.py
++++ b/services/promotions/migrations/__init__.py
+@@ -4,4 +4,5 @@
+ MIGRATIONS = [
+     (1, "m0001_coupons"),
+     (2, "m0002_redemptions"),
++    (3, "m0003_fixed_amount"),
+ ]
+diff --git a/services/promotions/migrations/m0003_fixed_amount.py b/services/promotions/migrations/m0003_fixed_amount.py
+new file mode 100644
+index 0000000..1ae5162
+--- /dev/null
++++ b/services/promotions/migrations/m0003_fixed_amount.py
+@@ -0,0 +1,6 @@
++# FEAT-050: fixed-amount coupons ("£5 off when you spend £30"). The FIVER row
++# itself is added by app._bootstrap_db() after the first-boot seed load.
++
++
++def up(run):
++    run("ALTER TABLE coupons ADD COLUMN amount_off_pence INTEGER DEFAULT 0")
+diff --git a/services/promotions/models.py b/services/promotions/models.py
+index a732b0f..e674a44 100644
+--- a/services/promotions/models.py
++++ b/services/promotions/models.py
+@@ -11,12 +11,14 @@ class Coupon(Model):
+     expires = Field(str)  # free text, see coupons.parse_expiry
+     free_delivery = Field(bool, default=False)
+     active = Field(int, default=1)
++    amount_off_pence = Field(int, default=0)  # FEAT-050
+ 
+     def as_payload(self):
+         return {
+             "code": self.code,
+             "percent_off": self.percent_off,
+             "free_delivery": bool(self.free_delivery),
++            "amount_off_pence": int(self.amount_off_pence or 0),
+         }
+ 
+     def as_dict(self):
+@@ -28,6 +30,7 @@ class Coupon(Model):
+             "min_spend_pence": int((self.min_spend or 0) * 100),
+             "expires": self.expires,
+             "active": bool(self.active),
++            "amount_off_pence": int(self.amount_off_pence or 0),
+         }
+ 
+ 

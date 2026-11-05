@@ -1,0 +1,14 @@
+diff --git a/services/edge_api/shaping.py b/services/edge_api/shaping.py
+index ffc7150..6006f7e 100644
+--- a/services/edge_api/shaping.py
++++ b/services/edge_api/shaping.py
+@@ -18,6 +18,9 @@ def product(p, detail=False):
+     out = {k: p.get(k) for k in fields}
+     if out.get("price") is not None:
+         out["price_pence"] = int(round(out["price"] * 100))
++    if out.get("price_pence") is not None:
++        # FEAT-047
++        out["price_display"] = "\u00a3%d.%02d" % (out["price_pence"] // 100, out["price_pence"] % 100)
+     if out.get("diet") is None:
+         out["diet"] = []
+     if out.get("tags") is None:

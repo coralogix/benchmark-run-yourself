@@ -1,0 +1,21 @@
+{
+ "message-queue-bytes-in":              "sum(rate(<message queue broker bytes-in counter>[1h]))",
+ "message-queue-messages-in":           "sum(rate(<message queue broker messages-in counter>[1h]))",
+ "compute-allocatable-cpu":             "sum(<node autoscaler allocatable resources gauge>{<resource label>=\"cpu\"})",
+ "access-gateway-sessions":             "sum(<access gateway active connections gauge>)",
+ "cluster-node-count":                  "count(<cluster node info metric>)",
+ "analytics-database-running-queries":  "sum(<analytics database running queries gauge>)",
+ "cache-memory-used":                   "sum(<cache memory used bytes gauge>)",
+ "dashboard-latency-p99":               "histogram_quantile(0.99, sum by (le)(rate(<dashboard request duration histogram>_bucket[1h])))",
+ "message-queue-consumer-lag":          "sum(<message queue consumer group lag gauge>)",
+ "counter-rate-a":                      "sum(rate(<a counter>[1h]))",
+ "counter-rate-b":                      "sum(rate(<a counter>[1h]))",
+ "request-rate-a":                      "sum(rate(<a request duration histogram>_count[1h]))",
+ "counter-rate-c":                      "sum(rate(<a counter>[1h]))",
+ "request-rate-b":                      "sum(rate(<a request duration histogram>_count[1h]))",
+ "request-latency-p99":                 "histogram_quantile(0.99, sum by (le)(rate(<a request duration histogram>_bucket[1h])))",
+ "gauge-a":                             "sum(<a gauge>)",
+ "gauge-b":                             "sum(<a gauge>)",
+ "gauge-c":                             "sum(<a gauge>)",
+ "gauge-d":                             "sum(<a gauge>)"
+}

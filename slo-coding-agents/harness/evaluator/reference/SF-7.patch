@@ -1,0 +1,114 @@
+# SF-7 reference fix. Repo: commerce (apply inside the commerce/ directory: git apply SF-7.patch)
+diff --git a/services/cart/state.py b/services/cart/state.py
+index 947fcfb..52e7015 100644
+--- a/services/cart/state.py
++++ b/services/cart/state.py
+@@ -25,9 +25,16 @@ from larder_common.log import get_logger
+ 
+ log = get_logger("cart.state")
+ 
+-# cart_id -> CartState. Module global, shared by all worker threads.
+-_CARTS = {}
+-# guards inserts into _CARTS. Mutations of a CartState are not locked (a
++# cart_id -> CartState, least recently used first. Module global, shared by all
++# worker threads. Bounded: the least recently used carts are dropped from memory
++# once there are more than MAX_CARTS_IN_MEMORY (abandoned carts would otherwise
++# pile up forever). cart.db has every cart, and get() reloads a dropped one.
++MAX_CARTS_IN_MEMORY = 1000
++# keep the first and the latest priced snapshot per cart (all the PM-610 banner
++# compares); keeping every one of them grew without bound.
++MAX_SNAPSHOTS = 2
++_CARTS = collections.OrderedDict()
++# guards _CARTS. Mutations of a CartState are not locked (a
+ # cart is only used by one customer at a time... in theory - JW 2023)
+ _CARTS_LOCK = threading.Lock()
+ 
+@@ -81,7 +88,10 @@ class CartState(object):
+         # PM-610: price-changed banner. keep them all, see module docstring.
+         # Written through to cart_snapshots since SB 2024-05 so it survives a
+         # restart (see warm()).
+-        self.snapshots.append(breakdown)
++        if len(self.snapshots) >= MAX_SNAPSHOTS:
++            self.snapshots[-1] = breakdown
++        else:
++            self.snapshots.append(breakdown)
+         from services.cart import store
+ 
+         store.save_snapshot(self.cart_id, breakdown)
+@@ -97,12 +107,18 @@ class CartState(object):
+ def put(st):
+     with _CARTS_LOCK:
+         _CARTS[st.cart_id] = st
++        _CARTS.move_to_end(st.cart_id)
++        while len(_CARTS) > MAX_CARTS_IN_MEMORY:
++            _CARTS.popitem(last=False)
+     return st
+ 
+ 
+ def get(cart_id):
+     """CartState or None. Falls back to cart.db (and caches what it finds)."""
+-    st = _CARTS.get(cart_id)
++    with _CARTS_LOCK:
++        st = _CARTS.get(cart_id)
++        if st is not None:
++            _CARTS.move_to_end(cart_id)
+     if st is not None:
+         return st
+     from services.cart import store
+@@ -145,7 +161,9 @@ def warm():
+     snapshots at boot instead. Returns the number of carts loaded."""
+     from services.cart import store
+ 
+-    carts, items, snaps = store.load_everything()
++    # only the most recently updated open carts, and only the snapshots the
++    # banner needs: warming every cart ever seen is what the memory limit tripped on
++    carts, items, snaps = store.load_recent_open(MAX_CARTS_IN_MEMORY)
+     for row in carts:
+         st = CartState(row["cart_id"], row["user_id"], row["status"] or OPEN, row["coupon_code"], row["created_at"],
+                        row["updated_at"])
+@@ -155,8 +173,9 @@ def warm():
+         for it in items.get(row["cart_id"], []):
+             st.lines[it["sku"]] = it["qty"]
+             st.added_at[it["sku"]] = it["added_at"]
+-        st.snapshots = snaps.get(row["cart_id"], [])
+-        _CARTS[st.cart_id] = st
++        sn = snaps.get(row["cart_id"], [])
++        st.snapshots = sn[:1] + sn[-1:] if len(sn) > MAX_SNAPSHOTS else sn
++        put(st)
+     if carts:
+         log.info("warmed %d carts (%d snapshots) from cart.db", len(carts), sum(len(v) for v in snaps.values()))
+     return len(carts)
+diff --git a/services/cart/store.py b/services/cart/store.py
+index bcb5f2d..fd8e0c5 100644
+--- a/services/cart/store.py
++++ b/services/cart/store.py
+@@ -90,3 +90,29 @@ def load_everything():
+         except ValueError:
+             pass
+     return carts, items, snaps
++
++
++def load_recent_open(limit):
++    """Like load_everything(), but only the most recently updated open carts and,
++    per cart, its first and latest snapshot (what the PM-610 banner compares)."""
++    d = _db()
++    carts = d.query("SELECT * FROM carts WHERE status = 'open' OR status IS NULL ORDER BY updated_at DESC LIMIT ?",
++                    (limit,))
++    ids = [c["cart_id"] for c in carts]
++    items, snaps = {}, {}
++    for i in range(0, len(ids), 500):
++        chunk = ids[i:i + 500]
++        marks = ",".join("?" * len(chunk))
++        for it in d.query("SELECT cart_id, sku, qty, added_at FROM cart_items WHERE cart_id IN (%s) ORDER BY id" % marks,
++                          tuple(chunk)):
++            items.setdefault(it["cart_id"], []).append(it)
++        for sn in d.query(
++                "SELECT cart_id, payload FROM cart_snapshots WHERE id IN ("
++                " SELECT MIN(id) FROM cart_snapshots WHERE cart_id IN (%s) GROUP BY cart_id"
++                " UNION SELECT MAX(id) FROM cart_snapshots WHERE cart_id IN (%s) GROUP BY cart_id) ORDER BY id"
++                % (marks, marks), tuple(chunk) * 2):
++            try:
++                snaps.setdefault(sn["cart_id"], []).append(json.loads(sn["payload"]))
++            except ValueError:
++                pass
++    return list(reversed(carts)), items, snaps

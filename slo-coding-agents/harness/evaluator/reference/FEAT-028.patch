@@ -1,0 +1,45 @@
+diff --git a/services/accounts/routes.py b/services/accounts/routes.py
+index 574c3ae..f3578a3 100644
+--- a/services/accounts/routes.py
++++ b/services/accounts/routes.py
+@@ -29,3 +29,17 @@ def get_user_masked(user_id):
+ @bp.route("/internal/accounts/<user_id>")
+ def account(user_id):
+     return ok(summary.account_summary(user_id))
++
++
++@bp.route("/internal/users/<user_id>/postcode", methods=["PUT"])
++def set_postcode(user_id):
++    # FEAT-028 (edge-api has already checked the postcode maps to a zone)
++    from larder_common.errors import BadRequest
++    from larder_common.web import body
++
++    pc = (body().get("postcode") or "").strip().upper()
++    if not pc:
++        raise BadRequest("invalid_postcode")
++    user = users.get_user(user_id)
++    user.update(postcode=pc)
++    return ok(summary.account_summary(user.user_id))
+diff --git a/services/edge_api/views/account.py b/services/edge_api/views/account.py
+index bed22e6..d224742 100644
+--- a/services/edge_api/views/account.py
++++ b/services/edge_api/views/account.py
+@@ -13,3 +13,18 @@ ACCOUNT_FIELDS = ("user_id", "name", "email", "postcode", "orders_count", "last_
+ @bp.route("/api/account/<user_id>")
+ def account(user_id):
+     return ok(upstreams.account(user_id))
++
++
++@bp.route("/api/account/<user_id>", methods=["PATCH"])
++def update_account(user_id):
++    """FEAT-028: change postcode (must map to a delivery zone)."""
++    from larder_common.errors import BadRequest
++    from larder_common.utils import normalise_postcode
++    from larder_common.web import body
++
++    pc = normalise_postcode(body().get("postcode") or "")
++    if not pc or upstreams.zone_lookup(pc) is None:
++        raise BadRequest("invalid_postcode")
++    upstreams.account(user_id)  # 404 for unknown users
++    res = upstreams.call(upstreams.ACCOUNTS, "PUT", "/internal/users/%s/postcode" % user_id, json={"postcode": pc})
++    return ok(res.body)

@@ -1,0 +1,39 @@
+# SF-4 reference fix. Repo: commerce (apply inside the commerce/ directory: git apply SF-4.patch)
+diff --git a/libs/larder_common/http.py b/libs/larder_common/http.py
+index 0ce38ca..6f2cd32 100644
+--- a/libs/larder_common/http.py
++++ b/libs/larder_common/http.py
+@@ -8,9 +8,11 @@ Shared HTTP client for service-to-service calls.
+ * One process-wide ``requests.Session`` (connection pooling; also the thing
+   the test suite swaps out, see tests/fakes.py).
+ * Base URLs come from larder_common.discovery (``<NAME>_URL`` env vars).
+-* Every call is wrapped in larder_common.retry: transport errors and gateway
+-  errors (the mesh/ELB answering for a dead or slow upstream) are retried
+-  ``settings.HTTP_CLIENT_EXTRA_ATTEMPTS`` times. That includes POSTs.
++* Idempotent calls (GET/HEAD/OPTIONS/PUT/DELETE) are wrapped in larder_common.retry:
++  transport errors and gateway errors (the mesh/ELB answering for a dead or slow
++  upstream) are retried ``settings.HTTP_CLIENT_EXTRA_ATTEMPTS`` times. POST/PATCH
++  are NOT retried: a timed-out POST may well have been processed (a retried
++  POST /internal/orders created a second order and a second charge).
+ * Timeout: ``settings.HTTP_CLIENT_TIMEOUT`` (see the comment in settings.py).
+ * Duration of every attempt is recorded as
+   commerce_http_client_duration_seconds{target,method}.
+@@ -38,6 +40,9 @@ _session.headers.update({"X-Larder-Lib": "larder_common/%s" % __version__})
+ GATEWAY_STATUSES = (503, 504)
+ GATEWAY_502_REASONS = ("upstream_unavailable", "bad_gateway", None)
+ 
++# methods that are safe to repeat after a timeout / dropped connection
++RETRYABLE_METHODS = ("GET", "HEAD", "OPTIONS", "PUT", "DELETE")
++
+ _clients = {}
+ _clients_lock = threading.Lock()
+ 
+@@ -123,7 +128,7 @@ class ServiceClient(object):
+         return res
+ 
+     def request(self, method, path, params=None, json=None, headers=None, retry=True):
+-        if not retry:
++        if not retry or method.upper() not in RETRYABLE_METHODS:
+             return self._send(method, path, params=params, json=json, headers=headers)
+         return call_with_retry(
+             self._send,

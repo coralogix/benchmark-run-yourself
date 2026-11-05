@@ -1,0 +1,199 @@
+#!/usr/bin/env python3
+"""slo-status: current SLO attainment, error budget and burn rate for Larder.
+
+Usage:
+  tools/slo-status            # table for every SLO
+  tools/slo-status --json     # machine-readable
+  tools/slo-status --window 30   # SLO-engine recent window in minutes (default 30)
+
+Data sources (all read-only):
+  * Coralogix SLO status API  -> compliance and remaining error budget
+    (whole SLO window, and the last N minutes)
+  * Coralogix metrics (PromQL) -> live burn rate over 2m/10m/60m and rolling 60m budget
+  * Coralogix alerts            -> which SLO alerts are currently firing
+The SLO definitions for this environment are listed in SLO_CATALOG.md and
+.larder/slo_catalog.json.
+"""
+import argparse
+import datetime as dt
+import json
+import os
+import subprocess
+import sys
+import urllib.parse
+import urllib.request
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+WS = HERE.parent
+CATALOG = WS / ".larder" / "slo_catalog.json"
+STALE_AFTER_MIN = 12
+
+
+def profile_creds():
+    prof = os.environ.get("CX_PROFILE")
+    if not prof:
+        env = WS / ".larder" / "agent.env"
+        if env.exists():
+            for ln in env.read_text().splitlines():
+                if ln.startswith("CX_PROFILE="):
+                    prof = ln.split("=", 1)[1].strip()
+    if not prof:
+        sys.exit("slo-status: CX_PROFILE is not set (source .larder/agent.env)")
+    path = Path.home() / ".cx" / "profiles" / f"{prof}.toml"
+    key = region = None
+    for ln in path.read_text().splitlines():
+        if "=" not in ln:
+            continue
+        k, v = (x.strip() for x in ln.split("=", 1))
+        v = v.strip('"')
+        if k == "api_key":
+            key = v
+        elif k == "region":
+            region = v
+    if not key or not region:
+        sys.exit(f"slo-status: profile {prof} has no api_key/region")
+    return prof, key, region
+
+
+def status(key, region, slo_id, frm=None):
+    q = {}
+    if frm:
+        q["from"] = frm
+    url = f"https://api.{region}.coralogix.com/mgmt/openapi/5/slo/slos/v1/{slo_id}/status"
+    if q:
+        url += "?" + urllib.parse.urlencode(q)
+    req = urllib.request.Request(url, headers={"Authorization": f"Bearer {key}", "User-Agent": "larder-slo-status/1.0"})
+    try:
+        with urllib.request.urlopen(req, timeout=30) as r:
+            return json.loads(r.read())
+    except Exception as e:  # noqa: BLE001
+        return {"error": str(e)}
+
+
+def promql(prof, query):
+    p = subprocess.run(["cx", "-p", prof, "--read-only", "--no-console-link", "-o", "json", "metrics", "query", query],
+                       capture_output=True, text=True, timeout=60)
+    try:
+        out = p.stdout
+        data = json.loads(out[out.index("["):])
+        return float(data[0]["value"][1]) if data else None
+    except Exception:  # noqa: BLE001
+        return None
+
+
+def promql_vector(prof, query):
+    """[(entity, value)] for a vector result, or None if the query failed."""
+    p = subprocess.run(["cx", "-p", prof, "--read-only", "--no-console-link", "-o", "json", "metrics", "query", query],
+                       capture_output=True, text=True, timeout=60)
+    try:
+        out = p.stdout
+        data = json.loads(out[out.index("["):])
+        return sorted(((d["metric"].get("entity", "?"), round(float(d["value"][1]), 3)) for d in data), key=lambda x: -x[1])
+    except Exception:  # noqa: BLE001
+        return None
+
+
+def minute_floor(t):
+    return t.replace(second=0, microsecond=0).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def firing_alerts(prof):
+    p = subprocess.run(["cx", "-p", prof, "--read-only", "--no-console-link", "-o", "json", "alerts", "list"],
+                       capture_output=True, text=True, timeout=60)
+    try:
+        out = p.stdout
+        data = json.loads(out[out.index("["):])
+    except Exception:  # noqa: BLE001
+        return None
+    return {a["name"]: a.get("priority") for a in data
+            if a.get("name", "").startswith("Larder · SLO · ") and "ALERTING" in str(a.get("status", ""))}
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--json", action="store_true")
+    ap.add_argument("--window", type=int, default=30, help="recent SLO-engine window in minutes")
+    a = ap.parse_args()
+    if not CATALOG.exists():
+        sys.exit("slo-status: .larder/slo_catalog.json not found")
+    cat = json.loads(CATALOG.read_text())
+    prof, key, region = profile_creds()
+    now = dt.datetime.now(dt.timezone.utc)
+    recent_from = minute_floor(now - dt.timedelta(minutes=a.window))
+    firing = firing_alerts(prof)
+    rows = []
+    for s in cat["slos"]:
+        full = status(key, region, s["id"])
+        recent = status(key, region, s["id"], recent_from)
+        live = {k: promql(prof, s[k]) for k in ("burn_rate_2m", "burn_rate_10m", "burn_rate_60m", "budget_remaining_60m", "total_10m")}
+        worst = promql_vector(prof, s["worst_entities_60m"]) if s.get("worst_entities_60m") else None
+        flags = []
+        if "error" in full:
+            flags.append("SLO_ENGINE_ERROR")
+        else:
+            try:
+                eff_to = dt.datetime.fromisoformat(full["effectiveTo"].replace("Z", "+00:00"))
+                lag = (now - eff_to).total_seconds() / 60
+                if lag > STALE_AFTER_MIN:
+                    flags.append(f"ENGINE_STALE({lag:.0f}m)")
+            except Exception:  # noqa: BLE001
+                flags.append("NO_TIMESTAMP")
+        if "error" not in full and full.get("lowestCompliance", 0) == 0 and (live["burn_rate_60m"] or 0) < 50:
+            # The engine reports exactly 0 before it has evaluated any window; live traffic says otherwise.
+            flags.append("ENGINE_NO_DATA_YET")
+        elif "error" not in full and live["budget_remaining_60m"] is not None and \
+                abs(100 * full.get("lowestRemainingErrorBudget", 0) - max(0.0, min(100.0, 100 * live["budget_remaining_60m"]))) > 50:
+            flags.append("ENGINE_LIVE_DISAGREE")
+        if not live["total_10m"]:
+            flags.append("NO_RECENT_TRAFFIC")
+        if any(v is None for v in live.values()):
+            flags.append("METRICS_QUERY_FAILED")
+        alerts = sorted(n.rsplit(" · ", 1)[1] for n in (firing or {}) if n in s.get("alerts", []))
+        rows.append({
+            "slo": s["name"], "id": s["id"], "criticality": s["criticality"], "target_pct": s["target"],
+            "engine_compliance_pct": None if "error" in full else round(100 * full.get("lowestCompliance", 0), 3),
+            "engine_budget_remaining_pct": None if "error" in full else round(100 * full.get("lowestRemainingErrorBudget", 0), 1),
+            f"engine_budget_remaining_last_{a.window}m_pct": None if "error" in recent else round(100 * recent.get("lowestRemainingErrorBudget", 0), 1),
+            "engine_evaluated_to": full.get("effectiveTo"),
+            "live_burn_2m": None if live["burn_rate_2m"] is None else round(live["burn_rate_2m"], 2),
+            "live_burn_10m": None if live["burn_rate_10m"] is None else round(live["burn_rate_10m"], 2),
+            "live_burn_60m": None if live["burn_rate_60m"] is None else round(live["burn_rate_60m"], 2),
+            "live_budget_remaining_60m_pct": None if live["budget_remaining_60m"] is None else round(100 * live["budget_remaining_60m"], 1),
+            "firing_alerts": alerts,
+            "group_by": s.get("group_by"),
+            "worst_entities_60m": worst,
+            "flags": flags,
+        })
+    if a.json:
+        print(json.dumps({"generated_at": now.isoformat(), "alerts_query_ok": firing is not None, "slos": rows}, indent=2))
+        return
+    print(f"Larder SLO status at {now:%H:%M:%S}Z")
+    print("live = computed now from ingress metrics (~1 min behind); engine = Coralogix SLO engine (authoritative, lags several min)")
+    print("burn rate 1.0 = spending budget exactly at the sustainable pace; 10 = an hour's budget in 6 minutes\n")
+    hdr = (f"{'SLO':38} {'crit':8} {'target':>6} {'burn2m':>7} {'burn10m':>7} {'burn60m':>7} {'budg60m%':>8} "
+           f"{'engine%':>8} {'engBudg%':>8}  firing alerts / flags")
+    print(hdr)
+    print("-" * len(hdr))
+
+    def f(v, w, p=2):
+        return f"{'-':>{w}}" if v is None else f"{v:>{w}.{p}f}"
+    for r in rows:
+        tail = ", ".join(r["firing_alerts"] + r["flags"]) or "ok"
+        print(f"{r['slo'].split('· ', 1)[-1][:38]:38} {r['criticality']:8} {r['target_pct']:>6.2f} {f(r['live_burn_2m'], 7)} "
+              f"{f(r['live_burn_10m'], 7)} {f(r['live_burn_60m'], 7)} {f(r['live_budget_remaining_60m_pct'], 8, 1)} "
+              f"{f(r['engine_compliance_pct'], 8, 3)} {f(r['engine_budget_remaining_pct'], 8, 1)}  {tail}")
+    grouped = [r for r in rows if r.get("group_by")]
+    if grouped:
+        print("\nGrouped SLOs: worst entities over the last 60 min (error ratio; entities with enough traffic, see SLO_CATALOG.md):")
+        for r in grouped:
+            w = r.get("worst_entities_60m")
+            shown = ", ".join(f"{e} {100 * v:.0f}%" for e, v in (w or [])[:5]) if w else ("none failing" if w == [] else "query failed")
+            print(f"  {r['slo'].split('· ', 1)[-1]:44} {shown}")
+    if firing is None:
+        print("\nWARNING: could not read alert status (cx alerts list failed); firing alerts not shown.")
+    print("\nNegative budget = overspent. See SLO_CATALOG.md for what each alert means.")
+
+
+if __name__ == "__main__":
+    main()

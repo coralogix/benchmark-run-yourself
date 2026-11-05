@@ -1,0 +1,29 @@
+diff --git a/services/edge_api/views/delivery.py b/services/edge_api/views/delivery.py
+index bf2f976..7f01d34 100644
+--- a/services/edge_api/views/delivery.py
++++ b/services/edge_api/views/delivery.py
+@@ -8,7 +8,23 @@ bp = Blueprint("delivery", __name__)
+ 
+ @bp.route("/api/delivery/slots")
+ def slots():
+-    return ok(delivery.list_slots(request.args.get("postcode", "")))
++    out = delivery.list_slots(request.args.get("postcode", ""))
++    date = request.args.get("date")
++    if date is not None:
++        # FEAT-034: one day at a time
++        import datetime
++        import re
++
++        from larder_common.errors import BadRequest
++
++        try:
++            if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", date):
++                raise ValueError(date)
++            datetime.date.fromisoformat(date)
++        except ValueError:
++            raise BadRequest("invalid_date")
++        out["slots"] = [s for s in out["slots"] if s.get("date") == date]
++    return ok(out)
+ 
+ 
+ @bp.route("/api/delivery/holds", methods=["POST"])

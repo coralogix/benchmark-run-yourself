@@ -1,0 +1,13 @@
+diff --git a/services/tax/totals.js b/services/tax/totals.js
+index e4f5a2f..1defc38 100644
+--- a/services/tax/totals.js
++++ b/services/tax/totals.js
+@@ -40,6 +40,8 @@ function subtotal(lines) {
+ }
+ 
+ function discountFor(sub, coupon) {
++  // FEAT-050: fixed-amount coupons
++  if (coupon && Number(coupon.amount_off_pence) > 0) return Math.min(Number(coupon.amount_off_pence) | 0, sub);
+   if (!coupon || coupon.percent_off == null) return 0;
+   var pct = Number(coupon.percent_off);
+   if (!(pct > 0)) return 0;

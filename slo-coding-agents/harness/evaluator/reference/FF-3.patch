@@ -1,0 +1,13 @@
+# FF-3 reference fix. Repo: ops (apply inside the ops/ directory: git apply FF-3.patch)
+diff --git a/services/slots/routes/slots.js b/services/slots/routes/slots.js
+index e65e1dc..18b8f00 100644
+--- a/services/slots/routes/slots.js
++++ b/services/slots/routes/slots.js
+@@ -51,6 +51,7 @@ router.post('/slot-holds', function (req, res, next) {
+       }
+ 
+       if (slot.booked >= slot.capacity) {
++        conn.release();
+         globals.counters.holdsRejected++;
+         logger.info('slot full', { slot_id: slot.slot_id, booked: slot.booked, capacity: slot.capacity });
+         return res.status(409).json({ error: 'slot_full' });

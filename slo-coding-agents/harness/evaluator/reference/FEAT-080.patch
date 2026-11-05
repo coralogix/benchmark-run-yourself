@@ -1,0 +1,29 @@
+Reference implementation for FEAT-080 (evaluator-only).
+Repo: commerce. Apply from a fresh copy of baseline/commerce:  git apply FEAT-080.patch
+
+diff --git a/services/edge_api/views/catalogue.py b/services/edge_api/views/catalogue.py
+index 79a9c7a..bce868f 100644
+--- a/services/edge_api/views/catalogue.py
++++ b/services/edge_api/views/catalogue.py
+@@ -20,6 +20,8 @@ MAX_PER_PAGE = settings.CATALOG_MAX_PER_PAGE
+ # DP 2023: search is capped at 50 by search itself (40 on prod, settings_local)
+ MAX_SEARCH_QUERY = 200
+ 
++API_VERSION = "2026.1"
++
+ 
+ @bp.route("/api/products")
+ def products():
+@@ -53,6 +55,12 @@ def product_detail(sku):
+     return ok(item)
+ 
+ 
++@bp.route("/api/version")
++def api_version():
++    # FEAT-080
++    return ok({"api_version": API_VERSION})
++
++
+ @bp.route("/api/categories")
+ def categories():
+     return ok({"categories": upstreams.categories()})

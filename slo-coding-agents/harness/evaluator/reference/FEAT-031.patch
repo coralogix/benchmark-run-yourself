@@ -1,0 +1,28 @@
+diff --git a/services/edge_api/views/catalogue.py b/services/edge_api/views/catalogue.py
+index 79a9c7a..d283478 100644
+--- a/services/edge_api/views/catalogue.py
++++ b/services/edge_api/views/catalogue.py
+@@ -19,6 +19,8 @@ MAX_PER_PAGE = settings.CATALOG_MAX_PER_PAGE
+ 
+ # DP 2023: search is capped at 50 by search itself (40 on prod, settings_local)
+ MAX_SEARCH_QUERY = 200
++SEARCH_DEFAULT_PER_PAGE = 20
++SEARCH_MAX_PER_PAGE = 50
+ 
+ 
+ @bp.route("/api/products")
+@@ -63,6 +65,12 @@ def do_search():
+     q = (request.args.get("q", "") or "")[:MAX_SEARCH_QUERY]
+     uid = request.args.get("uid") or None
+     data = upstreams.search(q, uid=uid)
+-    results = shaping.products(data.get("results"))
++    # FEAT-031: pages over the full result list
++    page = parse_int(request.args.get("page"), 1, lo=1)
++    per_page = parse_int(request.args.get("per_page"), SEARCH_DEFAULT_PER_PAGE, lo=1, hi=SEARCH_MAX_PER_PAGE)
++    allres = data.get("results") or []
++    start = (page - 1) * per_page
++    results = shaping.products(allres[start:start + per_page])
+     stock.attach_stock(results)
+-    return ok({"query": q, "results": results, "count": len(results)})
++    return ok({"query": q, "results": results, "count": len(results), "page": page, "per_page": per_page,
++               "total": len(allres)})

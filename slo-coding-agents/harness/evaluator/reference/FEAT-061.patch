@@ -1,0 +1,59 @@
+Reference implementation for FEAT-061 (evaluator-only).
+Repo: ops. Apply from a fresh copy of baseline/ops:  git apply FEAT-061.patch
+
+diff --git a/services/inventory/routes/reservations.js b/services/inventory/routes/reservations.js
+index 3c25199..c231896 100644
+--- a/services/inventory/routes/reservations.js
++++ b/services/inventory/routes/reservations.js
+@@ -45,6 +45,12 @@ router.post('/inventory/reservations', asyncRoute(async function (req, res) {
+   res.status(201).json(r);
+ }));
+ 
++// FEAT-061: POST /internal/inventory/:sku/restock { qty } -> { sku, on_hand, reserved, available }
++router.post('/inventory/:sku/restock', asyncRoute(async function (req, res) {
++  var body = req.body || {};
++  res.json(await stock.restock(req.params.sku, body.qty, { ref: body.ref }));
++}));
++
+ router.post('/inventory/releases', asyncRoute(async function (req, res) {
+   var body = req.body || {};
+   var l = lines(body);
+diff --git a/services/inventory/stock.js b/services/inventory/stock.js
+index 9f3c08e..97edfc8 100644
+--- a/services/inventory/stock.js
++++ b/services/inventory/stock.js
+@@ -145,6 +145,26 @@ async function reserve(sku, qty, ctx) {
+   return { sku: sku, qty: qty, available: available - qty };
+ }
+ 
++/**
++ * FEAT-061: restock - goods arrive. on_hand += qty. The read-modify-write is
++ * synchronous (no await between reading and writing the record), so concurrent
++ * restocks and reservations can't lose each other's updates.
++ */
++async function restock(sku, qty, ctx) {
++  if (typeof qty !== 'number' || !Number.isInteger(qty) || qty <= 0) {
++    throw new errors.BadRequest('qty must be a positive integer', { sku: sku });
++  }
++  var rec = await col().get(sku);
++  if (!rec) throw new errors.NotFound('unknown sku ' + sku, { sku: sku });
++  rec.on_hand = rec.on_hand + qty;
++  rec.updated_at = new Date().toISOString();
++  var out = view(rec);
++  await col().put(rec);
++  auditTrail.record('restock', { sku: sku, qty: qty, ref: ctx && ctx.ref });
++  telemetry.inc('reservations', { outcome: 'restocked' });
++  return out;
++}
++
+ /**
+  * Release a reservation (payment failed, hold expired, etc).
+  */
+@@ -235,6 +255,7 @@ module.exports = {
+   availability: availability,
+   priceLines: priceLines,
+   reserve: reserve,
++  restock: restock,
+   release: release,
+   releaseAll: releaseAll,
+   commitDispatch: commitDispatch,

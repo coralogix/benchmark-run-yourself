@@ -1,0 +1,95 @@
+#!/bin/bash
+# Grafana Mimir serving cluster; pm-loader backfills the week's TSDB blocks into it.
+# Changes from default (README step 3 lists each):
+#   - storage coordinates + memberlist members + single-tenant
+#   - ingestion limits raised to accept the corpus
+#   - block upload enabled (so mimirtool backfill works)
+#   - ignore_blocks_within: 0s + short sync so backfilled blocks are served promptly
+set -euxo pipefail
+MIMIR_VERSION="2.14.3"
+dnf -y install jq tar gzip python3 >/dev/null 2>&1
+cd /tmp
+curl -fsSL -o mimir "https://github.com/grafana/mimir/releases/download/mimir-$${MIMIR_VERSION}/mimir-linux-arm64"
+install -m 0755 mimir /usr/local/bin/mimir
+useradd --system --no-create-home --shell /sbin/nologin mimir || true
+mkdir -p /var/lib/mimir/tsdb /var/lib/mimir/tsdb-sync /var/lib/mimir/compactor /etc/mimir
+chown -R mimir:mimir /var/lib/mimir
+
+PRIVATE_IP=$(curl -s -H "X-aws-ec2-metadata-token: $(curl -s -X PUT 'http://169.254.169.254/latest/api/token' -H 'X-aws-ec2-metadata-token-ttl-seconds: 60')" http://169.254.169.254/latest/meta-data/local-ipv4)
+
+cat > /etc/mimir/mimir.yaml <<YAML
+multitenancy_enabled: false
+server:
+  http_listen_port: 8080
+  grpc_listen_port: 9095
+  log_level: info
+common:
+  storage:
+    backend: s3
+    s3:
+      endpoint: s3.${region}.amazonaws.com
+      region: ${region}
+      bucket_name: ${bucket}
+blocks_storage:
+  storage_prefix: mimirblocks${run_id}
+  tsdb:
+    dir: /var/lib/mimir/tsdb
+  bucket_store:
+    sync_dir: /var/lib/mimir/tsdb-sync
+    sync_interval: 1m
+    ignore_blocks_within: 0s
+querier:
+  # all data arrives as backfilled blocks (store-gateway path), none via live
+  # ingesters, so the querier must consult the store-gateway for every range.
+  # Default 12h would hide anything newer than 12h.
+  query_store_after: 0s
+ruler_storage:
+  storage_prefix: mimir-ruler
+alertmanager_storage:
+  storage_prefix: mimir-alertmanager
+compactor:
+  data_dir: /var/lib/mimir/compactor
+  # the bucket-index (which the querier needs to see backfilled blocks) is rebuilt
+  # on this interval; at the 15m default the querier waits up to 15m after upload
+  cleanup_interval: 2m
+memberlist:
+  join_members: [${join_members}]
+  bind_port: 7946
+  advertise_addr: $${PRIVATE_IP}
+ingester:
+  ring:
+    replication_factor: ${rf}
+limits:
+  max_global_series_per_user: 2500000
+  max_global_series_per_metric: 0
+  ingestion_rate: 1000000
+  ingestion_burst_size: 3000000
+  out_of_order_time_window: 1h
+  compactor_block_upload_enabled: true
+YAML
+chown mimir:mimir /etc/mimir/mimir.yaml
+
+cat > /etc/systemd/system/mimir.service <<UNIT
+[Unit]
+Description=Grafana Mimir
+After=network-online.target
+Wants=network-online.target
+[Service]
+User=mimir
+Group=mimir
+WorkingDirectory=/var/lib/mimir
+ExecStart=/usr/local/bin/mimir -config.file=/etc/mimir/mimir.yaml -target=all
+Restart=always
+RestartSec=5
+LimitNOFILE=1048576
+[Install]
+WantedBy=multi-user.target
+UNIT
+systemctl daemon-reload && systemctl enable --now mimir
+sleep 10
+
+# ------------------------------------------------------------- code + stage role
+mkdir -p /opt/bench && chmod -R 777 /opt/bench
+aws s3 cp s3://${bucket}/$RUN_TAG/code/stage.sh /opt/stage.sh --region ${region} && chmod +x /opt/stage.sh
+echo READY > /var/log/bench-ready.txt
+nohup setsid /opt/stage.sh mimir ${node_index} ${scale} ${reuse} >/var/log/stage-boot.log 2>&1 &

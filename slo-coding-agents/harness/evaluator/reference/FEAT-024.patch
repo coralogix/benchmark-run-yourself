@@ -1,0 +1,24 @@
+diff --git a/services/edge_api/app.py b/services/edge_api/app.py
+index 4f4bbf2..4900a93 100644
+--- a/services/edge_api/app.py
++++ b/services/edge_api/app.py
+@@ -20,6 +20,19 @@ def create_app():
+ 
+     headers.install(app)
+ 
++    # FEAT-024: JSON 405 that says which methods the route does support
++    from flask import jsonify
++    from werkzeug.exceptions import MethodNotAllowed
++
++    @app.errorhandler(MethodNotAllowed)
++    def _method_not_allowed(e):
++        resp = jsonify({"error": "method_not_allowed"})
++        resp.status_code = 405
++        allowed = sorted(set(e.valid_methods or []))
++        if allowed:
++            resp.headers["Allow"] = ", ".join(allowed)
++        return resp
++
+     from services.edge_api.views import all_blueprints
+ 
+     for bp in all_blueprints():

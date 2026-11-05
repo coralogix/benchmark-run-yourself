@@ -1,0 +1,123 @@
+diff --git a/services/cart/carts.py b/services/cart/carts.py
+index e28452d..c8552cc 100644
+--- a/services/cart/carts.py
++++ b/services/cart/carts.py
+@@ -162,6 +162,7 @@ def serialise(st, breakdown=None):
+                 "unit_price": line["unit_price"],
+                 "unit_price_pence": int(round(line["unit_price"] * 100)),
+                 "line_total_pence": line["line_total_pence"],
++                "multibuy_free_units": int(line.get("multibuy_free_units") or 0),
+             }
+         )
+     return {
+@@ -171,6 +172,7 @@ def serialise(st, breakdown=None):
+         "items": items,
+         "subtotal_pence": breakdown["subtotal_pence"],
+         "discount_pence": breakdown["discount_pence"],
++        "multibuy_discount_pence": int(breakdown.get("multibuy_discount_pence") or 0),
+         "delivery_fee_pence": breakdown["delivery_fee_pence"],
+         "total_pence": breakdown["total_pence"],
+         "total": breakdown["total"],
+diff --git a/services/pricing/prices.py b/services/pricing/prices.py
+index f0b1b7a..b95a514 100644
+--- a/services/pricing/prices.py
++++ b/services/pricing/prices.py
+@@ -26,16 +26,18 @@ _STATS = {"db": 0, "http": 0, "missing": 0}
+ 
+ def _from_db(sku):
+     row = catalog_db().query_one(
+-        "SELECT sku, name, price, vat_band, active FROM products WHERE sku = ?", (sku,)
++        "SELECT id, sku, name, price, vat_band, active FROM products WHERE sku = ?", (sku,)
+     )
+     if row is None:
+         return None
++    tags = [r["tag"] for r in catalog_db().query("SELECT tag FROM product_tags WHERE product_id = ?", (row["id"],))]
+     return {
+         "sku": row["sku"],
+         "name": row["name"],
+         "unit_price": row["price"],
+         "vat_band": row["vat_band"],
+         "active": bool(row["active"]),
++        "tags": tags,
+     }
+ 
+ 
+@@ -54,6 +56,7 @@ def _from_catalog_http(sku):
+         "unit_price": p["price"],
+         "vat_band": p.get("vat_band", "standard"),
+         "active": True,
++        "tags": p.get("tags") or [],
+     }
+ 
+ 
+@@ -111,6 +114,7 @@ def build_lines(raw_lines):
+                 "qty": qty,
+                 "unit_price": p["unit_price"],
+                 "vat_band": p["vat_band"],
++                "tags": p.get("tags") or [],
+             }
+         )
+     return lines
+diff --git a/services/pricing/quote.py b/services/pricing/quote.py
+index 1b1bcf7..874284f 100644
+--- a/services/pricing/quote.py
++++ b/services/pricing/quote.py
+@@ -9,25 +9,39 @@ and normalises the output so v1 and v2 look the same to callers.
+ from larder_common.log import get_logger
+ from services.pricing import coupons_client, engines, prices
+ 
++# FEAT-001: "3 for 2" on products tagged 3for2 - every third unit of a line is free.
++MULTIBUY_TAG = "3for2"
++MULTIBUY_BUY = 3
++
+ log = get_logger("pricing.quote")
+ 
+ 
++def multibuy_free_units(line):
++    if MULTIBUY_TAG not in (line.get("tags") or []):
++        return 0
++    return int(line["qty"]) // MULTIBUY_BUY
++
++
+ def _public_line(line):
++    free = int(line.get("multibuy_free_units") or 0)
+     return {
+         "sku": line["sku"],
+         "name": line.get("name"),
+-        "qty": line["qty"],
++        "qty": line["qty"] + free,
+         "unit_price": line["unit_price"],
+         "unit_price_pence": int(round(line["unit_price"] * 100)),
+         "line_total_pence": line["line_total_pence"],
+         "vat_band": line.get("vat_band", "standard"),
++        "multibuy_free_units": free,
+     }
+ 
+ 
+ def _shape(breakdown, coupon):
++    public = [_public_line(l) for l in breakdown["lines"]]
+     out = {
+         "engine": breakdown.get("engine"),
+-        "lines": [_public_line(l) for l in breakdown["lines"]],
++        "lines": public,
++        "multibuy_discount_pence": sum(l["multibuy_free_units"] * l["unit_price_pence"] for l in public),
+         "subtotal": breakdown["subtotal"],
+         "discount": breakdown["discount"],
+         "delivery_fee": breakdown["delivery_fee"],
+@@ -42,8 +56,15 @@ def _shape(breakdown, coupon):
+ 
+ 
+ def price_lines(lines, coupon=None):
++    """The engines price what is charged: each line goes in with its free units taken off
++    (and they're added back for display), so subtotal, coupon and delivery all work on
++    the subtotal after multi-buy."""
+     engine = engines.get_engine()
+-    return _shape(engine.price_cart(lines, coupon), coupon)
++    charged = []
++    for l in lines:
++        free = multibuy_free_units(l)
++        charged.append(dict(l, qty=int(l["qty"]) - free, multibuy_free_units=free))
++    return _shape(engine.price_cart(charged, coupon), coupon)
+ 
+ 
+ def quote(raw_lines, coupon_code=None, validate_coupon=False):

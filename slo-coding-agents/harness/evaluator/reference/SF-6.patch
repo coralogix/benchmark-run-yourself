@@ -1,0 +1,37 @@
+# SF-6 reference fix. Repo: ops (apply inside the ops/ directory: git apply SF-6.patch)
+diff --git a/services/orders/routes/orders.js b/services/orders/routes/orders.js
+index cce4780..80ada02 100644
+--- a/services/orders/routes/orders.js
++++ b/services/orders/routes/orders.js
+@@ -12,9 +12,11 @@
+  *                      newest first, {orders,page,per_page,total}
+  *   no page param      "v1 compat" (2021, ACC-33): the accounts app of the
+  *                      time fetched everything and filtered client-side, so
+- *                      this branch returns EVERY order in the system and
+- *                      ignores user_id entirely. The response is shaped like
+- *                      a single page so the new client code "just works".
++ *                      without user_id this branch returns EVERY order in the
++ *                      system. With user_id it returns only that user's orders
++ *                      (it used to ignore user_id, so the account page got
++ *                      slower with every order ever placed). The response is
++ *                      shaped like a single page so the client code "just works".
+  *                      orders.legacyListLimit caps it if > 0 (it is 0).
+  *
+  * TODO(l.chen 2022-05-17): remove v1 compat once accounts passes page=1.
+@@ -53,14 +55,13 @@ router.get('/orders', asyncRoute(async function (req, res) {
+   var hasPage = Object.prototype.hasOwnProperty.call(q, 'page');
+ 
+   if (!hasPage) {
+-    // v1 compat - see header. user_id is NOT applied here.
+-    var everything = await new Promise(function (resolve, reject) {
++    // v1 compat - see header. user_id IS applied when given.
++    var everything = q.user_id ? await store.byUser(q.user_id) : await new Promise(function (resolve, reject) {
+       store.listAllCb(function (err, list) { return err ? reject(err) : resolve(list); });
+     });
+     var cap = config.get('orders.legacyListLimit', 0);
+     if (cap > 0) everything = everything.slice(0, cap);
+     telemetry.setAttr('larder.orders.legacy_list', everything.length);
+-    if (q.user_id) logger.debug('orders: v1 compat list called with user_id', { user_id: q.user_id, returned: everything.length });
+     return res.json({
+       orders: everything.map(views.compactView),
+       page: 1,

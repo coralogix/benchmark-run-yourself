@@ -1,0 +1,50 @@
+{
+  "name": "larder-ops",
+  "version": "3.2.0",
+  "private": true,
+  "description": "Larder ops services (orders, inventory, slots, payments, fraud, ledger, tax, webhooks, warehouse, notifications, bus). Split out of larder-fulfilment in 2023.",
+  "scripts": {
+    "start": "echo 'start each service with: node --require ./lib/telemetry/otel.js services/<name>/server.js' && exit 1",
+    "start:orders": "node --require ./lib/telemetry/otel.js services/orders/server.js",
+    "start:bus": "node --require ./lib/telemetry/otel.js services/bus/server.js",
+    "test": "NODE_ENV=test mocha --exit --timeout 10000 --recursive test",
+    "lint": "echo 'eslint removed in 2021, see README' && exit 0",
+    "reseed": "rm -rf data && echo 'data dir removed; services reseed on next boot'"
+  },
+  "engines": {
+    "node": ">=8"
+  },
+  "author": "Larder Platform <platform@larder.example>",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@opentelemetry/api": "1.9.1",
+    "@opentelemetry/api-logs": "0.223.0",
+    "@opentelemetry/exporter-logs-otlp-proto": "0.223.0",
+    "@opentelemetry/exporter-metrics-otlp-proto": "0.223.0",
+    "@opentelemetry/exporter-trace-otlp-proto": "0.223.0",
+    "@opentelemetry/instrumentation-express": "0.71.1",
+    "@opentelemetry/instrumentation-http": "0.223.0",
+    "@opentelemetry/resources": "2.12.0",
+    "@opentelemetry/sdk-logs": "0.223.0",
+    "@opentelemetry/sdk-metrics": "2.12.0",
+    "@opentelemetry/sdk-node": "0.223.0",
+    "async": "2.6.4",
+    "axios": "0.21.4",
+    "bluebird": "3.7.2",
+    "body-parser": "1.20.3",
+    "express": "4.22.3",
+    "lodash": "4.17.21",
+    "moment": "2.29.4",
+    "node-fetch": "2.7.0",
+    "request": "2.88.2",
+    "request-promise": "4.2.6",
+    "uuid": "3.4.0",
+    "winston": "2.4.7"
+  },
+  "devDependencies": {
+    "chai": "4.5.0",
+    "mocha": "6.2.3",
+    "sinon": "7.5.0",
+    "supertest": "4.0.2"
+  }
+}

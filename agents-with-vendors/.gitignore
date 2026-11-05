@@ -1,0 +1,13 @@
+# Run output: transcripts, logs, scores, fault-script state
+results/
+# Secrets
+.env
+*.pem
+*.key
+# The patched shop, fetched by scripts/setup-shop.sh
+otel-demo/
+# Python and editor clutter
+.venv/
+__pycache__/
+*.pyc
+.DS_Store

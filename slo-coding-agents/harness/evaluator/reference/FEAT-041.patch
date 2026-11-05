@@ -1,0 +1,19 @@
+diff --git a/services/edge_api/views/checkout.py b/services/edge_api/views/checkout.py
+index c4f59da..320753a 100644
+--- a/services/edge_api/views/checkout.py
++++ b/services/edge_api/views/checkout.py
+@@ -21,6 +21,14 @@ def do_checkout():
+     if not data.get("cart_id"):
+         raise BadRequest("cart_id_required")
+     res = upstreams.checkout(data.get("cart_id"), data.get("hold_id"), data.get("payment_token"))
++    if res.status == 201 and isinstance(res.body, dict) and res.body.get("order_ref"):
++        # FEAT-041: the booked slot, from the order
++        try:
++            o = upstreams.order(res.body["order_ref"])
++            slot = (o.body or {}).get("slot") if o.ok else None
++        except Exception:  # noqa - never fail a confirmed checkout for this
++            slot = None
++        res.body["estimated_delivery"] = {"date": slot.get("date"), "window": slot.get("window")} if slot else None
+     return passthrough(res)
+ 
+ 

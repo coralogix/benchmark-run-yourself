@@ -1,0 +1,25 @@
+diff --git a/services/recommendations/engine.py b/services/recommendations/engine.py
+index 2172e4f..e1be6f5 100644
+--- a/services/recommendations/engine.py
++++ b/services/recommendations/engine.py
+@@ -53,6 +53,12 @@ def _candidates(base):
+     return skus[: settings.RECS_CANDIDATES]
+ 
+ 
++def _pence(p):
++    if p.get("price_pence") is not None:
++        return int(p["price_pence"])
++    return int(round(float(p.get("price") or 0) * 100))
++
++
+ def also_bought(sku, limit=None):
+     limit = limit or settings.RECS_LIMIT
+     base = _product(sku)
+@@ -64,5 +70,7 @@ def also_bought(sku, limit=None):
+         p = _product(cand)
+         if p is not None:
+             products.append(p)
++    ceiling = 2 * _pence(base)
++    products = [p for p in products if _pence(p) <= ceiling]
+     ranked = scoring.rank(base, products)
+     return base, [scoring.strip(p) for p in ranked[:limit]]

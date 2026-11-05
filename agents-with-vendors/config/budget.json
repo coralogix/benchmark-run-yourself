@@ -1,0 +1,12 @@
+{
+  "_comment": "Pricing inputs for agents/budget-window.py and scoring/figures.py, from the pricing step in README.md. reference_budget_usd: the illustrative monthly budget. split: Coralogix's spend split across traces (T), logs (L) and metrics (M) for the measured telemetry mix, summing to 1. table: per other platform and signal, the share of Coralogix's volume the same money buys at that platform's list price (0 to 1); the values are the results page's. dt_billing_factor: Dynatrace's billed datapoints divided by the datapoints the collector sends to it, from Dynatrace's own billing usage events over a clean window. Replace every null before running.",
+  "reference_budget_usd": 10000,
+  "split": {"T": null, "L": null, "M": null},
+  "table": {
+    "dynatrace": {"T": 0.823, "L": 1.000, "M": 0.057},
+    "grafana":   {"T": 0.343, "L": 0.863, "M": 0.791},
+    "newrelic":  {"T": 0.381, "L": 0.959, "M": 0.159},
+    "datadog":   {"T": 0.180, "L": 0.280, "M": 0.103}
+  },
+  "dt_billing_factor": null
+}

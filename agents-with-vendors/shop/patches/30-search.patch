@@ -1,0 +1,448 @@
+diff --git a/compose.search.yaml b/compose.search.yaml
+new file mode 100644
+index 0000000..3350f08
+--- /dev/null
++++ b/compose.search.yaml
+@@ -0,0 +1,44 @@
++# Benchmark: product search for the search relevance scenario. agents/ops.sh
++# dc includes this file. frontend-proxy routes /api/search here and the load
++# generator's search_products task calls it.
++services:
++  search:
++    image: harness-search:1
++    container_name: search
++    build:
++      context: ./
++      dockerfile: ./src/search/Dockerfile
++    deploy:
++      resources:
++        limits:
++          memory: 120M
++    restart: unless-stopped
++    ports:
++      - "8090"
++    environment:
++      - SEARCH_PORT=8090
++      - PRODUCT_CATALOG_ADDR
++      - OTEL_PYTHON_LOG_CORRELATION=true
++      - OTEL_EXPORTER_OTLP_ENDPOINT
++      - OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE
++      - OTEL_EXPORTER_OTLP_METRICS_DEFAULT_HISTOGRAM_AGGREGATION
++      - OTEL_RESOURCE_ATTRIBUTES=${OTEL_RESOURCE_ATTRIBUTES},service.criticality=medium
++      - OTEL_SERVICE_NAME=search
++      - OTEL_PYTHON_SDK_INTERNAL_METRICS_ENABLED=true
++      - PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=python
++    healthcheck:
++      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8090/healthz || exit 1"]
++      start_period: 10s
++      interval: 5s
++      timeout: 5s
++      retries: 20
++    depends_on:
++      product-catalog:
++        condition: service_started
++      otel-collector:
++        condition: service_started
++    logging:
++      driver: "json-file"
++      options:
++        max-size: "5m"
++        max-file: "2"
+diff --git a/src/frontend-proxy/envoy.tmpl.yaml b/src/frontend-proxy/envoy.tmpl.yaml
+index 7fbe8ac..50e6f54 100644
+--- a/src/frontend-proxy/envoy.tmpl.yaml
++++ b/src/frontend-proxy/envoy.tmpl.yaml
+@@ -92,6 +92,8 @@ static_resources:
+                             timeout: 0s
+                             upgrade_configs:
+                               - upgrade_type: websocket
++                        - match: { path: "/api/search" }
++                          route: { cluster: search }
+                         - match: { prefix: "/" }  # Default/catch-all route - keep last since prefix:"/" matches everything
+                           route: { cluster: frontend }
+                 http_filters:
+@@ -209,6 +211,19 @@ static_resources:
+                     socket_address:
+                       address: ${FRONTEND_HOST}
+                       port_value: ${FRONTEND_PORT}
++    - name: search
++      type: STRICT_DNS
++      lb_policy: ROUND_ROBIN
++      typed_dns_resolver_config: *dns_resolver
++      load_assignment:
++        cluster_name: search
++        endpoints:
++          - lb_endpoints:
++              - endpoint:
++                  address:
++                    socket_address:
++                      address: search
++                      port_value: 8090
+     - name: image-provider
+       type: STRICT_DNS
+       lb_policy: ROUND_ROBIN
+diff --git a/src/search/Dockerfile b/src/search/Dockerfile
+new file mode 100644
+index 0000000..8f03a76
+--- /dev/null
++++ b/src/search/Dockerfile
+@@ -0,0 +1,31 @@
++# Copyright The OpenTelemetry Authors
++# SPDX-License-Identifier: Apache-2.0
++# Product search. Reuses recommendation's locked Python dependencies and its
++# generated gRPC stubs (ProductCatalogService), so no new packages.
++
++FROM docker.io/library/python:3.14.7-alpine3.24@sha256:c6ead215bfd31f1e433d968853b7a769989117115b728874824e6c0a27cb96fc AS build-venv
++
++RUN apk update && \
++    apk add gcc g++ linux-headers
++
++COPY ./src/recommendation/requirements.txt requirements.txt
++
++RUN python -m venv venv && \
++    venv/bin/pip install --no-cache-dir --require-hashes -r requirements.txt
++
++RUN venv/bin/opentelemetry-bootstrap -a install
++
++FROM docker.io/library/python:3.14.7-alpine3.24@sha256:c6ead215bfd31f1e433d968853b7a769989117115b728874824e6c0a27cb96fc
++
++COPY --from=build-venv /venv/ /venv/
++
++WORKDIR /app
++
++COPY ./src/recommendation/demo_pb2_grpc.py demo_pb2_grpc.py
++COPY ./src/recommendation/demo_pb2.py demo_pb2.py
++COPY ./src/search/matcher.py matcher.py
++COPY ./src/search/search_server.py search_server.py
++
++ARG SEARCH_PORT=8090
++EXPOSE ${SEARCH_PORT}
++ENTRYPOINT [ "/venv/bin/opentelemetry-instrument", "/venv/bin/python", "search_server.py" ]
+diff --git a/src/search/README.md b/src/search/README.md
+new file mode 100644
+index 0000000..94c6d06
+--- /dev/null
++++ b/src/search/README.md
+@@ -0,0 +1,17 @@
++# Search service
++
++Product search for the Astronomy Shop: `POST /api/search` with `{"query": "..."}`
++(routed by frontend-proxy). It indexes the catalog from product-catalog
++(`ListProducts`, refreshed every `CATALOG_REFRESH_S`, default 60 s) and returns
++up to 6 matching products plus popular-product suggestions, 8 products in total.
++
++Matching: `match_mode` in `/tmp/search.conf` (`any`, the default, is tokenised
++term matching across name, categories and description; `phrase` is stricter,
++needing the whole query as a phrase in the name or categories).
++
++Telemetry: an HTTP server span per request and a `search_products` span with
++`app.search.query`, `app.search.results.count` and
++`app.search.results.product_ids`; gRPC client spans to product-catalog. Logs at
++startup and on errors only.
++
++Env: `SEARCH_PORT` (8090), `PRODUCT_CATALOG_ADDR`, `OTEL_*`.
+diff --git a/src/search/matcher.py b/src/search/matcher.py
+new file mode 100644
+index 0000000..a92f579
+--- /dev/null
++++ b/src/search/matcher.py
+@@ -0,0 +1,105 @@
++# Copyright The OpenTelemetry Authors
++# SPDX-License-Identifier: Apache-2.0
++"""Product search over the catalog.
++
++Two match modes, chosen per request from the service config:
++  any    - tokenised: a product matches when any query term (lightly stemmed,
++           stop words dropped) appears in its name, categories or description;
++           ranked by where the terms hit.
++  phrase - stricter relevance: the whole query must appear as a phrase in the
++           product's name or categories.
++"""
++
++import re
++
++STOP_WORDS = {"a", "an", "and", "the", "for", "of", "to", "with", "in", "on", "my", "best", "cheap"}
++MAX_RESULTS = 6
++PAGE_SIZE = 8  # results + suggestions, so every response lists the same number of products
++
++_TOKEN = re.compile(r"[a-z0-9]+")
++
++
++def stem(word):
++    """Very light plural/verb stemming: binoculars to binocular, accessories to accessory."""
++    if len(word) <= 3:
++        return word
++    if word.endswith("ies"):
++        return word[:-3] + "y"
++    if word.endswith(("sses", "xes", "ches", "shes")):
++        return word[:-2]
++    if word.endswith("ing") and len(word) > 5:
++        return word[:-3]
++    if word.endswith("s") and not word.endswith("ss"):
++        return word[:-1]
++    return word
++
++
++def terms(text):
++    return [stem(t) for t in _TOKEN.findall(text.lower()) if t not in STOP_WORDS]
++
++
++class Index:
++    def __init__(self, products):
++        # products: list of dicts with id, name, description, categories (list), price_usd, picture
++        self.products = products
++        self._name = {p["id"]: set(terms(p["name"])) for p in products}
++        self._cat = {p["id"]: set(terms(" ".join(p["categories"]))) for p in products}
++        self._desc = {p["id"]: set(terms(p["description"])) for p in products}
++        self._phrase_text = {
++            p["id"]: " " + " ".join(_TOKEN.findall((p["name"] + " " + " ".join(p["categories"])).lower())) + " "
++            for p in products
++        }
++
++    def match_any(self, query):
++        q = terms(query)
++        scored = []
++        for p in self.products:
++            pid = p["id"]
++            score = 0
++            for t in q:
++                if t in self._name[pid]:
++                    score += 3
++                elif t in self._cat[pid]:
++                    score += 2
++                elif t in self._desc[pid]:
++                    score += 1
++            if score:
++                scored.append((-score, p["name"], p))
++        scored.sort(key=lambda s: (s[0], s[1]))
++        return [s[2] for s in scored[:MAX_RESULTS]]
++
++    def match_phrase(self, query):
++        words = _TOKEN.findall(query.lower())
++        if not words:
++            return []
++        needle = " " + " ".join(words) + " "
++        single = len(words) == 1
++        hits = []
++        for p in self.products:
++            pid = p["id"]
++            if needle in self._phrase_text[pid]:
++                hits.append(p)
++            elif single and stem(words[0]) in (self._name[pid] | self._cat[pid]):
++                hits.append(p)
++        hits.sort(key=lambda p: p["name"])
++        return hits[:MAX_RESULTS]
++
++    def search(self, query, mode):
++        return self.match_phrase(query) if mode == "phrase" else self.match_any(query)
++
++
++def page(results, popular):
++    """Results first, then popular products to fill the page ("you might also like")."""
++    ids = {p["id"] for p in results}
++    suggestions = [p for p in popular if p["id"] not in ids][: PAGE_SIZE - len(results)]
++    return results, suggestions
++
++
++def summary(p):
++    return {
++        "id": p["id"],
++        "name": p["name"],
++        "picture": p["picture"],
++        "priceUsd": p["price_usd"],
++        "categories": p["categories"],
++    }
+diff --git a/src/search/search_server.py b/src/search/search_server.py
+new file mode 100644
+index 0000000..f46315c
+--- /dev/null
++++ b/src/search/search_server.py
+@@ -0,0 +1,188 @@
++#!/usr/bin/python
++
++# Copyright The OpenTelemetry Authors
++# SPDX-License-Identifier: Apache-2.0
++"""Product search: POST /api/search {"query": "..."} returns results and suggestions.
++
++Indexes the catalog from product-catalog (ListProducts, refreshed every
++CATALOG_REFRESH_S). Runs under opentelemetry-instrument (gRPC client spans,
++SDK setup); the HTTP server span is created here. Logs only at startup and on
++errors.
++"""
++
++import json
++import logging
++import os
++import threading
++import time
++from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
++
++import grpc
++from opentelemetry import trace
++from opentelemetry._logs import set_logger_provider
++from opentelemetry.exporter.otlp.proto.grpc._log_exporter import OTLPLogExporter
++from opentelemetry.propagate import extract
++from opentelemetry.sdk._logs import LoggerProvider, LoggingHandler
++from opentelemetry.sdk._logs.export import BatchLogRecordProcessor
++from opentelemetry.sdk.resources import Resource
++from opentelemetry.trace import SpanKind, Status, StatusCode
++
++import demo_pb2
++import demo_pb2_grpc
++import matcher
++
++CONFIG_FILE = os.environ.get("SEARCH_CONFIG_FILE", "/tmp/search.conf")
++POPULAR_IDS = os.environ.get(
++    "SEARCH_POPULAR_IDS",
++    "OLJCESPC7Z,66VCHSJNUP,2ZYFJ3GM2N,LS4PSXUNUM,6E92ZMYYFZ,L9ECAV7KIM,1YMWWN1N4O,0PUK6V6EV0,9SIQT8TOJO,HQTGWGPNH4",
++).split(",")
++REFRESH_S = int(os.environ.get("CATALOG_REFRESH_S", "60"))
++
++tracer = trace.get_tracer("search")
++logger = logging.getLogger("main")
++
++_state = {"index": None, "popular": []}
++_config = {"mtime": None, "mode": "any"}
++_config_lock = threading.Lock()
++
++
++def match_mode():
++    """match_mode from the config file (re-read when it changes); default 'any'."""
++    try:
++        mtime = os.stat(CONFIG_FILE).st_mtime
++    except OSError:
++        return "any"
++    with _config_lock:
++        if mtime != _config["mtime"]:
++            mode = "any"
++            try:
++                with open(CONFIG_FILE) as f:
++                    for line in f:
++                        key, _, value = line.strip().partition("=")
++                        if key.strip() == "match_mode" and value.strip() in ("any", "phrase"):
++                            mode = value.strip()
++            except OSError:
++                pass
++            _config.update(mtime=mtime, mode=mode)
++        return _config["mode"]
++
++
++def load_catalog(stub):
++    resp = stub.ListProducts(demo_pb2.Empty())
++    products = [
++        {
++            "id": p.id,
++            "name": p.name,
++            "description": p.description,
++            "categories": list(p.categories),
++            "picture": p.picture,
++            "price_usd": round(p.price_usd.units + p.price_usd.nanos / 1e9, 2),
++        }
++        for p in resp.products
++    ]
++    by_id = {p["id"]: p for p in products}
++    _state["index"] = matcher.Index(products)
++    _state["popular"] = [by_id[i] for i in POPULAR_IDS if i in by_id] + [
++        p for p in products if p["id"] not in POPULAR_IDS
++    ]
++
++
++def refresh_loop(stub):
++    while True:
++        time.sleep(REFRESH_S)
++        try:
++            load_catalog(stub)
++        except Exception as e:  # keep serving the last good index
++            logger.error(f"catalog refresh failed: {e}")
++
++
++class Handler(BaseHTTPRequestHandler):
++    protocol_version = "HTTP/1.1"
++
++    def log_message(self, *args):  # no per-request access log
++        pass
++
++    def _send(self, code, body):
++        data = json.dumps(body).encode()
++        self.send_response(code)
++        self.send_header("Content-Type", "application/json")
++        self.send_header("Content-Length", str(len(data)))
++        self.end_headers()
++        self.wfile.write(data)
++        return data
++
++    def do_GET(self):
++        if self.path == "/healthz":
++            self._send(200 if _state["index"] else 503, {"ok": bool(_state["index"])})
++        else:
++            self._send(404, {"error": "not found"})
++
++    def do_POST(self):
++        path = self.path.split("?", 1)[0]
++        ctx = extract(dict(self.headers))
++        with tracer.start_as_current_span(f"POST {path}", context=ctx, kind=SpanKind.SERVER) as span:
++            span.set_attribute("http.request.method", "POST")
++            span.set_attribute("url.path", path)
++            span.set_attribute("http.route", "/api/search")
++            if path != "/api/search":
++                span.set_attribute("http.response.status_code", 404)
++                self._send(404, {"error": "not found"})
++                return
++            try:
++                length = int(self.headers.get("Content-Length") or 0)
++                query = str(json.loads(self.rfile.read(length) or b"{}").get("query", "")).strip()[:200]
++            except (ValueError, AttributeError):
++                span.set_attribute("http.response.status_code", 400)
++                self._send(400, {"error": "invalid request"})
++                return
++            index = _state["index"]
++            if index is None:
++                span.set_attribute("http.response.status_code", 503)
++                span.set_status(Status(StatusCode.ERROR, "catalog not loaded"))
++                self._send(503, {"error": "catalog not loaded"})
++                return
++            with tracer.start_as_current_span("search_products") as inner:
++                results = index.search(query, match_mode())
++                results, suggestions = matcher.page(results, _state["popular"])
++                inner.set_attribute("app.search.query", query)
++                inner.set_attribute("app.search.results.count", len(results))
++                inner.set_attribute("app.search.results.product_ids", [p["id"] for p in results])
++            span.set_attribute("app.search.query", query)
++            span.set_attribute("app.search.results.count", len(results))
++            data = self._send(200, {
++                "query": query,
++                "results": [matcher.summary(p) for p in results],
++                "suggestions": [matcher.summary(p) for p in suggestions],
++            })
++            span.set_attribute("http.response.status_code", 200)
++            span.set_attribute("http.response.body.size", len(data))
++
++
++def must_map_env(key):
++    value = os.environ.get(key)
++    if value is None:
++        raise Exception(f"{key} environment variable must be set")
++    return value
++
++
++if __name__ == "__main__":
++    logger_provider = LoggerProvider(resource=Resource.create({}))
++    set_logger_provider(logger_provider)
++    logger_provider.add_log_record_processor(BatchLogRecordProcessor(OTLPLogExporter(insecure=True)))
++    logger.addHandler(LoggingHandler(level=logging.NOTSET, logger_provider=logger_provider))
++    logger.setLevel(logging.INFO)
++
++    stub = demo_pb2_grpc.ProductCatalogServiceStub(grpc.insecure_channel(must_map_env("PRODUCT_CATALOG_ADDR")))
++    for attempt in range(30):
++        try:
++            load_catalog(stub)
++            break
++        except Exception as e:
++            logger.error(f"catalog load failed (attempt {attempt + 1}): {e}")
++            time.sleep(2)
++    threading.Thread(target=refresh_loop, args=(stub,), daemon=True).start()
++
++    port = int(must_map_env("SEARCH_PORT"))
++    server = ThreadingHTTPServer(("0.0.0.0", port), Handler)
++    logger.info(f"Search service started, listening on port {port}")
++    server.serve_forever()
