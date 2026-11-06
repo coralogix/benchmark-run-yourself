@@ -9,9 +9,9 @@ dependencies = [
     # without testing the /v1 routes (simplejson + Response subclassing) - TH
     "Flask==2.2.5",
     "Werkzeug==2.2.3",
-    "waitress==2.1.2",
-    "requests==2.28.2",
-    "urllib3<2",
+    "waitress==3.0.1",
+    "requests==2.33.0",
+    "urllib3<3",
     "arrow==0.15.5",
     "python-dateutil==2.8.1",
     "simplejson==3.17.6",
