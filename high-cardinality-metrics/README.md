@@ -1,6 +1,6 @@
 # Coralogix Metrics vs Popular Open Source Engines
 
-This benchmark measures PromQL query latency and error rate under high cardinality and high concurrency. Five metrics backends at matched monthly spend (Coralogix, Prometheus, ClickHouse MergeTree, ClickHouse TimeSeries and Grafana Mimir) are loaded with the same one-week corpus of 1.8 million active series. Ten queries, from a single pinned series to a multi-window burn-rate alert, run against each backend at four cardinality bands (100k, 200k, 500k and 1M series) and at 10 to 100 queries at once. Every (platform, query, band, concurrency) cell records p50, p95, p99, sample count and error rate.
+This benchmark measures PromQL query latency and error rate under high cardinality and high concurrency. Six metrics backends at matched monthly spend (Coralogix, Prometheus, VictoriaMetrics, ClickHouse MergeTree, ClickHouse TimeSeries and Grafana Mimir) are loaded with the same one-week corpus of 1.8 million active series. Ten queries, from a single pinned series to a multi-window burn-rate alert, run against each backend at four cardinality bands (100k, 200k, 500k and 1M series) and at 10 to 100 queries at once. Every (platform, query, band, concurrency) cell records p50, p95, p99, sample count and error rate.
 
 Results: https://benchmarks.coralogix.com/metrics-concurrency
 
@@ -8,29 +8,29 @@ Results: https://benchmarks.coralogix.com/metrics-concurrency
 
 - An AWS account in one region with a VPC, a subnet with outbound internet access and quota for these Graviton (m7g) instances, all created by `infra/main.tf`:
   - two m7g.16xlarge loaders (Prometheus and ClickHouse MergeTree), temporary
-  - three m7g.8xlarge servers (Prometheus, ClickHouse MergeTree, ClickHouse TimeSeries)
+  - four m7g.8xlarge servers (Prometheus, VictoriaMetrics, ClickHouse MergeTree, ClickHouse TimeSeries)
   - thirteen m7g.xlarge: nine Mimir nodes and four Coralogix senders (the senders are temporary)
-  - five m7g.4xlarge query clients, one per platform
+  - six m7g.4xlarge query clients, one per platform
   - one t4g.small coordinator
 - A Coralogix account (standard, no special flags) with a Send-Your-Data API key and an API key with metrics query access.
 - Terraform 1.10 or later, AWS CLI v2, Go 1.27.3 (to build the generator locally), Python 3.9 or later with `numpy` (`pip install numpy`), GNU make.
-- Installed on the boxes by their bootstrap scripts: ClickHouse 26.10.2.103 (MergeTree and TimeSeries), Prometheus 3.1.0, Grafana Mimir and mimirtool 2.14.3, OpenTelemetry Collector Contrib 0.164.0, Go 1.27.3.
-- Cost of one run (`SCALE=real`, `REUSE=0`): about $681, infrastructure and Coralogix ingest. It uses the m7g on-demand prices behind the page's monthly costs (m7g.8xlarge $1.4552 an hour, each m7g size priced in proportion to its vCPUs), t4g.small at $0.0184 an hour and gp3 at $0.08 per GB-month.
+- Installed on the boxes by their bootstrap scripts: ClickHouse 26.10.2.103 (MergeTree and TimeSeries), Prometheus 3.1.0, VictoriaMetrics and vmctl v1.155.0, Grafana Mimir and mimirtool 2.14.3, OpenTelemetry Collector Contrib 0.164.0, Go 1.27.3.
+- Cost of one run (`SCALE=real`, `REUSE=0`): about $748, infrastructure and Coralogix ingest. It uses the m7g on-demand prices behind the page's monthly costs (m7g.8xlarge $1.4552 an hour, each m7g size priced in proportion to its vCPUs), t4g.small at $0.0184 an hour and gp3 at $0.08 per GB-month.
 
   | Item | Count and price | Hours | Cost |
   |---|---|---|---|
-  | Serving nodes | 3 x m7g.8xlarge at $1.4552 = $4.3656/h | 30 | $131 |
+  | Serving nodes | 4 x m7g.8xlarge at $1.4552 = $5.8208/h | 30 | $175 |
   | Mimir nodes | 9 x m7g.xlarge at $0.1819 = $1.6371/h | 30 | $49 |
-  | Query clients | 5 x m7g.4xlarge at $0.7276 = $3.6380/h | 30 | $109 |
+  | Query clients | 6 x m7g.4xlarge at $0.7276 = $4.3656/h | 30 | $131 |
   | Coordinator | 1 x t4g.small at $0.0184/h | 30 | $1 |
   | Loaders | 2 x m7g.16xlarge at $2.9104 = $5.8208/h | 17 | $99 |
   | Coralogix senders | 4 x m7g.xlarge at $0.1819 = $0.7276/h | 17 | $12 |
-  | gp3 on the boxes that stay | 2,120 GB (300 + 2 x 600 + 9 x 50 + 5 x 30 + 20) at $0.08/730 per GB-hour | 30 | $7 |
+  | gp3 on the boxes that stay | 2,450 GB (2 x 300 + 2 x 600 + 9 x 50 + 6 x 30 + 20) at $0.08/730 per GB-hour | 30 | $8 |
   | gp3 on the boxes that terminate early | 1,020 GB (600 + 300 + 4 x 30) at $0.08/730 per GB-hour | 17 | $2 |
   | Coralogix ingest | one week of the corpus: $1,178 a month x 168 / 730 hours | | $271 |
-  | Total | | | about $681 |
+  | Total | | | about $748 |
 
-  The hours: the loaders and senders run for the ingest, about 17 hours (the ClickHouse MergeTree load is the longest, `infra/stage.sh`), and terminate themselves; the table assumes all of them run that long. Every other box runs until the coordinator tears the fleet down after the last sweep, so it runs for the ingest plus the slowest platform's sweep. A sweep is 400 concurrent cells (4 bands x 10 queries x 10 levels) and 40 serial cells. A concurrent cell takes 15 s if every request is fast and up to 135 s if requests run to the 120 s client timeout; a serial cell takes at most 45 s plus one request. That puts one platform's sweep between about 2 hours (400 x 15 s plus the serial cells) and 17 hours (400 x 135 s + 40 x 165 s); a platform that times out in most of its cells takes about 13 hours, so the estimate uses 17 + 13 = 30 hours. At the 17-hour upper bound the boxes that stay run 34 hours and the run costs about $720.
+  The hours: the loaders and senders run for the ingest, about 17 hours (the ClickHouse MergeTree load is the longest, `infra/stage.sh`), and terminate themselves; the table assumes all of them run that long. Every other box runs until the coordinator tears the fleet down after the last sweep, so it runs for the ingest plus the slowest platform's sweep. A sweep is 400 concurrent cells (4 bands x 10 queries x 10 levels) and 40 serial cells. A concurrent cell takes 15 s if every request is fast and up to 135 s if requests run to the 120 s client timeout; a serial cell takes at most 45 s plus one request. That puts one platform's sweep between about 2 hours (400 x 15 s plus the serial cells) and 17 hours (400 x 135 s + 40 x 165 s); a platform that times out in most of its cells takes about 13 hours, so the estimate uses 17 + 13 = 30 hours. At the 17-hour upper bound the boxes that stay run 34 hours and the run costs about $796.
 
   Not included: S3 for the corpus and Mimir's blocks (a few hundred GB, under $1 a day), internet egress for the Coralogix ingest, and a NAT gateway if the subnet reaches the internet through one. `SCALE=test` runs on small instances for well under an hour. `REUSE=1` skips the 17-hour ingest and the Coralogix ingest; the loaders and senders still start, and the Prometheus loader backfills Mimir from the stored blocks before they terminate.
 
@@ -44,7 +44,7 @@ make score             # per-cell summaries, results/page-data.json and results/
 make clean             # terraform destroy; the bucket, corpus and secret are kept for reuse
 ```
 
-`SCALE` in `.env` picks the size: `test` is a small rehearsal (band b1, 20 minutes of data, 1 and 10 queries at once) on small instances, `real` is the full run. `REUSE=1` mounts the corpus already stored in the bucket: Prometheus and ClickHouse MergeTree serve it directly, Mimir is backfilled from its blocks and Coralogix is sent nothing; ClickHouse TimeSeries has no stored corpus, so a reuse run leaves it out. Values given on the command line override `.env`, for example `make run SCALE=real REUSE=0`.
+`SCALE` in `.env` picks the size: `test` is a small rehearsal (band b1, 20 minutes of data, 1 and 10 queries at once) on small instances, `real` is the full run. `REUSE=1` mounts the corpus already stored in the bucket: Prometheus and ClickHouse MergeTree serve it directly, Mimir and VictoriaMetrics are loaded from its blocks and Coralogix is sent nothing; ClickHouse TimeSeries has no stored corpus, so a reuse run leaves it out. Values given on the command line override `.env`, for example `make run SCALE=real REUSE=0`.
 
 ## Step by step
 
@@ -62,9 +62,10 @@ make clean             # terraform destroy; the bucket, corpus and secret are ke
    make clean SCALE=test
    ```
 
-2. **Provision five matched backends.** Every self-hosted platform runs on m7g (Graviton) instances in one region, with the query clients in the same private subnet as the self-hosted nodes. `infra/main.tf` creates them:
+2. **Provision six matched backends.** Every self-hosted platform runs on m7g (Graviton) instances in one region, with the query clients in the same private subnet as the self-hosted nodes. `infra/main.tf` creates them:
    - Coralogix (SaaS): a standard account with no special flags, billed on ingest at about $1,178 per month for this volume.
    - Prometheus: 1 node, m7g.8xlarge (32 vCPU / 128 GiB), local TSDB on gp3 (300 GB provisioned).
+   - VictoriaMetrics: 1 node, m7g.8xlarge, single-node VictoriaMetrics on gp3 (300 GB provisioned), loaded from the Prometheus loader's blocks.
    - ClickHouse (MergeTree): 1 node, m7g.8xlarge, MergeTree tables on gp3 (600 GB provisioned), loaded from a separate m7g.16xlarge loader.
    - ClickHouse (TimeSeries): 1 node, m7g.8xlarge, the TimeSeries engine on gp3 (600 GB provisioned), loaded on the node itself.
    - Grafana Mimir: 9 nodes, m7g.xlarge each (36 vCPU / 144 GiB in total), replication factor 3, memberlist ring, blocks on S3, 50 GB gp3 per node.
@@ -77,13 +78,14 @@ make clean             # terraform destroy; the bucket, corpus and secret are ke
 
    `make run` applies `infra/main.tf`, waits for the `06-data-safe` marker (up to 48 hours, `WAIT_MAX`) and downloads one result tarball per platform into `results/`.
 
-   Steps 3 to 12 describe what the boxes do during `make run`; their commands are for manual runs only.
+   Steps 3 to 13 describe what the boxes do during `make run`; their commands are for manual runs only.
 
    `infra/stage.sh` drives every box by role: loaders, servers, Coralogix senders, one query client per platform and a coordinator. Boxes coordinate through markers in `s3://$BENCH_BUCKET/<run tag>/`; `make run` prints the run tag and writes it to `results/run-tag`. Watch for a marker with `RUN_TAG=$(cat results/run-tag) scripts/wait-marker.sh <marker>` after loading the settings (`set -a; . ./.env; set +a`).
 
-3. **Keep every configuration stock, except what loading a backfilled week needs.** Leave every query timeout, cache, concurrency limit and sharding setting at its default, Coralogix included. Timeouts are:
+3. **Keep every configuration stock, except what loading a backfilled week needs, and tune VictoriaMetrics.** On every platform but VictoriaMetrics, leave every query timeout, cache, concurrency limit and sharding setting at its default, Coralogix included. Timeouts are:
    - the query client: 120 s per request (`TIMEOUT` in `harness/run.py`), the same for every platform; a request past it is an error
    - Prometheus: its stock `--query.timeout` of 2 minutes
+   - VictoriaMetrics: `-search.maxQueryDuration` raised to 120 s, the client timeout
    - Mimir: its default querier timeout
    - ClickHouse MergeTree and TimeSeries: no `max_execution_time`, so the 120 s client timeout is the cap
    - Coralogix: none configured
@@ -110,6 +112,21 @@ make clean             # terraform destroy; the bucket, corpus and secret are ke
    - the `prometheus_api_v1` HTTP handler on `prometheus.metrics`, serving PromQL at `:8123/prometheus/api/v1`
 
    No `async_insert` or other server setting is changed on either ClickHouse.
+
+   VictoriaMetrics is the one platform tuned for this workload. It runs as a single node, the version VictoriaMetrics recommends below a million samples a second, with these query flags, all in the `vm-server` role of `infra/stage.sh`:
+
+   | Flag | Value | Default | Why |
+   |---|---|---|---|
+   | `-search.maxConcurrentRequests` | 32 | 16 | One slot per core. The published run tried 32, 64 and 100 at 100 queries at once on the burn-rate and join queries at 1M series before the measured sweep; 32 answered burn-rate alerts fastest and used a third of the memory 100 needed. |
+   | `-search.maxQueueDuration` | 120s | 10s | A query waiting for a slot queues for up to the client timeout instead of being rejected after 10 s. |
+   | `-search.maxQueryDuration` | 120s | 30s | The burn-rate alert at 1M series runs past the default. |
+   | `-search.maxSamplesPerQuery` | 10,000,000,000 | 1,000,000,000 | The burn-rate alert's 6-hour windows over 1M series approach the default. |
+   | `-search.maxUniqueTimeseries` | 5,000,000 | derived from memory | The 1M-series band. |
+   | `-search.maxSeriesPerAggrFunc` | 5,000,000 | 1,000,000 | The 1M-series band. |
+   | `-search.maxLabelsAPISeries` | 5,000,000 | 1,000,000 | Label enumeration over the 1M-series band. |
+   | `-search.maxLabelsAPIDuration` | 60s | 5s | Label enumeration over the 1M-series band. |
+   | `-retentionPeriod` | 100y | 1 month | The loaded week must not age out. |
+   | `-search.disableCache` | set | not set | Turns the response cache off, so VictoriaMetrics answers every query from storage, like every other platform. |
 
 4. **Generate one deterministic corpus.** Build the generator and use one fixed seed (`--seed 1`) for every platform. The corpus is 1,800,000 active series at 60-second resolution over one week: 10,080 points per series, about 18.1 billion samples. The four cardinality bands have 100k, 200k, 500k and 1,000,000 active series. Every series carries cluster, namespace, service, pod, region, http_route, http_method, status_code and customer_id.
 
@@ -143,7 +160,19 @@ make clean             # terraform destroy; the bucket, corpus and secret are ke
      --table prometheus.metrics --chunk 4000 --parallel 24
    ```
 
-8. **Load Coralogix.** Send the week to the account's metrics endpoint with historical timestamps. `infra/stage.sh` (role `cx-sender`) runs four writers, one per shard, 0 to N-1.
+8. **Load VictoriaMetrics.** In `infra/stage.sh` (role `vm-server`) the serving node imports the same TSDB blocks the Prometheus loader wrote to S3, so Prometheus, Mimir and VictoriaMetrics hold the identical week. Eight `vmctl` processes read the blocks over disjoint time windows in parallel, each window edge at 30 seconds past the minute so no 60-second sample lands on a boundary. The node then force-merges once, checks that it holds exactly the samples the blocks' `meta.json` files count, deletes the downloaded blocks and restarts with the tuned flags from step 3. A `REUSE=1` run imports the stored blocks the same way.
+
+   ```sh
+   aws s3 sync s3://$BENCH_BUCKET/corpus/<prefix>/blocks/ /var/lib/vm-blocks/
+   vmctl prometheus -s --disable-progress-bar --prom-snapshot=/var/lib/vm-blocks \
+     --vm-addr=http://127.0.0.1:8428 --prom-concurrency=4 --vm-concurrency=4 --vm-batch-size=500000 \
+     --prom-filter-time-start=<window-start> --prom-filter-time-end=<window-end>
+   curl -X POST http://127.0.0.1:8428/internal/force_merge
+   ```
+
+   VictoriaMetrics' label and series APIs search only the current day unless given a range, and Prometheus searches all its data. To make both search the same week, the query client sends VictoriaMetrics `start` and `end` covering the week before the query instant (`label_window` in `harness/run.py`).
+
+9. **Load Coralogix.** Send the week to the account's metrics endpoint with historical timestamps. `infra/stage.sh` (role `cx-sender`) runs four writers, one per shard, 0 to N-1.
 
    ```sh
    export CORALOGIX_KEY=<send-key>
@@ -151,9 +180,9 @@ make clean             # terraform destroy; the bucket, corpus and secret are ke
      --bands b1,b2,b3,b4 --shard <i> --shards <N> --backfill 168h --interval 1m --seed 1
    ```
 
-9. **Confirm idle.** The loaders and senders terminate themselves once their data is in S3 or on the account, leaving each platform at its footprint from step 2. Each query node runs nothing but its engine before the first measured query.
+10. **Confirm idle.** The loaders and senders terminate themselves once their data is in S3 or on the account, leaving each platform at its footprint from step 2. Each query node runs nothing but its engine before the first measured query.
 
-10. **Pin the query instant and prepare the query ladder.** The coordinator writes one instant (`QUERY_EVAL_TIME`, unix seconds) to the `data-eval-time` marker: its clock minus 300 s, read once the servers are ready. Every loader starts after that point and writes the week that ends at its own start time, so the instant lies inside every engine's loaded week. Every query on every platform is evaluated at that instant. On a `REUSE=1` run the instant comes from the corpus manifest. The ten PromQL queries are in `harness/queries.py`, lightest to heaviest. Coralogix, Prometheus, Mimir and ClickHouse TimeSeries run the same PromQL, with each backend's counter name (`COUNTER_NAME` in `harness/queries.py`), through the harness's Prometheus-API path; ClickHouse MergeTree runs the SQL translations in `harness/queries_ch.py`. Each client runs a verify phase first.
+11. **Pin the query instant and prepare the query ladder.** The coordinator writes one instant (`QUERY_EVAL_TIME`, unix seconds) to the `data-eval-time` marker: its clock minus 300 s, read once the servers are ready. Every loader starts after that point and writes the week that ends at its own start time, so the instant lies inside every engine's loaded week. Every query on every platform is evaluated at that instant. On a `REUSE=1` run the instant comes from the corpus manifest. The ten PromQL queries are in `harness/queries.py`, lightest to heaviest. Coralogix, Prometheus, VictoriaMetrics, Mimir and ClickHouse TimeSeries run the same PromQL, with each backend's counter name (`COUNTER_NAME` in `harness/queries.py`), through the harness's Prometheus-API path; ClickHouse MergeTree runs the SQL translations in `harness/queries_ch.py`. Each client runs a verify phase first.
    1. A fully pinned single-series read
    2. Label-values enumeration
    3. An equality label filter
@@ -171,11 +200,11 @@ make clean             # terraform destroy; the bucket, corpus and secret are ke
    python3 harness/run.py --backends prometheus --bands b1,b2,b3,b4 --phase verify --out <dir>
    ```
 
-11. **Sweep cardinality and concurrency.** Each platform has its own m7g.4xlarge query client (`infra/stage.sh`, role `harness`, index 0 Coralogix, 1 Mimir, 2 Prometheus, 3 ClickHouse MergeTree, 4 ClickHouse TimeSeries), with the same rungs, bands, levels and windows. It runs the full ladder at each band, first serially (concurrency 1: up to 40 repeats per cell, a 45 s budget, at least 5 repeats), then at 10, 20, 30, 40, 50, 60, 70, 80, 90 and 100 queries at once. The published cells are 10 to 100 at once: 5 platforms x 10 queries x 4 bands x 10 levels, 2,000 cells. Each cell is closed-loop: exactly C workers each send the query, wait for the response and send again with no think time. Workers stop starting new requests after 15 s (`--conc-seconds 15`); requests in flight finish, so with the 120 s client timeout a cell can run to about 135 s. Every completed request is recorded. A cell where no request completes is recorded as all-fail (stopped answering), not as a latency.
+12. **Sweep cardinality and concurrency.** Each platform has its own m7g.4xlarge query client (`infra/stage.sh`, role `harness`, index 0 Coralogix, 1 Mimir, 2 Prometheus, 3 ClickHouse MergeTree, 4 ClickHouse TimeSeries, 5 VictoriaMetrics), with the same rungs, bands, levels and windows. It runs the full ladder at each band, first serially (concurrency 1: up to 40 repeats per cell, a 45 s budget, at least 5 repeats), then at 10, 20, 30, 40, 50, 60, 70, 80, 90 and 100 queries at once. The published cells are 10 to 100 at once: 6 platforms x 10 queries x 4 bands x 10 levels, 2,400 cells. Each cell is closed-loop: exactly C workers each send the query, wait for the response and send again with no think time. Workers stop starting new requests after 15 s (`--conc-seconds 15`); requests in flight finish, so with the 120 s client timeout a cell can run to about 135 s. Every completed request is recorded. A cell where no request completes is recorded as all-fail (stopped answering), not as a latency.
 
     ```sh
     # one platform, one level; repeat for C = 10 to 100 in steps of 10
-    python3 harness/run.py --backends <coralogix|prometheus|mimir|clickhouse> --bands b1,b2,b3,b4 \
+    python3 harness/run.py --backends <coralogix|prometheus|victoriametrics|mimir|clickhouse> --bands b1,b2,b3,b4 \
       --phase concurrent --concurrency <C> --conc-seconds 15 --out results/sweep-<engine>
     # concurrency 1
     python3 harness/run.py --backends <backend> --bands b1,b2,b3,b4 \
@@ -191,22 +220,23 @@ make clean             # terraform destroy; the bucket, corpus and secret are ke
     export MIMIR_COUNTER_NAME='http_requests_{band}_total'
     export CH_HTTP=http://<clickhouse-mergetree-ip>:8123
     export PROM_PROMQL=http://<prometheus-ip>:9090/api/v1
+    export VM_PROMQL=http://<victoriametrics-ip>:8428/api/v1
     # ClickHouse TimeSeries: --backends prometheus, with
     export PROM_PROMQL=http://<clickhouse-timeseries-ip>:8123/prometheus/api/v1
     export PROM_COUNTER_NAME='http_requests_total_{band}'
     ```
 
-    `tsinsert` writes the generator's counter name, `http_requests_total_<band>`; Prometheus's OTLP receiver renames it to `http_requests_<band>_total`, so the TimeSeries client sets `PROM_COUNTER_NAME`. Put each platform's output in `results/sweep-<engine>/` (`coralogix`, `prometheus`, `clickhouse`, `clickhouse-timeseries`, `mimir`); `make run` downloads them there.
+    `tsinsert` writes the generator's counter name, `http_requests_total_<band>`; Prometheus's OTLP receiver renames it to `http_requests_<band>_total`, so the TimeSeries client sets `PROM_COUNTER_NAME`. Put each platform's output in `results/sweep-<engine>/` (`coralogix`, `prometheus`, `victoriametrics`, `clickhouse`, `clickhouse-timeseries`, `mimir`); `make run` downloads them there.
 
-12. **Compute engine time.** Coralogix answers over the public internet; the self-hosted platforms share the query client's private network. The network floor is the fastest any Coralogix query of any shape completed in the run: the lowest latency over every successful Coralogix request in `results/sweep-coralogix/` (every query, band and concurrency, the serial phase included). `analysis/build_page_data.py` computes it from the run's own measurements, stores it in `results/page-data.json` as `coralogixFloorMs` with the request it came from (`coralogixFloorFrom`), and prints it. Engine time subtracts the floor from every Coralogix time and leaves the self-hosted times unchanged. Nothing needs setting; `make score` does it.
+13. **Compute engine time.** Coralogix answers over the public internet; the self-hosted platforms share the query client's private network. The network floor is the fastest any Coralogix query of any shape completed in the run: the lowest latency over every successful Coralogix request in `results/sweep-coralogix/` (every query, band and concurrency, the serial phase included). `analysis/build_page_data.py` computes it from the run's own measurements, stores it in `results/page-data.json` as `coralogixFloorMs` with the request it came from (`coralogixFloorFrom`), and prints it. Engine time subtracts the floor from every Coralogix time and leaves the self-hosted times unchanged. Nothing needs setting; `make score` does it.
 
-13. **Compare with the page.** Compare each figure in the next section with the results page. `make score` writes `results/summary-<engine>.txt`, `results/page-data.json` (in the format the page reads) and `results/figures.txt`.
+14. **Compare with the page.** Compare each figure in the next section with the results page. `make score` writes `results/summary-<engine>.txt`, `results/page-data.json` (in the format the page reads) and `results/figures.txt`.
 
     ```sh
     make score
     ```
 
-14. **Clean up.** The coordinator terminates every instance once the result tarballs are in S3. Remove the rest of the Terraform resources (IAM role and profile, security group); the bucket, the corpus under `s3://$BENCH_BUCKET/corpus/` and the secret are kept for a `REUSE=1` run. Delete them by hand when finished.
+15. **Clean up.** The coordinator terminates every instance once the result tarballs are in S3. Remove the rest of the Terraform resources (IAM role and profile, security group); the bucket, the corpus under `s3://$BENCH_BUCKET/corpus/` and the secret are kept for a `REUSE=1` run. Delete them by hand when finished.
 
     ```sh
     make clean SCALE=real
@@ -217,7 +247,7 @@ make clean             # terraform destroy; the bucket, corpus and secret are ke
 
 ## How each figure is computed
 
-- **Matched monthly spend:** m7g on-demand prices for 730 hours plus gp3 storage. Prometheus, ClickHouse MergeTree and ClickHouse TimeSeries: m7g.8xlarge at $1.4552 an hour ($1,062) plus 1 TB of gp3 ($80), $1,142. Mimir: 9 x m7g.xlarge ($1,195) plus 450 GB of gp3 ($40), $1,235. Coralogix: its ingest bill for this volume, about $1,178. Terraform provisions 300 GB for Prometheus, 600 GB for each ClickHouse and 50 GB per Mimir node.
+- **Matched monthly spend:** m7g on-demand prices for 730 hours plus gp3 storage. Prometheus, VictoriaMetrics, ClickHouse MergeTree and ClickHouse TimeSeries: m7g.8xlarge at $1.4552 an hour ($1,062) plus 1 TB of gp3 ($80), $1,142. Mimir: 9 x m7g.xlarge ($1,195) plus 450 GB of gp3 ($40), $1,235. Coralogix: its ingest bill for this volume, about $1,178. Terraform provisions 300 GB each for Prometheus and VictoriaMetrics, 600 GB for each ClickHouse and 50 GB per Mimir node.
 - **Per-cell latency:** p50, p95 and p99 of successful requests, with sample count and error rate, for every (platform, query, band, concurrency) cell from 10 to 100 at once. `analysis/build_page_data.py`, written to `results/page-data.json`; `harness/summarise.py` prints per-cell tables per platform to `results/summary-<engine>.txt`.
 - **Coralogix network floor:** the fastest any Coralogix query of any shape completed in the run, the minimum latency over every successful request in `results/sweep-coralogix/`. `analysis/build_page_data.py` (`coralogixFloorMs` and `coralogixFloorFrom` in `results/page-data.json`); `analysis/figures.py` prints it first.
 - **Engine time:** Coralogix p50 minus the network floor (never below 0.01 ms); self-hosted p50 unchanged. `analysis/build_page_data.py` and `analysis/figures.py`, both reading `coralogixFloorMs`.
@@ -235,7 +265,7 @@ make clean             # terraform destroy; the bucket, corpus and secret are ke
 ```
 Makefile, .env.example   entry points and settings
 infra/                   main.tf (the fleet), stage.sh (every box's role in the run), and one bootstrap per box type:
-                         user-data-prom.sh, user-data-ch.sh (MergeTree), user-data-ch-timeseries.sh,
+                         user-data-prom.sh, user-data-vm.sh, user-data-ch.sh (MergeTree), user-data-ch-timeseries.sh,
                          user-data-mimir.sh.tftpl, user-data-worker.sh (senders, query clients, coordinator)
 generator/               metricgen: the deterministic corpus (plan, bench, tsinsert)
 harness/                 run.py (query client), queries.py (PromQL ladder), queries_ch.py (SQL ladder), summarise.py

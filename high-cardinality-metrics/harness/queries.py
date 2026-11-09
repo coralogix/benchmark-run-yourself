@@ -29,6 +29,9 @@ COUNTER_NAME = {
     # tsinsert, keeps the generator's name http_requests_total_<band>;
     # infra/stage.sh sets PROM_COUNTER_NAME for that client.
     "prometheus": os.environ.get("PROM_COUNTER_NAME") or "http_requests_{band}_total",
+    # VictoriaMetrics imports the Prometheus blocks with vmctl, so it carries the
+    # Prometheus name.
+    "victoriametrics": "http_requests_{band}_total",
 }
 
 # Rungs. {c}=counter, {h}=histogram bucket base, {g}=gauge, {i}=info.

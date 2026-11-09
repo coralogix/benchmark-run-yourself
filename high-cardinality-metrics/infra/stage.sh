@@ -11,6 +11,8 @@
 #   - Coralogix  : cx-sender ingests the week straight to the SaaS endpoint
 #   - ClickHouse TimeSeries : ts-server loads its own week with metricgen tsinsert
 #                  (no S3 corpus; loaded fresh on every run, left out on REUSE)
+#   - VictoriaMetrics : vm-server imports pm-loader's blocks from S3 with vmctl,
+#                  force-merges, then restarts with its tuned query flags
 #
 # Every transfer rides S3, the same coordination bus as the markers. Boxes block on
 # the marker they need and write the marker they own; nothing waits on a human.
@@ -36,7 +38,7 @@
 set -uo pipefail
 ROLE="${1:?role}"; IDX="${2:-0}"; SCALE="${3:-test}"; REUSE="${4:-0}"
 
-# BUCKET, REGION, RUN_TAG, CX_SECRET_ID, MIMIR_IPS, PROM_IP, CH_IP and TS_IP are written
+# BUCKET, REGION, RUN_TAG, CX_SECRET_ID, MIMIR_IPS, PROM_IP, CH_IP, TS_IP and VM_IP are written
 # to /etc/bench.env by infra/main.tf.
 . /etc/bench.env
 B=$BUCKET                 # code + markers
@@ -60,7 +62,7 @@ MIMIR_IPS=$(echo $MIMIR_IPS | cut -d' ' -f1-$MIMIR_N)
 
 # Engines swept in this run. ClickHouse TimeSeries has no stored corpus, so a
 # REUSE run leaves it out (infra/main.tf creates neither its server nor its client).
-ENGINES="coralogix mimir prometheus clickhouse"
+ENGINES="coralogix mimir prometheus clickhouse victoriametrics"
 [ "$REUSE" = "1" ] || ENGINES="$ENGINES clickhouse-timeseries"
 
 # Stable corpus key: bands, interval and span. Same inputs give the same key, so the corpus is reusable.
@@ -101,22 +103,23 @@ case "$ROLE" in
 
 # ===========================================================================
 coordinator)
-  say "waiting for serving engines to come up ($MIMIR_N mimir, prom, clickhouse, timeseries)"
+  say "waiting for serving engines to come up ($MIMIR_N mimir, prom, clickhouse, timeseries, victoriametrics)"
   for t in $(seq 1 120); do
     ok=0; for i in $MIMIR_IPS; do curl -sf -m5 "http://$i:8080/ready" >/dev/null 2>&1 && ok=$((ok+1)); done
     pok=0; curl -sf -m5 "http://$PROM_IP:9090/-/ready" >/dev/null 2>&1 && pok=1
     chok=0; curl -sf -m5 "http://$CH_IP:8123/?query=SELECT%201" >/dev/null 2>&1 && chok=1
+    vmok=0; curl -sf -m5 "http://$VM_IP:8428/health" >/dev/null 2>&1 && vmok=1
     tsok=1
     if [ "$REUSE" != "1" ]; then
       tsok=0; curl -sf -m5 "http://$TS_IP:8123/?query=SELECT%201" >/dev/null 2>&1 && tsok=1
     fi
-    say "mimir $ok/$MIMIR_N prom $pok clickhouse $chok timeseries $tsok"
-    [ "$ok" -ge "$MIMIR_N" ] && [ "$pok" = 1 ] && [ "$chok" = 1 ] && [ "$tsok" = 1 ] && break
+    say "mimir $ok/$MIMIR_N prom $pok clickhouse $chok timeseries $tsok victoriametrics $vmok"
+    [ "$ok" -ge "$MIMIR_N" ] && [ "$pok" = 1 ] && [ "$chok" = 1 ] && [ "$tsok" = 1 ] && [ "$vmok" = 1 ] && break
     sleep 20
   done
-  [ "$ok" -ge "$MIMIR_N" ] && [ "$pok" = 1 ] && [ "$chok" = 1 ] && [ "$tsok" = 1 ] \
-    || die "engines not ready: mimir $ok/$MIMIR_N prom $pok ch $chok ts $tsok" infra
-  mark 01-infra-ready "mimir $MIMIR_N/$MIMIR_N, prom up, clickhouse up, timeseries $tsok"
+  [ "$ok" -ge "$MIMIR_N" ] && [ "$pok" = 1 ] && [ "$chok" = 1 ] && [ "$tsok" = 1 ] && [ "$vmok" = 1 ] \
+    || die "engines not ready: mimir $ok/$MIMIR_N prom $pok ch $chok ts $tsok vm $vmok" infra
+  mark 01-infra-ready "mimir $MIMIR_N/$MIMIR_N, prom up, clickhouse up, timeseries $tsok, victoriametrics up"
   # Pin query evaluation inside the data window. The data is historical and there is
   # no live ingestion, so wall-clock now() would evaluate on an empty recent window.
   # Every harness role reads this and queries at it, so every engine is compared
@@ -326,6 +329,72 @@ prom-server)
   ;;
 
 # ===========================================================================
+vm-server)
+  # VictoriaMetrics imports the same TSDB blocks Prometheus serves (and Mimir is
+  # backfilled from), so all three hold the identical week. Ingest is not measured.
+  waitfor 02-pm-blocks-ready
+  vmm(){  # sum of one /metrics family, optionally only the series whose labels contain $2
+    curl -s http://127.0.0.1:8428/metrics | awk -v m="$1" -v f="${2:-}" \
+      '{n=$1; sub(/[{].*/,"",n); if (n==m && index($1,f)>0) s+=$2} END {printf "%.0f\n", s}'; }
+  mkdir -p /var/lib/vm-blocks
+  aws s3 sync "$BLK_CORPUS/" /var/lib/vm-blocks/ --region $REGION >/dev/null || die "block download failed" vm-server
+  # expected samples straight from the blocks' own metadata
+  read MIN MAX EXP < <(python3 - <<'PY'
+import json, glob
+m = [json.load(open(f)) for f in glob.glob('/var/lib/vm-blocks/*/meta.json')]
+print(min(x['minTime'] for x in m), max(x['maxTime'] for x in m), sum(x['stats']['numSamples'] for x in m))
+PY
+)
+  [ -n "${EXP:-}" ] || die "no blocks found in $BLK_CORPUS" vm-server
+  say "importing $EXP samples ($MIN to $MAX ms) with vmctl"
+  # The blocks are few, so one vmctl would read only a handful at once. Eight vmctl
+  # processes over disjoint time windows read in parallel; each window edge sits at
+  # :30 so no 60-second sample lands on a boundary.
+  python3 - "$MIN" "$MAX" 8 > /var/lib/vm-blocks/windows.txt <<'PY'
+import sys, datetime as dt
+lo, hi, k = int(sys.argv[1]) // 1000, int(sys.argv[2]) // 1000, int(sys.argv[3])
+lo -= lo % 60 + 30; hi += 60 - hi % 60 + 30
+edges = [e - e % 60 + 30 for e in (lo + (hi - lo) * i // k for i in range(k + 1))]
+f = lambda t: dt.datetime.fromtimestamp(t, dt.timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
+for a, b in zip(edges, edges[1:]): print(f(a), f(b - 1))
+PY
+  PIDS=""; i=0
+  while read S E; do
+    vmctl prometheus -s --disable-progress-bar --prom-snapshot=/var/lib/vm-blocks \
+      --vm-addr=http://127.0.0.1:8428 --prom-concurrency=4 --vm-concurrency=4 --vm-batch-size=500000 \
+      --prom-filter-time-start="$S" --prom-filter-time-end="$E" > /var/log/vmctl-$i.log 2>&1 &
+    PIDS="$PIDS $!"; i=$((i+1))
+  done < /var/lib/vm-blocks/windows.txt
+  for p in $PIDS; do wait "$p" || die "vmctl failed: $(tail -n2 /var/log/vmctl-*.log | tr '\n' ' ' | cut -c1-400)" vm-import; done
+  # one forced merge, so compaction is done before any query is measured
+  curl -s -X POST http://127.0.0.1:8428/internal/force_merge >/dev/null
+  quiet=0
+  for t in $(seq 1 240); do
+    sleep 30
+    [ "$(vmm vm_active_merges)" = "0" ] && quiet=$((quiet+1)) || quiet=0
+    [ $quiet -ge 4 ] && break
+  done
+  ROWS=$(vmm vm_rows 'type="storage/')
+  python3 -c "import sys; r,x=$ROWS,$EXP; sys.exit(0 if abs(r-x) <= x*0.001 else 1)" \
+    || die "VictoriaMetrics holds $ROWS samples, the blocks hold $EXP" vm-import
+  say "imported and merged: $ROWS samples (blocks: $EXP)"
+  rm -rf /var/lib/vm-blocks
+  # The tuned query flags (README, step 3). Everything not listed is the default.
+  echo 'VMFLAGS="-storageDataPath=/var/lib/victoria-metrics -retentionPeriod=100y -httpListenAddr=:8428 -search.disableCache -search.maxConcurrentRequests=32 -search.maxQueueDuration=120s -search.maxQueryDuration=120s -search.maxSamplesPerQuery=10000000000 -search.maxUniqueTimeseries=5000000 -search.maxSeriesPerAggrFunc=5000000 -search.maxLabelsAPISeries=5000000 -search.maxLabelsAPIDuration=60s"' \
+    > /etc/victoria-metrics.env
+  systemctl restart victoria-metrics
+  for t in $(seq 1 60); do curl -sf -m3 http://127.0.0.1:8428/health >/dev/null 2>&1 && break; sleep 5; done
+  waitfor data-eval-time
+  EVAL=$(aws s3 cp "s3://$B/$P/data-eval-time" - --region $REGION 2>/dev/null | tr -d '[:space:]')
+  FB=$(echo "$BANDS" | cut -d, -f1)
+  R=$(curl -s -G "http://127.0.0.1:8428/api/v1/query" \
+        --data-urlencode "query=count(kube_pod_info_${FB})" --data-urlencode "time=$EVAL" 2>/dev/null)
+  echo "$R" | grep -q '"value"' || die "VictoriaMetrics returned no data at $EVAL: $R" vm-serve
+  say "victoriametrics serving: $R"
+  mark 03-victoriametrics-data "imported $ROWS samples"
+  ;;
+
+# ===========================================================================
 mimir)
   # cluster is started by user-data. idx0 confirms the backfilled blocks are
   # actually loaded by the store-gateway before declaring the engine ready.
@@ -396,6 +465,9 @@ harness)
     4) ENG=clickhouse-timeseries ; BACKEND=prometheus
        export PROM_PROMQL="http://$TS_IP:8123/prometheus/api/v1"
        export PROM_COUNTER_NAME="http_requests_total_{band}" ;;
+    # VictoriaMetrics is loaded from the Prometheus blocks, so it carries the
+    # Prometheus counter name; harness/run.py gives its label APIs the week.
+    5) ENG=victoriametrics ; BACKEND=victoriametrics ; export VM_PROMQL="http://$VM_IP:8428/api/v1" ;;
     *) die "unknown harness index $IDX" harness ;;
   esac
   waitfor "03-$ENG-data"

@@ -8,7 +8,7 @@ compute the same figures.
 
 | Folder | Results page | What it measures |
 |---|---|---|
-| [high-cardinality-metrics](high-cardinality-metrics) | [Coralogix Metrics vs Popular Open Source Engines](https://benchmarks.coralogix.com/metrics-concurrency) | PromQL query latency and errors for five metrics backends at matched spend, across cardinality and concurrency. |
+| [high-cardinality-metrics](high-cardinality-metrics) | [Coralogix Metrics vs Popular Open Source Engines](https://benchmarks.coralogix.com/metrics-concurrency) | PromQL query latency and errors for six metrics backends at matched spend, across cardinality and concurrency. |
 | [agents-with-vendors](agents-with-vendors) | [Agent Intelligence Vendor Comparison](https://benchmarks.coralogix.com/observability-vendor-comparison) | How well one coding agent investigates the same incidents through five observability platforms' CLIs. |
 | [timestral-on-production-data](timestral-on-production-data) | [Timestral on Production Data](https://benchmarks.coralogix.com/timestral-benchmarks) | Forecast accuracy and speed of Mistral's Timestral models against other forecasting models on production telemetry. |
 | [slo-coding-agents](slo-coding-agents) | [SLOs and Coding Agents](https://benchmarks.coralogix.com/slo-coding-agents) | What a coding agent running a shop for three hours does with and without Coralogix SLOs. |
