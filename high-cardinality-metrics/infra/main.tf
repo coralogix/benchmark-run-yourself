@@ -29,7 +29,7 @@ variable "ami_id" { type = string }
 variable "vpc_id" { type = string }
 variable "subnet_id" { type = string }
 # First three octets of the private addresses to pin inside the subnet,
-# e.g. "10.0.4". The subnet must contain <prefix>.11 to <prefix>.32.
+# e.g. "10.0.4". The subnet must contain <prefix>.11 to <prefix>.33.
 variable "private_ip_prefix" { type = string }
 # One bucket for code, coordination markers, the reusable corpus and Mimir's blocks.
 variable "bucket" { type = string }
@@ -63,6 +63,7 @@ locals {
   prom_ip   = "${var.private_ip_prefix}.21"
   ch_ip     = "${var.private_ip_prefix}.31"
   ts_ip     = "${var.private_ip_prefix}.32"
+  vm_ip     = "${var.private_ip_prefix}.33"
 
   mimir_count = local.is_real ? 9 : 1
   mimir_rf    = local.is_real ? 3 : 1
@@ -75,6 +76,7 @@ locals {
   pm_loader_type   = local.is_real ? "m7g.16xlarge" : "m7g.xlarge"
   ch_server_type   = local.is_real ? "m7g.8xlarge" : "m7g.large"
   prom_server_type = local.is_real ? "m7g.8xlarge" : "m7g.large"
+  vm_server_type   = local.is_real ? "m7g.8xlarge" : "m7g.large"
   ts_server_type   = local.is_real ? "m7g.8xlarge" : "m7g.large"
   mimir_type       = local.is_real ? "m7g.xlarge" : "m7g.large"
   harness_type     = local.is_real ? "m7g.4xlarge" : "m7g.large"
@@ -100,6 +102,7 @@ locals {
     PROM_IP=${local.prom_ip}
     CH_IP=${local.ch_ip}
     TS_IP=${local.ts_ip}
+    VM_IP=${local.vm_ip}
     ENV
     set -a; . /etc/bench.env; set +a
   EOT
@@ -108,6 +111,7 @@ locals {
     ch   = file("${path.module}/user-data-ch.sh")
     ts   = file("${path.module}/user-data-ch-timeseries.sh")
     prom = file("${path.module}/user-data-prom.sh")
+    vm   = file("${path.module}/user-data-vm.sh")
     work = file("${path.module}/user-data-worker.sh")
   }
 }
@@ -346,6 +350,31 @@ resource "aws_instance" "pm_loader" {
   }
 }
 
+# ---------------------------------------------------------- VictoriaMetrics
+# One serving node, the same size as Prometheus. It imports the Prometheus
+# loader's blocks with vmctl, then serves PromQL on :8428 with its tuned flags.
+resource "aws_instance" "vm_server" {
+  ami                    = var.ami_id
+  instance_type          = local.vm_server_type
+  subnet_id              = var.subnet_id
+  private_ip             = local.vm_ip
+  vpc_security_group_ids = [aws_security_group.bench.id]
+  iam_instance_profile   = aws_iam_instance_profile.node.name
+  metadata_options {
+    http_tokens = "required"
+  }
+  root_block_device {
+    volume_type = "gp3"
+    volume_size = local.prom_disk
+  }
+  user_data = join("\n", [local.bench_env, replace(replace(replace(replace(local.role_script.vm,
+  "__ROLE__", "vm-server"), "__IDX__", "0"), "__SCALE__", var.scale), "__REUSE__", var.reuse)])
+  tags = {
+    Name  = "${var.run_tag}-vm-server"
+    Stack = "victoriametrics"
+  }
+}
+
 # ----------------------------------------------------------- Coralogix sender
 resource "aws_instance" "cx_sender" {
   count                  = local.cx_count
@@ -369,9 +398,10 @@ resource "aws_instance" "cx_sender" {
   }
 }
 
-# --------------------------------------------------------------- Harness x5
+# --------------------------------------------------------------- Harness x6
 # One query client per platform: 0 Coralogix, 1 Mimir, 2 Prometheus,
-# 3 ClickHouse MergeTree, 4 ClickHouse TimeSeries. All in the same subnet as
+# 3 ClickHouse MergeTree, 4 ClickHouse TimeSeries, and harness_vm below for
+# VictoriaMetrics (index 5, created on reuse runs too). All in the same subnet as
 # the self-hosted nodes.
 resource "aws_instance" "harness" {
   count                  = local.harness_count
@@ -391,6 +421,27 @@ resource "aws_instance" "harness" {
   "__ROLE__", "harness"), "__IDX__", tostring(count.index)), "__SCALE__", var.scale), "__REUSE__", var.reuse)])
   tags = {
     Name  = "${var.run_tag}-harness-${count.index}"
+    Stack = "harness"
+  }
+}
+
+resource "aws_instance" "harness_vm" {
+  ami                    = var.ami_id
+  instance_type          = local.harness_type
+  subnet_id              = var.subnet_id
+  vpc_security_group_ids = [aws_security_group.bench.id]
+  iam_instance_profile   = aws_iam_instance_profile.node.name
+  metadata_options {
+    http_tokens = "required"
+  }
+  root_block_device {
+    volume_type = "gp3"
+    volume_size = 30
+  }
+  user_data = join("\n", [local.bench_env, replace(replace(replace(replace(local.role_script.work,
+  "__ROLE__", "harness"), "__IDX__", "5"), "__SCALE__", var.scale), "__REUSE__", var.reuse)])
+  tags = {
+    Name  = "${var.run_tag}-harness-5"
     Stack = "harness"
   }
 }
@@ -420,5 +471,6 @@ resource "aws_instance" "coordinator" {
 output "ch_server" { value = local.ch_ip }
 output "ts_server" { value = local.ts_count > 0 ? local.ts_ip : "" }
 output "prom_server" { value = local.prom_ip }
+output "vm_server" { value = local.vm_ip }
 output "mimir0" { value = local.mimir_ips[0] }
 output "scale" { value = var.scale }

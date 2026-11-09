@@ -34,6 +34,9 @@ BACKENDS = {
     # One Prometheus node.
     "prometheus": dict(base=os.environ.get("PROM_PROMQL", ""),
                        key=""),
+    # One VictoriaMetrics node, Prometheus-compatible query API.
+    "victoriametrics": dict(base=os.environ.get("VM_PROMQL", ""),
+                            key=""),
     # ClickHouse speaks SQL over its HTTP interface, not PromQL. Queries come
     # from queries_ch.py, which documents each translation.
     "clickhouse": dict(base=os.environ.get("CH_HTTP", ""),
@@ -333,7 +336,7 @@ def execute(backend, band, rung, params, phase, repeat, run_id, worker=0):
     r = render(rung, backend, band, params)
     if r["kind"] == "label_values":
         path = f"/label/{r['label']}/values"
-        q = {"match[]": r["match"]}
+        q = {"match[]": r["match"], **label_window(backend)}
     else:
         path = "/query"
         # stats=all makes Prometheus-compatible engines report their OWN
@@ -366,13 +369,23 @@ def execute(backend, band, rung, params, phase, repeat, run_id, worker=0):
     return rec
 
 
+def label_window(backend):
+    """VictoriaMetrics' label and series APIs search only the current day unless given
+    a range; Prometheus and the others search all their data. Give VictoriaMetrics the
+    week before the query instant, so every engine searches the same week."""
+    if backend != "victoriametrics" or not EVAL_TS:
+        return {}
+    end = int(float(EVAL_TS))
+    return {"start": str(end - 168 * 3600), "end": str(end)}
+
+
 def sample_params(backend, band):
     """Pull real label values so queries are parameterised from the data, not guessed."""
     if backend == "clickhouse":
         return sample_params_ch(band)
     names = metric_names(backend, band)
     def vals(label, match):
-        res = http_get(backend, f"/label/{label}/values", {"match[]": match})
+        res = http_get(backend, f"/label/{label}/values", {"match[]": match, **label_window(backend)})
         try:
             return json.loads(res["body"]).get("data", []) or []
         except Exception:
@@ -388,7 +401,7 @@ def sample_params(backend, band):
     # R01 pins a series that exists: ask the backend for real label sets;
     # pick() overlays one per repeat.
     res = http_get(backend, "/series", {"match[]": f'{c}{{service="{svc}"}}',
-                                        "limit": "500"})
+                                        "limit": "500", **label_window(backend)})
     try:
         out["_series"] = json.loads(res["body"]).get("data", []) or []
     except Exception:
@@ -450,7 +463,8 @@ def main():
             sys.exit(f"unknown backend {b!r}; known: {', '.join(BACKENDS)}")
         if not BACKENDS[b]["base"] and not (b == "mimir" and MIMIR_NODES):
             env = {"coralogix": "CX_PROMQL", "mimir": "MIMIR_PROMQL",
-                   "prometheus": "PROM_PROMQL", "clickhouse": "CH_HTTP"}[b]
+                   "prometheus": "PROM_PROMQL", "clickhouse": "CH_HTTP",
+                   "victoriametrics": "VM_PROMQL"}[b]
             sys.exit(f"{env} is not set; it is required for --backends {b}")
     bands = args.bands.split(",")
     rungs = [r for r in RUNGS if not args.rungs or r["id"] in args.rungs.split(",")]

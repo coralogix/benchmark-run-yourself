@@ -10,6 +10,7 @@ ARGS=()
 add(){ [ -d "results/$3" ] && ARGS+=(--engine "$1=$2=results/$3") || echo "skip $1: results/$3 missing"; }
 add coralogix "Coralogix" sweep-coralogix
 add prometheus "Prometheus" sweep-prometheus
+add victoriametrics "VictoriaMetrics" sweep-victoriametrics
 add clickhouse "ClickHouse (MergeTree)" sweep-clickhouse
 add clickhouse_timeseries "ClickHouse (TimeSeries)" sweep-clickhouse-timeseries
 add mimir "Grafana Mimir" sweep-mimir

@@ -8,6 +8,7 @@ JSON file with p50, p95, p99, sample count and error rate for every
   python3 analysis/build_page_data.py \\
       --engine "coralogix=Coralogix=results/sweep-coralogix" \\
       --engine "prometheus=Prometheus=results/sweep-prometheus" \\
+      --engine "victoriametrics=VictoriaMetrics=results/sweep-victoriametrics" \\
       --engine "clickhouse=ClickHouse (MergeTree)=results/sweep-clickhouse" \\
       --engine "clickhouse_timeseries=ClickHouse (TimeSeries)=results/sweep-clickhouse-timeseries" \\
       --engine "mimir=Grafana Mimir=results/sweep-mimir" \\

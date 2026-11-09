@@ -22,7 +22,7 @@ echo "run tag: $RUN_TAG"
 terraform -chdir=infra apply -input=false -auto-approve -var scale="$SCALE" -var reuse="${REUSE:-0}"
 WAIT_MAX="${WAIT_MAX:-172800}" scripts/wait-marker.sh 06-data-safe
 mkdir -p results
-ENGINES="coralogix mimir prometheus clickhouse"
+ENGINES="coralogix mimir prometheus clickhouse victoriametrics"
 [ "${REUSE:-0}" = "1" ] || ENGINES="$ENGINES clickhouse-timeseries"
 for e in $ENGINES; do
   aws s3 cp "s3://$BENCH_BUCKET/$RUN_TAG/sweep-$e.tgz" "results/sweep-$e.tgz" --region "$AWS_REGION"
