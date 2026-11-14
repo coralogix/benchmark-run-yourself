@@ -12,6 +12,7 @@ compute the same figures.
 | [agents-with-vendors](agents-with-vendors) | [Agent Intelligence Vendor Comparison](https://benchmarks.coralogix.com/observability-vendor-comparison) | How well one coding agent investigates the same incidents through five observability platforms' CLIs. |
 | [timestral-on-production-data](timestral-on-production-data) | [Timestral on Production Data](https://benchmarks.coralogix.com/timestral-benchmarks) | Forecast accuracy and speed of Mistral's Timestral models against other forecasting models on production telemetry. |
 | [slo-coding-agents](slo-coding-agents) | [SLOs and Coding Agents](https://benchmarks.coralogix.com/slo-coding-agents) | What a coding agent running a shop for three hours does with and without Coralogix SLOs. |
+| [datasets-and-tokenomics](datasets-and-tokenomics) | [Datasets & Tokenomics](https://benchmarks.coralogix.com/dataset-agents) | Tokens, time and tool calls of AI agents answering the same telemetry questions with no datasets, by discovering datasets, or with a dataset catalog in the system prompt. |
 
 Each folder is self-contained: a README with what you need, the estimated cost of one run, a step by step guide and the
 definition of every figure; a Makefile; an `.env.example`; and only the code needed to run it.

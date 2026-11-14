@@ -1,0 +1,1868 @@
+[
+ {
+  "id": "AI-T1-003",
+  "domain": "ai",
+  "tier": 1,
+  "title": "Support assistant prompt-injection flags",
+  "question": "How many times did the prompt-injection guardrail flag a prompt sent to the Coralogix Store support assistant {W}? Count every guardrail check span, including replayed test prompts.",
+  "ref": [
+   {
+    "kind": "spans",
+    "query": "source spans | filter $l.serviceName == 'support-assistant' && $d.tags['gen_ai.operation.name'] == 'guardrails' && $d.tags['gen_ai.prompt.guardrails.prompt_injection.triggered']:string == 'true' | aggregate count() as n"
+   }
+  ],
+  "compute": "{'must': [], 'numbers': [[R[0][0]['n'], 0.005]]}",
+  "datasets": [
+   "ai.assistant_calls"
+  ]
+ },
+ {
+  "id": "AI-T1-004",
+  "domain": "ai",
+  "tier": 1,
+  "title": "Chat assistant failed tool calls on one day",
+  "question": "How many tool calls made by the GoldSpin Play chat assistant failed on {DAY4} (UTC day)?",
+  "ref": [
+   {
+    "kind": "spans",
+    "query": "source spans | filter $l.serviceName == 'chat-assistant' && $d.tags['gen_ai.operation.name'] == 'execute_tool' && $d.tags['otel.status_code'] == 'ERROR' | aggregate count() as n",
+    "start": "{T4}",
+    "end": "{T5}"
+   }
+  ],
+  "compute": "{'must': [], 'numbers': [[R[0][0]['n'], 0.005]]}",
+  "datasets": [
+   "ai.assistant_calls"
+  ]
+ },
+ {
+  "id": "AI-T1-005",
+  "domain": "ai",
+  "tier": 1,
+  "title": "Insight assistant output tokens on one day",
+  "question": "How many output tokens did the Coralogix Finance insight assistant's LLM calls generate on {DAY5} (UTC day)?",
+  "ref": [
+   {
+    "kind": "spans",
+    "query": "source spans | filter $l.serviceName == 'insight-assistant' && $d.tags['gen_ai.operation.name'] == 'chat' | aggregate sum($d.tags['gen_ai.usage.output_tokens']:number) as t",
+    "start": "{T5}",
+    "end": "{T6}"
+   }
+  ],
+  "compute": "{'must': [], 'numbers': [[R[0][0]['t'], 0.005]]}",
+  "datasets": [
+   "ai.assistant_calls"
+  ]
+ },
+ {
+  "id": "AI-T2-002",
+  "domain": "ai",
+  "tier": 2,
+  "title": "Top-spending assistant user",
+  "question": "Across all three customer-facing assistants, which end user generated the most LLM spend {W}, and how much in US dollars?",
+  "ref": [
+   {
+    "kind": "spans",
+    "query": "source spans | filter ($l.applicationName == 'goldspin-play' || $l.applicationName == 'coralogix-store' || $l.applicationName == 'coralogix-finance') && $d.tags['gen_ai.operation.name'] == 'chat' | groupby firstNonNull($d.tags['gen_ai.request.user'], $d.tags['enduser.id'], $d.tags['user.id']):string as u aggregate sum(($d.tags['gen_ai.prompt_price']:number + $d.tags['gen_ai.response_price']:number)) as c"
+   }
+  ],
+  "compute": "{'must': [[top(R[0], 'c')[0]['u']]], 'numbers': [[top(R[0], 'c')[0]['c'], 0.005]]}",
+  "unique": "top(R[0], 'c')[0]['c'] > 1.01 * top(R[0], 'c')[1]['c']",
+  "datasets": [
+   "ai.assistant_calls"
+  ]
+ },
+ {
+  "id": "AI-T2-003",
+  "domain": "ai",
+  "tier": 2,
+  "title": "Slowest insight-assistant agent",
+  "question": "The Coralogix Finance insight assistant is made of several agents. Which agent has the slowest 95th-percentile invocation latency {W}, and what is that p95 in milliseconds?",
+  "ref": [
+   {
+    "kind": "spans",
+    "query": "source spans | filter $l.serviceName == 'insight-assistant' && $d.tags['gen_ai.operation.name'] == 'invoke_agent' | groupby $d.tags['gen_ai.agent.name']:string as a aggregate percentile(0.95, $m.duration:number / 1000) as p"
+   }
+  ],
+  "compute": "{'must': [[top(R[0], 'p')[0]['a']]], 'numbers': [[top(R[0], 'p')[0]['p'], 0.02]]}",
+  "unique": "top(R[0], 'p')[0]['p'] > 1.05 * top(R[0], 'p')[1]['p']",
+  "datasets": [
+   "ai.assistant_calls"
+  ]
+ },
+ {
+  "id": "AI-T3-001",
+  "domain": "ai",
+  "tier": 3,
+  "title": "Most expensive assistant per conversation",
+  "question": "Which of the three customer-facing assistants costs the most in LLM spend per conversation {W}, and what is its average LLM cost per conversation in US dollars?",
+  "ref": [
+   {
+    "kind": "spans",
+    "query": "source spans | filter ($l.applicationName == 'goldspin-play' || $l.applicationName == 'coralogix-store' || $l.applicationName == 'coralogix-finance') && $d.tags['gen_ai.operation.name'] == 'chat' | groupby $l.serviceName as s aggregate sum(($d.tags['gen_ai.prompt_price']:number + $d.tags['gen_ai.response_price']:number)) as c, distinct_count($d.tags['gen_ai.conversation.id']) as k"
+   }
+  ],
+  "compute": "(T := sorted(R[0], key=lambda r: -r['c'] / r['k']), A := {'chat-assistant': ['chat-assistant', 'chat assistant', 'goldspin'], 'support-assistant': ['support-assistant', 'support assistant', 'store'], 'insight-assistant': ['insight-assistant', 'insight assistant', 'finance']}, {'must': [A[T[0]['s']]], 'numbers': [[T[0]['c'] / T[0]['k'], 0.01]]})[-1]",
+  "unique": "(T := sorted(R[0], key=lambda r: -r['c'] / r['k']), T[0]['c'] / T[0]['k'] > 1.01 * T[1]['c'] / T[1]['k'])[-1]",
+  "datasets": [
+   "ai.assistant_calls"
+  ]
+ },
+ {
+  "id": "AI-T3-002",
+  "domain": "ai",
+  "tier": 3,
+  "title": "Share of chat-assistant prompts blocked by guardrails",
+  "question": "What percentage of the GoldSpin Play chat assistant's guardrail checks ended with the guardrail triggering {W}? Count every guardrail check span, including replayed test prompts.",
+  "ref": [
+   {
+    "kind": "spans",
+    "query": "source spans | filter $l.serviceName == 'chat-assistant' && $d.tags['gen_ai.operation.name'] == 'guardrails' | aggregate count() as n, sum(if($d.tags['guardrails.triggered']:string == 'True' || $d.tags['guardrails.triggered']:string == 'true', 1, 0)) as t"
+   }
+  ],
+  "compute": "{'must': [], 'numbers': [[pct(R[0][0]['t'], R[0][0]['n']), 0.01]]}",
+  "datasets": [
+   "ai.assistant_calls"
+  ]
+ },
+ {
+  "id": "AI-T3-003",
+  "domain": "ai",
+  "tier": 3,
+  "title": "Prompt-injection rate per 1,000 LLM calls",
+  "question": "Normalised for traffic, which assistant attracts the most prompt-injection attempts: give the assistant and its number of prompt-injection guardrail triggers per 1,000 LLM chat calls {W}. Count every guardrail check span, including replayed test prompts.",
+  "ref": [
+   {
+    "kind": "spans",
+    "query": "source spans | filter ($l.applicationName == 'goldspin-play' || $l.applicationName == 'coralogix-store' || $l.applicationName == 'coralogix-finance') && $d.tags['gen_ai.operation.name'] == 'guardrails' && $d.tags['gen_ai.prompt.guardrails.prompt_injection.triggered']:string == 'true' | groupby $l.serviceName as s aggregate count() as n"
+   },
+   {
+    "kind": "spans",
+    "query": "source spans | filter ($l.applicationName == 'goldspin-play' || $l.applicationName == 'coralogix-store' || $l.applicationName == 'coralogix-finance') && $d.tags['gen_ai.operation.name'] == 'chat' | groupby $l.serviceName as s aggregate count() as n"
+   }
+  ],
+  "compute": "(I := {r['s']: r['n'] for r in R[0]}, C := {r['s']: r['n'] for r in R[1]}, T := sorted([[1000 * I.get(s, 0) / C[s], s] for s in C]), A := {'chat-assistant': ['chat-assistant', 'chat assistant', 'goldspin'], 'support-assistant': ['support-assistant', 'support assistant', 'store'], 'insight-assistant': ['insight-assistant', 'insight assistant', 'finance']}, {'must': [A[T[-1][1]]], 'numbers': [[T[-1][0], 0.01]]})[-1]",
+  "unique": "(I := {r['s']: r['n'] for r in R[0]}, C := {r['s']: r['n'] for r in R[1]}, T := sorted([[1000 * I.get(s, 0) / C[s], s] for s in C]), T[-1][0] > 1.01 * T[-2][0])[-1]",
+  "datasets": [
+   "ai.assistant_calls"
+  ]
+ },
+ {
+  "id": "AI-T4-002",
+  "domain": "ai",
+  "tier": 4,
+  "title": "Insight assistant's biggest-spending user, profiled",
+  "question": "FinOps wants a profile of the Coralogix Finance insight assistant's biggest-spending user {W}. Who is it, what was their total LLM spend in US dollars, how many conversations did they have, and what was their average LLM cost per conversation?",
+  "ref": [
+   {
+    "kind": "spans",
+    "query": "source spans | filter $l.serviceName == 'insight-assistant' && $d.tags['gen_ai.operation.name'] == 'chat' | groupby firstNonNull($d.tags['gen_ai.request.user'], $d.tags['enduser.id'], $d.tags['user.id']):string as u aggregate sum(($d.tags['gen_ai.prompt_price']:number + $d.tags['gen_ai.response_price']:number)) as c, distinct_count($d.tags['gen_ai.conversation.id']) as k"
+   }
+  ],
+  "compute": "(T := top(R[0], 'c')[0], {'must': [[T['u']]], 'numbers': [[T['c'], 0.005], [T['k'], 0.01], [T['c'] / T['k'], 0.01]]})[-1]",
+  "unique": "top(R[0], 'c')[0]['c'] > 1.02 * top(R[0], 'c')[1]['c']",
+  "datasets": [
+   "ai.assistant_calls"
+  ]
+ },
+ {
+  "id": "AI-T4-004",
+  "domain": "ai",
+  "tier": 4,
+  "title": "Odds tool failures vs price-feed staleness",
+  "question": "The GoldSpin Play chat assistant's get_market_odds tool sometimes fails. Find the UTC day {W} with the most get_market_odds failures, say how many failed that day, and how many stale-price errors (StaleMarketPriceError or PriceFeedStale) the odds-feed service logged on that same day.",
+  "ref": [
+   {
+    "kind": "spans",
+    "query": "source spans | filter $l.serviceName == 'chat-assistant' && $d.tags['gen_ai.operation.name'] == 'execute_tool' && $d.tags['gen_ai.tool.name'] == 'get_market_odds' && $d.tags['otel.status_code'] == 'ERROR' | groupby formatTimestamp(roundTime($m.timestamp, 1d), '%Y-%m-%d') as d aggregate count() as n"
+   },
+   {
+    "kind": "logs",
+    "query": "source logs | filter $l.applicationname == 'goldspin-play' && $l.subsystemname == 'odds-feed' && ($d.attributes['error.type'] == 'StaleMarketPriceError' || $d.attributes['error.type'] == 'PriceFeedStale') | groupby formatTimestamp(roundTime($m.timestamp, 1d), '%Y-%m-%d') as d aggregate count() as n"
+   }
+  ],
+  "compute": "(P := sorted([[r['n'], r['d']] for r in R[0]]), Y := P[-1][1], D := Y[8:10].lstrip('0'), M := MON3[Y[5:7]], MF := MONF[Y[5:7]], DG := [Y, Y[5:10], D + ' ' + M, M + ' ' + D, MF + ' ' + D, D + ' ' + MF, D + 'st ' + M, D + 'nd ' + M, D + 'rd ' + M, D + 'th ' + M, Y[8:10] + '/' + Y[5:7]], {'must': [DG], 'numbers': [[P[-1][0], 0.005], [sum([r['n'] for r in R[1] if r['d'] == Y]), 0.005]]})[-1]",
+  "unique": "(P := sorted([[r['n'], r['d']] for r in R[0]]), P[-1][0] > 1.05 * P[-2][0])[-1]",
+  "datasets": [
+   "ai.assistant_calls",
+   "gaming.odds_feed_hourly",
+   "ops.error_rollup_hourly"
+  ]
+ },
+ {
+  "id": "ECO-T1-001",
+  "domain": "ecommerce",
+  "tier": 1,
+  "title": "Baskets started",
+  "question": "How many shopping baskets were started on Coralogix Store {W}?",
+  "ref": [
+   {
+    "kind": "logs",
+    "query": "source logs | filter $l.applicationname == 'coralogix-store' && $d.logRecord.attributes['event.name'] == 'basket.started' | aggregate count() as n"
+   }
+  ],
+  "compute": "{'must': [], 'numbers': [[R[0][0]['n'], 0.005]]}",
+  "datasets": [
+   "ecommerce.order_events",
+   "ecommerce.session_funnel"
+  ]
+ },
+ {
+  "id": "ECO-T1-003",
+  "domain": "ecommerce",
+  "tier": 1,
+  "title": "Declined order value",
+  "question": "What was the total value in GBP of Coralogix Store orders that were declined at payment {W}?",
+  "ref": [
+   {
+    "kind": "logs",
+    "query": "source logs | filter $l.applicationname == 'coralogix-store' && $d.logRecord.attributes['event.name'] == 'order.declined' | aggregate sum($d.logRecord.attributes['money.amount_minor']:number) as v"
+   }
+  ],
+  "compute": "{'must': [], 'numbers': [[gbp(R[0][0]['v']), 0.005]]}",
+  "datasets": [
+   "ecommerce.order_events",
+   "ecommerce.session_funnel"
+  ]
+ },
+ {
+  "id": "ECO-T1-005",
+  "domain": "ecommerce",
+  "tier": 1,
+  "title": "Max stock replica lag",
+  "question": "What was the worst replication lag seen on the store's lagging stock-ledger replica {W}? Give it in seconds.",
+  "ref": [
+   {
+    "kind": "logs",
+    "query": "source logs | filter $l.applicationname == 'coralogix-store' && $d.logRecord.attributes['stock.ledger.name'] == 'stock-ledger-replica-3' | aggregate max($d.logRecord.attributes['stock.replica_lag_ms']:number) as mx"
+   }
+  ],
+  "compute": "{'must': [['replica-3', 'replica 3']], 'numbers': [], 'numbers_any': [[R[0][0]['mx'] / 1000, 0.005], [R[0][0]['mx'], 0.005]]}",
+  "datasets": []
+ },
+ {
+  "id": "ECO-T1-007",
+  "domain": "ecommerce",
+  "tier": 1,
+  "title": "Pool-exhaustion checkout failures, one day",
+  "question": "On {DAY2} (UTC), how many checkout attempts at Coralogix Store failed because the checkout service had no database connection available? Count each failed checkout once.",
+  "ref": [
+   {
+    "kind": "logs",
+    "query": "source logs | filter $l.applicationname == 'coralogix-store' && $d.logRecord.attributes['error.type'] == 'CheckoutFailed' | groupby $l.subsystemname as s aggregate count() as n",
+    "start": "{T2}",
+    "end": "{T3}"
+   }
+  ],
+  "compute": "{'must': [], 'numbers': [[[r for r in R[0] if r['s'] == 'checkout-service'][0]['n'], 0.005]]}",
+  "datasets": [
+   "ops.error_rollup_hourly"
+  ]
+ },
+ {
+  "id": "ECO-T1-010",
+  "domain": "ecommerce",
+  "tier": 1,
+  "title": "Click-and-collect orders, one day",
+  "question": "How many Coralogix Store orders were placed for click-and-collect on {DAY5} (UTC day)?",
+  "ref": [
+   {
+    "kind": "logs",
+    "query": "source logs | filter $l.applicationname == 'coralogix-store' && $d.logRecord.attributes['event.name'] == 'order.placed' && $d.logRecord.attributes['delivery.method'] == 'click-collect' | groupby $l.subsystemname as s aggregate count() as n",
+    "start": "{T5}",
+    "end": "{T6}"
+   }
+  ],
+  "compute": "{'must': [], 'numbers': [], 'numbers_any': [[sum([r['n'] for r in R[0]]), 0.005], [[r for r in R[0] if r['s'] == 'order-service'][0]['n'], 0.005]]}",
+  "datasets": [
+   "ecommerce.order_events"
+  ]
+ },
+ {
+  "id": "ECO-T2-001",
+  "domain": "ecommerce",
+  "tier": 2,
+  "title": "Department hit hardest by genuine stock-outs",
+  "question": "Which product department lost the most order value to items that were genuinely out of stock (not stock-ledger sync problems) {W}, and how much in GBP?",
+  "ref": [
+   {
+    "kind": "logs",
+    "query": "source logs | filter $l.applicationname == 'coralogix-store' && $d.logRecord.attributes['event.name'] == 'order.lost' && $d.logRecord.attributes['stock.cause'] == 'genuinely-out-of-stock' | groupby $d.logRecord.attributes['product.department']:string as dep aggregate sum($d.logRecord.attributes['money.amount_minor']:number) as v"
+   }
+  ],
+  "compute": "{'must': [[top(R[0],'v')[0]['dep']]], 'numbers': [[gbp(top(R[0],'v')[0]['v']), 0.005]]}",
+  "unique": "top(R[0],'v')[0]['v'] > 1.01 * top(R[0],'v')[1]['v']",
+  "datasets": [
+   "ecommerce.order_events"
+  ]
+ },
+ {
+  "id": "ECO-T2-002",
+  "domain": "ecommerce",
+  "tier": 2,
+  "title": "Most-used promo code",
+  "question": "Which promo code was used on the most placed Coralogix Store orders {W}, and on how many orders?",
+  "ref": [
+   {
+    "kind": "logs",
+    "query": "source logs | filter $l.applicationname == 'coralogix-store' && $d.logRecord.attributes['event.name'] == 'order.placed' && $d.logRecord.attributes['order.promo_code'] != 'none' && $d.logRecord.attributes['order.promo_code'] != null | groupby $d.logRecord.attributes['order.promo_code']:string as p, $l.subsystemname as s aggregate count() as n"
+   }
+  ],
+  "compute": "{'must': [[top([{'p': p, 'n': sum([r['n'] for r in R[0] if r['p'] == p])} for p in ['ACADEMY20','MERCH15','WELCOME10','FREESHIP']],'n')[0]['p']]], 'numbers': [], 'numbers_any': [[top([{'p': p, 'n': sum([r['n'] for r in R[0] if r['p'] == p])} for p in ['ACADEMY20','MERCH15','WELCOME10','FREESHIP']],'n')[0]['n'], 0.005], [top([r for r in R[0] if r['s'] == 'order-service'],'n')[0]['n'], 0.005]]}",
+  "unique": "top([{'p': p, 'n': sum([r['n'] for r in R[0] if r['p'] == p])} for p in ['ACADEMY20','MERCH15','WELCOME10','FREESHIP']],'n')[0]['n'] > 1.01 * top([{'p': p, 'n': sum([r['n'] for r in R[0] if r['p'] == p])} for p in ['ACADEMY20','MERCH15','WELCOME10','FREESHIP']],'n')[1]['n'] and top([r for r in R[0] if r['s'] == 'order-service'],'n')[0]['p'] == top([{'p': p, 'n': sum([r['n'] for r in R[0] if r['p'] == p])} for p in ['ACADEMY20','MERCH15','WELCOME10','FREESHIP']],'n')[0]['p']",
+  "datasets": [
+   "ecommerce.order_events",
+   "ecommerce.session_funnel"
+  ]
+ },
+ {
+  "id": "ECO-T2-003",
+  "domain": "ecommerce",
+  "tier": 2,
+  "title": "Payment method with most declined value",
+  "question": "Which payment method accounted for the most declined order value at Coralogix Store {W}, and how much in GBP?",
+  "ref": [
+   {
+    "kind": "logs",
+    "query": "source logs | filter $l.applicationname == 'coralogix-store' && $d.logRecord.attributes['event.name'] == 'order.declined' | groupby $d.logRecord.attributes['payment.method']:string as m aggregate sum($d.logRecord.attributes['money.amount_minor']:number) as v"
+   }
+  ],
+  "compute": "{'must': [[top(R[0],'v')[0]['m']]], 'numbers': [[gbp(top(R[0],'v')[0]['v']), 0.005]]}",
+  "unique": "top(R[0],'v')[0]['v'] > 1.01 * top(R[0],'v')[1]['v']",
+  "datasets": [
+   "ecommerce.order_events"
+  ]
+ },
+ {
+  "id": "ECO-T2-004",
+  "domain": "ecommerce",
+  "tier": 2,
+  "title": "Delivery method with highest revenue",
+  "question": "Which delivery method brought in the most placed-order revenue at Coralogix Store {W}, and how much in GBP?",
+  "ref": [
+   {
+    "kind": "logs",
+    "query": "source logs | filter $l.applicationname == 'coralogix-store' && $d.logRecord.attributes['event.name'] == 'order.placed' | groupby $d.logRecord.attributes['delivery.method']:string as m, $l.subsystemname as s aggregate sum($d.logRecord.attributes['money.amount_minor']:number) as v"
+   }
+  ],
+  "compute": "{'must': [[top([{'m': m, 'v': sum([r['v'] for r in R[0] if r['m'] == m])} for m in ['standard','named-day','click-collect']],'v')[0]['m']]], 'numbers': [], 'numbers_any': [[gbp(top([{'m': m, 'v': sum([r['v'] for r in R[0] if r['m'] == m])} for m in ['standard','named-day','click-collect']],'v')[0]['v']), 0.005], [gbp(top([r for r in R[0] if r['s'] == 'order-service'],'v')[0]['v']), 0.005]]}",
+  "unique": "top([{'m': m, 'v': sum([r['v'] for r in R[0] if r['m'] == m])} for m in ['standard','named-day','click-collect']],'v')[0]['v'] > 1.01 * top([{'m': m, 'v': sum([r['v'] for r in R[0] if r['m'] == m])} for m in ['standard','named-day','click-collect']],'v')[1]['v']",
+  "datasets": [
+   "ecommerce.order_events"
+  ]
+ },
+ {
+  "id": "ECO-T2-005",
+  "domain": "ecommerce",
+  "tier": 2,
+  "title": "Leakiest funnel stage",
+  "question": "At which step do Coralogix Store shoppers abandon the most baskets {W}, and what percentage of all abandoned baskets does that step account for?",
+  "ref": [
+   {
+    "kind": "logs",
+    "query": "source logs | filter $l.applicationname == 'coralogix-store' && $d.logRecord.attributes['event.name'] == 'basket.abandoned' | groupby $d.logRecord.attributes['abandon.stage']:string as st aggregate count() as n"
+   }
+  ],
+  "compute": "{'must': [[top(R[0],'n')[0]['st']]], 'numbers': [[pct(top(R[0],'n')[0]['n'], sum([r['n'] for r in R[0]])), 0.01]]}",
+  "unique": "top(R[0],'n')[0]['n'] > 1.01 * top(R[0],'n')[1]['n']",
+  "datasets": [
+   "ecommerce.order_events",
+   "ecommerce.session_funnel"
+  ]
+ },
+ {
+  "id": "ECO-T3-003",
+  "domain": "ecommerce",
+  "tier": 3,
+  "title": "Deepest effective discount",
+  "question": "Which promo code gave the deepest effective discount at Coralogix Store {W}, measured as total discount divided by total pre-discount value of the orders that used it? Give the percentage.",
+  "ref": [
+   {
+    "kind": "logs",
+    "query": "source logs | filter $l.applicationname == 'coralogix-store' && $d.logRecord.attributes['event.name'] == 'order.placed' && $d.logRecord.attributes['order.promo_code'] != 'none' | groupby $d.logRecord.attributes['order.promo_code']:string as p aggregate sum($d.logRecord.attributes['money.amount_minor']:number) as v, sum($d.logRecord.attributes['order.discount_minor']:number) as d"
+   }
+  ],
+  "compute": "{'must': [[sorted(R[0], key=lambda r: -r['d']/(r['v']+r['d']))[0]['p']]], 'numbers': [[pct(sorted(R[0], key=lambda r: -r['d']/(r['v']+r['d']))[0]['d'], sorted(R[0], key=lambda r: -r['d']/(r['v']+r['d']))[0]['v'] + sorted(R[0], key=lambda r: -r['d']/(r['v']+r['d']))[0]['d']), 0.01]]}",
+  "unique": "sorted([r['d']/(r['v']+r['d']) for r in R[0]])[-1] > 1.01 * sorted([r['d']/(r['v']+r['d']) for r in R[0]])[-2]",
+  "datasets": [
+   "ecommerce.order_events"
+  ]
+ },
+ {
+  "id": "ECO-T3-004",
+  "domain": "ecommerce",
+  "tier": 3,
+  "title": "Overall gross margin on orders",
+  "question": "What was Coralogix Store's gross margin percentage on placed orders {W}, computed as (order revenue - cost of goods) / order revenue?",
+  "ref": [
+   {
+    "kind": "logs",
+    "query": "source logs | filter $l.applicationname == 'coralogix-store' && ($d.logRecord.attributes['event.name'] == 'order.placed' || $d.logRecord.attributes['event.name'] == 'order.cogs') | groupby $d.logRecord.attributes['event.name']:string as ev aggregate sum($d.logRecord.attributes['money.amount_minor']:number) as v"
+   }
+  ],
+  "compute": "{'must': [], 'numbers': [[pct([r for r in R[0] if r['ev'] == 'order.placed'][0]['v'] - [r for r in R[0] if r['ev'] == 'order.cogs'][0]['v'], [r for r in R[0] if r['ev'] == 'order.placed'][0]['v']), 0.01]]}",
+  "datasets": [
+   "ecommerce.order_events"
+  ]
+ },
+ {
+  "id": "ECO-T3-005",
+  "domain": "ecommerce",
+  "tier": 3,
+  "title": "Phantom share of stock-out losses",
+  "question": "Of all order value Coralogix Store lost to out-of-stock refusals {W}, what percentage was caused by the stock ledger being out of sync rather than genuine shortages, and which department did those phantom stock-outs hit?",
+  "ref": [
+   {
+    "kind": "logs",
+    "query": "source logs | filter $l.applicationname == 'coralogix-store' && $d.logRecord.attributes['event.name'] == 'order.lost' | groupby $d.logRecord.attributes['stock.cause']:string as c, $d.logRecord.attributes['product.department']:string as dep aggregate sum($d.logRecord.attributes['money.amount_minor']:number) as v"
+   }
+  ],
+  "compute": "{'must': [[top([r for r in R[0] if r['c'] == 'ledger-out-of-sync'],'v')[0]['dep']]], 'numbers': [[pct(sum([r['v'] for r in R[0] if r['c'] == 'ledger-out-of-sync']), sum([r['v'] for r in R[0]])), 0.01]]}",
+  "datasets": [
+   "ecommerce.order_events"
+  ]
+ },
+ {
+  "id": "ECO-T3-006",
+  "domain": "ecommerce",
+  "tier": 3,
+  "title": "Distinct ordering customers",
+  "question": "How many distinct customers placed at least one order at Coralogix Store {W}?",
+  "ref": [
+   {
+    "kind": "logs",
+    "query": "source logs | filter $l.applicationname == 'coralogix-store' && $d.logRecord.attributes['event.name'] == 'order.placed' | aggregate distinct_count($d.logRecord.attributes['user.id']) as u"
+   }
+  ],
+  "compute": "{'must': [], 'numbers': [[R[0][0]['u'], 0.005]]}",
+  "datasets": [
+   "ecommerce.session_funnel",
+   "ecommerce.order_events"
+  ]
+ },
+ {
+  "id": "ECO-T3-007",
+  "domain": "ecommerce",
+  "tier": 3,
+  "title": "Lines per order",
+  "question": "On average, how many distinct product lines did a placed Coralogix Store order contain {W}?",
+  "ref": [
+   {
+    "kind": "logs",
+    "query": "source logs | filter $l.applicationname == 'coralogix-store' && ($d.logRecord.attributes['event.name'] == 'order.placed' || $d.logRecord.attributes['event.name'] == 'order.line') | groupby $d.logRecord.attributes['event.name']:string as ev aggregate count() as n, avg($d.logRecord.attributes['order.lines']:number) as al"
+   }
+  ],
+  "compute": "{'must': [], 'numbers': [], 'numbers_any': [[[r for r in R[0] if r['ev'] == 'order.placed'][0]['al'], 0.01], [[r for r in R[0] if r['ev'] == 'order.line'][0]['n'] / [r for r in R[0] if r['ev'] == 'order.placed'][0]['n'], 0.01]]}",
+  "datasets": [
+   "ecommerce.order_events"
+  ]
+ },
+ {
+  "id": "ECO-T4-001",
+  "domain": "ecommerce",
+  "tier": 4,
+  "title": "Worst day of stock-ledger refusals",
+  "question": "Checkout at Coralogix Store refuses to reserve stock when a stock-ledger replica falls behind. Find the UTC day {W} on which the checkout service logged the most such refusals. Report: the day, how many refusals checkout logged that day, which replica was behind, and the order value in GBP lost that day to ledger-out-of-sync stock-outs.",
+  "ref": [
+   {
+    "kind": "logs",
+    "query": "source logs | filter $l.subsystemname == 'checkout-service' && $d.logRecord.attributes['error.type'] == 'StockLedgerUnavailable' | groupby formatTimestamp(roundTime($m.timestamp, 1d), '%Y-%m-%d') as d aggregate count() as n"
+   },
+   {
+    "kind": "logs",
+    "query": "source logs | filter $l.applicationname == 'coralogix-store' && $d.logRecord.attributes['event.name'] == 'order.lost' && $d.logRecord.attributes['stock.cause'] == 'ledger-out-of-sync' | groupby formatTimestamp(roundTime($m.timestamp, 1d), '%Y-%m-%d') as d aggregate sum($d.logRecord.attributes['money.amount_minor']:number) as v"
+   }
+  ],
+  "compute": "{'must': [[top(R[0],'n')[0]['d'], top(R[0],'n')[0]['d'][8:10].lstrip('0')+' '+MON3[top(R[0],'n')[0]['d'][5:7]], MON3[top(R[0],'n')[0]['d'][5:7]]+' '+top(R[0],'n')[0]['d'][8:10].lstrip('0'), MONF[top(R[0],'n')[0]['d'][5:7]]+' '+top(R[0],'n')[0]['d'][8:10].lstrip('0'), top(R[0],'n')[0]['d'][5:7]+'/'+top(R[0],'n')[0]['d'][8:10], top(R[0],'n')[0]['d'][8:10]+'/'+top(R[0],'n')[0]['d'][5:7]], ['replica-3', 'replica 3']], 'numbers': [[top(R[0],'n')[0]['n'], 0.005], [gbp([r for r in R[1] if r['d'] == top(R[0],'n')[0]['d']][0]['v']), 0.005]]}",
+  "unique": "top(R[0],'n')[0]['n'] > 1.01 * top(R[0],'n')[1]['n']",
+  "datasets": [
+   "ops.error_rollup_hourly",
+   "ecommerce.order_events"
+  ]
+ },
+ {
+  "id": "ECO-T4-002",
+  "domain": "ecommerce",
+  "tier": 4,
+  "title": "Connection-pool checkout failures: worst hour",
+  "question": "Coralogix Store checkouts sometimes fail outright with a checkout error. Counting each failed checkout once, which UTC hour {W} had the most of these failures, how many were there, and what resource ran out to cause them?",
+  "ref": [
+   {
+    "kind": "logs",
+    "query": "source logs | filter $l.subsystemname == 'checkout-service' && $d.logRecord.attributes['error.type'] == 'CheckoutFailed' | groupby formatTimestamp(roundTime($m.timestamp, 1h), '%Y-%m-%dT%H') as h aggregate count() as n"
+   }
+  ],
+  "compute": "{'must': [[top(R[0],'n')[0]['h'], top(R[0],'n')[0]['h'][8:10].lstrip('0')+' '+MON3[top(R[0],'n')[0]['h'][5:7]], MON3[top(R[0],'n')[0]['h'][5:7]]+' '+top(R[0],'n')[0]['h'][8:10].lstrip('0'), MONF[top(R[0],'n')[0]['h'][5:7]]+' '+top(R[0],'n')[0]['h'][8:10].lstrip('0'), top(R[0],'n')[0]['h'][5:7]+'/'+top(R[0],'n')[0]['h'][8:10], top(R[0],'n')[0]['h'][8:10]+'/'+top(R[0],'n')[0]['h'][5:7]], ['t'+top(R[0],'n')[0]['h'][11:13], top(R[0],'n')[0]['h'][11:13]+':00', top(R[0],'n')[0]['h'][11:13]+'00 utc', top(R[0],'n')[0]['h'][11:13]+'00z', top(R[0],'n')[0]['h'][11:13]+'h utc'], ['connection', 'pool']], 'numbers': [[top(R[0],'n')[0]['n'], 0.005]]}",
+  "unique": "top(R[0],'n')[0]['n'] > 1.01 * top(R[0],'n')[1]['n']",
+  "datasets": [
+   "ops.error_rollup_hourly",
+   "platform.resource_pressure_hourly"
+  ]
+ },
+ {
+  "id": "ECO-T4-003",
+  "domain": "ecommerce",
+  "tier": 4,
+  "title": "Recommendations outage root cause",
+  "question": "Product recommendations at Coralogix Store fail when the recommendation model is unavailable. Which service is the root cause, which UTC day {W} had the most of these failures, and how many distinct failures were there that day?",
+  "ref": [
+   {
+    "kind": "logs",
+    "query": "source logs | filter $l.applicationname == 'coralogix-store' && $d.logRecord.attributes['error.type'] == 'ModelUnavailable' | groupby formatTimestamp(roundTime($m.timestamp, 1d), '%Y-%m-%d') as d, $l.subsystemname as s aggregate count() as n"
+   }
+  ],
+  "compute": "{'must': [['recommendation-service', 'recommendation service'], [top([r for r in R[0] if r['s'] == 'recommendation-service'],'n')[0]['d'], top([r for r in R[0] if r['s'] == 'recommendation-service'],'n')[0]['d'][8:10].lstrip('0')+' '+MON3[top([r for r in R[0] if r['s'] == 'recommendation-service'],'n')[0]['d'][5:7]], MON3[top([r for r in R[0] if r['s'] == 'recommendation-service'],'n')[0]['d'][5:7]]+' '+top([r for r in R[0] if r['s'] == 'recommendation-service'],'n')[0]['d'][8:10].lstrip('0'), MONF[top([r for r in R[0] if r['s'] == 'recommendation-service'],'n')[0]['d'][5:7]]+' '+top([r for r in R[0] if r['s'] == 'recommendation-service'],'n')[0]['d'][8:10].lstrip('0'), top([r for r in R[0] if r['s'] == 'recommendation-service'],'n')[0]['d'][5:7]+'/'+top([r for r in R[0] if r['s'] == 'recommendation-service'],'n')[0]['d'][8:10], top([r for r in R[0] if r['s'] == 'recommendation-service'],'n')[0]['d'][8:10]+'/'+top([r for r in R[0] if r['s'] == 'recommendation-service'],'n')[0]['d'][5:7]]], 'numbers': [[top([r for r in R[0] if r['s'] == 'recommendation-service'],'n')[0]['n'], 0.005]]}",
+  "unique": "top([r for r in R[0] if r['s'] == 'recommendation-service'],'n')[0]['n'] > 1.01 * top([r for r in R[0] if r['s'] == 'recommendation-service'],'n')[1]['n']",
+  "datasets": [
+   "ops.error_rollup_hourly"
+  ]
+ },
+ {
+  "id": "ECO-T4-004",
+  "domain": "ecommerce",
+  "tier": 4,
+  "title": "Slowest checkout dependency",
+  "question": "Looking at traces, which downstream call made by the Coralogix Store checkout service has the highest p95 latency {W}? Give the operation, its p95 in milliseconds, and how many of those calls errored.",
+  "ref": [
+   {
+    "kind": "spans",
+    "query": "source spans | filter $l.serviceName == 'checkout-service' && $d.tags['span.kind'] == 'client' | groupby $l.operationName as op aggregate percentile(0.95, $m.duration:number / 1000) as p95, count() as n, sum(if($d.tags['otel.status_code'] == 'ERROR', 1, 0)) as err"
+   }
+  ],
+  "compute": "{'must': [[top(R[0],'p95')[0]['op']]], 'numbers': [[top(R[0],'p95')[0]['p95'], 0.02], [top(R[0],'p95')[0]['err'], 0.005]]}",
+  "unique": "top(R[0],'p95')[0]['p95'] > 1.05 * top(R[0],'p95')[1]['p95']",
+  "datasets": [
+   "platform.service_latency_hourly"
+  ]
+ },
+ {
+  "id": "ECO-T4-005",
+  "domain": "ecommerce",
+  "tier": 4,
+  "title": "Worst day for payment declines",
+  "question": "On the UTC day {W} with the most declined Coralogix Store orders, how many orders were declined, what was their total value in GBP, and what decline code and reason did the issuer give?",
+  "ref": [
+   {
+    "kind": "logs",
+    "query": "source logs | filter $l.applicationname == 'coralogix-store' && $d.logRecord.attributes['event.name'] == 'order.declined' | groupby formatTimestamp(roundTime($m.timestamp, 1d), '%Y-%m-%d') as d aggregate count() as n, sum($d.logRecord.attributes['money.amount_minor']:number) as v"
+   },
+   {
+    "kind": "logs",
+    "query": "source logs | filter $l.applicationname == 'coralogix-store' && $d.logRecord.attributes['event.name'] == 'order.declined' | groupby $d.logRecord.attributes['decline.code']:string as c, $d.logRecord.attributes['decline.reason']:string as r aggregate count() as n"
+   }
+  ],
+  "compute": "{'must': [[top(R[0],'n')[0]['d'], top(R[0],'n')[0]['d'][8:10].lstrip('0')+' '+MON3[top(R[0],'n')[0]['d'][5:7]], MON3[top(R[0],'n')[0]['d'][5:7]]+' '+top(R[0],'n')[0]['d'][8:10].lstrip('0'), MONF[top(R[0],'n')[0]['d'][5:7]]+' '+top(R[0],'n')[0]['d'][8:10].lstrip('0'), top(R[0],'n')[0]['d'][5:7]+'/'+top(R[0],'n')[0]['d'][8:10], top(R[0],'n')[0]['d'][8:10]+'/'+top(R[0],'n')[0]['d'][5:7]], [top(R[1],'n')[0]['c']], [top(R[1],'n')[0]['r'], top(R[1],'n')[0]['r'].replace('-', ' ')]], 'numbers': [[top(R[0],'n')[0]['n'], 0.005], [gbp(top(R[0],'n')[0]['v']), 0.005]]}",
+  "unique": "top(R[0],'n')[0]['n'] > 1.01 * top(R[0],'n')[1]['n']",
+  "datasets": [
+   "ecommerce.order_events"
+  ]
+ },
+ {
+  "id": "FIN-T1-001",
+  "domain": "fintech",
+  "tier": 1,
+  "title": "Billed research queries",
+  "question": "How many research queries did Coralogix Finance bill to clients {W}?",
+  "ref": [
+   {
+    "kind": "logs",
+    "query": "source logs | filter $l.applicationname == 'coralogix-finance' && $d.logRecord.attributes['event.name'] == 'query.billed' | aggregate count() as n"
+   }
+  ],
+  "compute": "{'must': [], 'numbers': [[R[0][0]['n'], 0.005]]}",
+  "datasets": [
+   "fintech.research_billing",
+   "fintech.client_daily"
+  ]
+ },
+ {
+  "id": "FIN-T1-002",
+  "domain": "fintech",
+  "tier": 1,
+  "title": "Query revenue billed",
+  "question": "What was Coralogix Finance's total research query revenue billed to clients {W}, in GBP?",
+  "ref": [
+   {
+    "kind": "logs",
+    "query": "source logs | filter $l.applicationname == 'coralogix-finance' && $d.logRecord.attributes['event.name'] == 'query.billed' | aggregate sum($d.logRecord.attributes['money.amount_minor']:number) as v"
+   }
+  ],
+  "compute": "{'must': [], 'numbers': [[gbp(R[0][0]['v']), 0.005]]}",
+  "datasets": [
+   "fintech.research_billing",
+   "fintech.client_daily"
+  ]
+ },
+ {
+  "id": "FIN-T1-003",
+  "domain": "fintech",
+  "tier": 1,
+  "title": "Uncited-answer refunds",
+  "question": "Coralogix Finance refunds credits when a research answer comes back without citations. How many such refunds were issued {W}, and what was their total value in GBP?",
+  "ref": [
+   {
+    "kind": "logs",
+    "query": "source logs | filter $l.applicationname == 'coralogix-finance' && $d.logRecord.attributes['event.name'] == 'credit.refunded' | aggregate count() as n, sum($d.logRecord.attributes['money.amount_minor']:number) as v"
+   }
+  ],
+  "compute": "{'must': [], 'numbers': [[R[0][0]['n'], 0.005], [gbp(R[0][0]['v']), 0.005]]}",
+  "datasets": [
+   "fintech.research_billing",
+   "fintech.client_daily"
+  ]
+ },
+ {
+  "id": "FIN-T1-005",
+  "domain": "fintech",
+  "tier": 1,
+  "title": "Market-data vendor cost",
+  "question": "How much did Coralogix Finance spend on market-data vendor calls for research queries {W}, in GBP?",
+  "ref": [
+   {
+    "kind": "logs",
+    "query": "source logs | filter $l.applicationname == 'coralogix-finance' && $d.logRecord.attributes['event.name'] == 'vendor.datacall.charged' | aggregate sum($d.logRecord.attributes['money.amount_minor']:number) as v"
+   }
+  ],
+  "compute": "{'must': [], 'numbers': [[gbp(R[0][0]['v']), 0.005]]}",
+  "datasets": [
+   "fintech.research_billing",
+   "fintech.client_daily"
+  ]
+ },
+ {
+  "id": "FIN-T2-001",
+  "domain": "fintech",
+  "tier": 2,
+  "title": "Top segment by query revenue",
+  "question": "Which client segment generated the most research query revenue for Coralogix Finance {W}, and how much in GBP?",
+  "ref": [
+   {
+    "kind": "logs",
+    "query": "source logs | filter $l.applicationname == 'coralogix-finance' && $d.logRecord.attributes['event.name'] == 'query.billed' | groupby $d.logRecord.attributes['user.segment']:string as seg aggregate sum($d.logRecord.attributes['money.amount_minor']:number) as v | orderby v desc"
+   }
+  ],
+  "compute": "{'must': [[R[0][0]['seg']]], 'numbers': [[gbp(R[0][0]['v']), 0.005]]}",
+  "unique": "R[0][0]['v'] > 1.01 * R[0][1]['v']",
+  "datasets": [
+   "fintech.research_billing",
+   "fintech.client_daily"
+  ]
+ },
+ {
+  "id": "FIN-T2-002",
+  "domain": "fintech",
+  "tier": 2,
+  "title": "Top region by billed queries",
+  "question": "Which research region had the most billed research queries at Coralogix Finance {W}, and how many?",
+  "ref": [
+   {
+    "kind": "logs",
+    "query": "source logs | filter $l.applicationname == 'coralogix-finance' && $d.logRecord.attributes['event.name'] == 'query.billed' | groupby $d.logRecord.attributes['research.region']:string as r aggregate count() as n | orderby n desc"
+   }
+  ],
+  "compute": "{'must': [[R[0][0]['r']]], 'numbers': [[R[0][0]['n'], 0.005]]}",
+  "unique": "R[0][0]['n'] > 1.01 * R[0][1]['n']",
+  "datasets": [
+   "fintech.research_billing"
+  ]
+ },
+ {
+  "id": "FIN-T2-003",
+  "domain": "fintech",
+  "tier": 2,
+  "title": "Top client by query revenue",
+  "question": "Which individual client user generated the most billed research query revenue at Coralogix Finance {W}, and how much in GBP?",
+  "ref": [
+   {
+    "kind": "logs",
+    "query": "source logs | filter $l.applicationname == 'coralogix-finance' && $d.logRecord.attributes['event.name'] == 'query.billed' | groupby $d.logRecord.attributes['user.id']:string as u aggregate sum($d.logRecord.attributes['money.amount_minor']:number) as v | orderby v desc | limit 5"
+   }
+  ],
+  "compute": "{'must': [[R[0][0]['u']]], 'numbers': [[gbp(R[0][0]['v']), 0.005]]}",
+  "unique": "R[0][0]['v'] > 1.01 * R[0][1]['v']",
+  "datasets": [
+   "fintech.research_billing",
+   "fintech.client_daily"
+  ]
+ },
+ {
+  "id": "FIN-T2-004",
+  "domain": "fintech",
+  "tier": 2,
+  "title": "Asset class with most guardrail refusals",
+  "question": "Which research asset class had the most queries refused by guardrails at Coralogix Finance {W}, and how many refusals?",
+  "ref": [
+   {
+    "kind": "logs",
+    "query": "source logs | filter $l.applicationname == 'coralogix-finance' && $d.logRecord.attributes['event.name'] == 'query.failed' && $d.logRecord.attributes['outcome'] == 'refused' | groupby $d.logRecord.attributes['research.asset_class']:string as ac aggregate count() as n | orderby n desc"
+   }
+  ],
+  "compute": "{'must': [[R[0][0]['ac']]], 'numbers': [[R[0][0]['n'], 0.005]]}",
+  "unique": "R[0][0]['n'] > 1.01 * R[0][1]['n']",
+  "datasets": [
+   "fintech.research_billing"
+  ]
+ },
+ {
+  "id": "FIN-T2-005",
+  "domain": "fintech",
+  "tier": 2,
+  "title": "Worst day for vendor quota errors",
+  "question": "On which UTC day {W} did Coralogix Finance log the most vendor-quota-exceeded errors (count every error log, across all services), and how many?",
+  "ref": [
+   {
+    "kind": "logs",
+    "query": "source logs | filter $l.applicationname == 'coralogix-finance' && $d.logRecord.attributes['error.type'] == 'VendorQuotaExceeded' | groupby formatTimestamp(roundTime($m.timestamp, 1d), '%Y-%m-%d') as d aggregate count() as n | orderby n desc"
+   }
+  ],
+  "compute": "{'must': [[R[0][0]['d'], R[0][0]['d'][5:], str(int(R[0][0]['d'][8:10]))+' '+MON3[R[0][0]['d'][5:7]], MON3[R[0][0]['d'][5:7]]+' '+str(int(R[0][0]['d'][8:10])), MONF[R[0][0]['d'][5:7]]+' '+str(int(R[0][0]['d'][8:10])), str(int(R[0][0]['d'][8:10]))+' '+MONF[R[0][0]['d'][5:7]], MON3[R[0][0]['d'][5:7]]+'-'+str(int(R[0][0]['d'][8:10])), str(int(R[0][0]['d'][8:10]))+'/'+R[0][0]['d'][5:7], R[0][0]['d'][5:7]+'/'+str(int(R[0][0]['d'][8:10])), str(int(R[0][0]['d'][8:10]))+'st '+MON3[R[0][0]['d'][5:7]], str(int(R[0][0]['d'][8:10]))+'nd '+MON3[R[0][0]['d'][5:7]], str(int(R[0][0]['d'][8:10]))+'rd '+MON3[R[0][0]['d'][5:7]], str(int(R[0][0]['d'][8:10]))+'th '+MON3[R[0][0]['d'][5:7]], MON3[R[0][0]['d'][5:7]]+' '+str(int(R[0][0]['d'][8:10]))+'st', MON3[R[0][0]['d'][5:7]]+' '+str(int(R[0][0]['d'][8:10]))+'nd', MON3[R[0][0]['d'][5:7]]+' '+str(int(R[0][0]['d'][8:10]))+'rd', MON3[R[0][0]['d'][5:7]]+' '+str(int(R[0][0]['d'][8:10]))+'th']], 'numbers': [[R[0][0]['n'], 0.005]]}",
+  "unique": "R[0][0]['n'] > 1.01 * R[0][1]['n']",
+  "datasets": [
+   "ops.error_rollup_hourly"
+  ]
+ },
+ {
+  "id": "FIN-T3-001",
+  "domain": "fintech",
+  "tier": 3,
+  "title": "Highest refund rate by region",
+  "question": "Measured by value (credits refunded divided by query revenue billed), which research region had the highest refund rate at Coralogix Finance {W}, and what was that rate as a percentage?",
+  "ref": [
+   {
+    "kind": "logs",
+    "query": "source logs | filter $l.applicationname == 'coralogix-finance' && ($d.logRecord.attributes['event.name'] == 'credit.refunded' || $d.logRecord.attributes['event.name'] == 'query.billed') | create ev from $d.logRecord.attributes['event.name']:string | create amt from $d.logRecord.attributes['money.amount_minor']:number | groupby $d.logRecord.attributes['research.region']:string as r aggregate sum(if(ev == 'credit.refunded', amt, 0)) as ref, sum(if(ev == 'query.billed', amt, 0)) as bil | create rate from 100.0 * ref / bil | orderby rate desc"
+   }
+  ],
+  "compute": "{'must': [[R[0][0]['r']]], 'numbers': [[R[0][0]['rate'], 0.01]]}",
+  "unique": "R[0][0]['rate'] > 1.01 * R[0][1]['rate']",
+  "datasets": [
+   "fintech.research_billing"
+  ]
+ },
+ {
+  "id": "FIN-T3-002",
+  "domain": "fintech",
+  "tier": 3,
+  "title": "Overall gross margin",
+  "question": "What was Coralogix Finance's gross margin on research queries {W}, defined as (query revenue billed - credits refunded - inference costs - market-data costs) / query revenue billed? Give it as a percentage.",
+  "ref": [
+   {
+    "kind": "logs",
+    "query": "source logs | filter $l.applicationname == 'coralogix-finance' && $d.logRecord.attributes['event.domain'] == 'business' | create ev from $d.logRecord.attributes['event.name']:string | create amt from $d.logRecord.attributes['money.amount_minor']:number | aggregate sum(if(ev == 'query.billed', amt, 0)) as bil, sum(if(ev == 'credit.refunded', amt, 0)) as ref, sum(if(ev == 'inference.charged', amt, 0)) as inf, sum(if(ev == 'vendor.datacall.charged', amt, 0)) as md"
+   }
+  ],
+  "compute": "{'must': [], 'numbers': [[pct(R[0][0]['bil'] - R[0][0]['ref'] - R[0][0]['inf'] - R[0][0]['md'], R[0][0]['bil']), 0.01]]}",
+  "datasets": [
+   "fintech.research_billing",
+   "fintech.client_daily"
+  ]
+ },
+ {
+  "id": "FIN-T3-003",
+  "domain": "fintech",
+  "tier": 3,
+  "title": "Lowest average price per query by segment",
+  "question": "Which client segment paid the lowest average price per billed research query at Coralogix Finance {W}, and what was that average in pence?",
+  "ref": [
+   {
+    "kind": "logs",
+    "query": "source logs | filter $l.applicationname == 'coralogix-finance' && $d.logRecord.attributes['event.name'] == 'query.billed' | groupby $d.logRecord.attributes['user.segment']:string as seg aggregate avg($d.logRecord.attributes['money.amount_minor']:number) as a | orderby a asc"
+   }
+  ],
+  "compute": "{'must': [[R[0][0]['seg']]], 'numbers': [[R[0][0]['a'], 0.01]]}",
+  "unique": "R[0][1]['a'] > 1.01 * R[0][0]['a']",
+  "datasets": [
+   "fintech.research_billing"
+  ]
+ },
+ {
+  "id": "FIN-T3-004",
+  "domain": "fintech",
+  "tier": 3,
+  "title": "Boutique cost-to-serve ratio",
+  "question": "For boutique clients only, what were Coralogix Finance's combined inference and market-data costs as a percentage of the research query revenue billed to those clients {W}?",
+  "ref": [
+   {
+    "kind": "logs",
+    "query": "source logs | filter $l.applicationname == 'coralogix-finance' && $d.logRecord.attributes['user.segment'] == 'boutique' && $d.logRecord.attributes['event.domain'] == 'business' | create ev from $d.logRecord.attributes['event.name']:string | create amt from $d.logRecord.attributes['money.amount_minor']:number | aggregate sum(if(ev == 'query.billed', amt, 0)) as bil, sum(if(ev == 'inference.charged' || ev == 'vendor.datacall.charged', amt, 0)) as cost"
+   }
+  ],
+  "compute": "{'must': [], 'numbers': [[pct(R[0][0]['cost'], R[0][0]['bil']), 0.01]]}",
+  "datasets": [
+   "fintech.research_billing",
+   "fintech.client_daily"
+  ]
+ },
+ {
+  "id": "FIN-T4-001",
+  "domain": "fintech",
+  "tier": 4,
+  "title": "Vendor quota impact on top-affected client",
+  "question": "Vendor management wants to know who is hurt most by market-data quota exhaustion at Coralogix Finance {W}. Which client user had the most vendor-quota rejections logged by the market-data gateway, how many rejections, what share (%) of that client's live-prices API requests returned HTTP 503, and how much query revenue (GBP) did that client generate in the same window?",
+  "ref": [
+   {
+    "kind": "logs",
+    "query": "source logs | filter $l.applicationname == 'coralogix-finance' && $l.subsystemname == 'market-data-gateway' && $d.logRecord.attributes['error.type'] == 'VendorQuotaExceeded' | groupby $d.logRecord.attributes['user.id']:string as u aggregate count() as n | orderby n desc | limit 5"
+   },
+   {
+    "kind": "logs",
+    "query": "source logs | filter $l.applicationname == 'coralogix-finance' && $l.subsystemname == 'research-gateway' && $d.logRecord.attributes['http.route'] == '/api/live-prices' && $d.logRecord.attributes['http.status_code'] != null | groupby $d.logRecord.attributes['user.id']:string as u aggregate count() as total, sum(if($d.logRecord.attributes['http.status_code']:string == '503', 1, 0)) as bad"
+   },
+   {
+    "kind": "logs",
+    "query": "source logs | filter $l.applicationname == 'coralogix-finance' && $d.logRecord.attributes['event.name'] == 'query.billed' | groupby $d.logRecord.attributes['user.id']:string as u aggregate sum($d.logRecord.attributes['money.amount_minor']:number) as v"
+   }
+  ],
+  "compute": "{'must': [[R[0][0]['u']]], 'numbers': [[R[0][0]['n'], 0.005], [[pct(r['bad'], r['total']) for r in R[1] if r['u'] == R[0][0]['u']][0], 0.01], [[gbp(r['v']) for r in R[2] if r['u'] == R[0][0]['u']][0], 0.005]]}",
+  "unique": "R[0][0]['n'] > 1.01 * R[0][1]['n']",
+  "datasets": [
+   "fintech.client_daily",
+   "platform.http_requests_hourly"
+  ]
+ },
+ {
+  "id": "FIN-T4-002",
+  "domain": "fintech",
+  "tier": 4,
+  "title": "Regional refund concentration root cause",
+  "question": "Refunds for uncited answers at Coralogix Finance are concentrated in one research region {W}. Which region is it, how much was refunded there in GBP, which corpus vendor serves that region's retrieval, and what was the average corpus freshness for that region in hours?",
+  "ref": [
+   {
+    "kind": "logs",
+    "query": "source logs | filter $l.applicationname == 'coralogix-finance' && $d.logRecord.attributes['event.name'] == 'credit.refunded' | groupby $d.logRecord.attributes['research.region']:string as r aggregate sum($d.logRecord.attributes['money.amount_minor']:number) as v | orderby v desc"
+   },
+   {
+    "kind": "logs",
+    "query": "source logs | filter $l.applicationname == 'coralogix-finance' && $l.subsystemname == 'research-gateway' && $d.logRecord.attributes['corpus.region'] != null | groupby $d.logRecord.attributes['corpus.region']:string as r, $d.logRecord.attributes['corpus.vendor']:string as vendor aggregate avg($d.logRecord.attributes['corpus.freshness_seconds']:number) as fresh, count() as n"
+   }
+  ],
+  "compute": "{'must': [[R[0][0]['r']], [[x['vendor'] for x in R[1] if x['r'] == R[0][0]['r']][0]]], 'numbers': [[gbp(R[0][0]['v']), 0.005], [[x['fresh'] for x in R[1] if x['r'] == R[0][0]['r']][0] / 3600, 0.01]]}",
+  "unique": "R[0][0]['v'] > 2 * R[0][1]['v'] and len([x for x in R[1] if x['r'] == R[0][0]['r']]) == 1",
+  "datasets": [
+   "fintech.research_billing"
+  ]
+ },
+ {
+  "id": "FIN-T4-003",
+  "domain": "fintech",
+  "tier": 4,
+  "title": "Most profitable asset class",
+  "question": "Finance wants unit economics by research asset class at Coralogix Finance {W}. Which asset class contributed the most gross profit in GBP, defined as query revenue billed minus credits refunded minus inference costs minus market-data costs? Give the asset class, the gross profit in GBP, and its gross margin as a percentage of its billed revenue.",
+  "ref": [
+   {
+    "kind": "logs",
+    "query": "source logs | filter $l.applicationname == 'coralogix-finance' && $d.logRecord.attributes['event.domain'] == 'business' && $d.logRecord.attributes['research.asset_class'] != null | create ev from $d.logRecord.attributes['event.name']:string | create amt from $d.logRecord.attributes['money.amount_minor']:number | groupby $d.logRecord.attributes['research.asset_class']:string as ac aggregate sum(if(ev == 'query.billed', amt, 0)) as bil, sum(if(ev == 'credit.refunded', amt, 0)) as ref, sum(if(ev == 'inference.charged', amt, 0)) as inf, sum(if(ev == 'vendor.datacall.charged', amt, 0)) as md | create gp from bil - ref - inf - md | orderby gp desc"
+   }
+  ],
+  "compute": "{'must': [[R[0][0]['ac']]], 'numbers': [[gbp(R[0][0]['gp']), 0.005], [pct(R[0][0]['gp'], R[0][0]['bil']), 0.01]]}",
+  "unique": "R[0][0]['gp'] > 1.01 * R[0][1]['gp']",
+  "datasets": [
+   "fintech.research_billing"
+  ]
+ },
+ {
+  "id": "FIN-T4-004",
+  "domain": "fintech",
+  "tier": 4,
+  "title": "Worst day for ledger conflicts",
+  "question": "Coralogix Finance's billing service occasionally fails to consume credits because of ledger conflicts. On which UTC day {W} did the billing service log the most credit-ledger conflicts, how many were there that day, and how many distinct client users were affected that day?",
+  "ref": [
+   {
+    "kind": "logs",
+    "query": "source logs | filter $l.applicationname == 'coralogix-finance' && $l.subsystemname == 'billing-service' && $d.logRecord.attributes['error.type'] == 'CreditLedgerConflict' | groupby formatTimestamp(roundTime($m.timestamp, 1d), '%Y-%m-%d') as d aggregate count() as n, approx_count_distinct($d.logRecord.attributes['user.id']) as users | orderby n desc"
+   }
+  ],
+  "compute": "{'must': [[R[0][0]['d'], R[0][0]['d'][5:], str(int(R[0][0]['d'][8:10]))+' '+MON3[R[0][0]['d'][5:7]], MON3[R[0][0]['d'][5:7]]+' '+str(int(R[0][0]['d'][8:10])), MONF[R[0][0]['d'][5:7]]+' '+str(int(R[0][0]['d'][8:10])), str(int(R[0][0]['d'][8:10]))+' '+MONF[R[0][0]['d'][5:7]], MON3[R[0][0]['d'][5:7]]+'-'+str(int(R[0][0]['d'][8:10])), str(int(R[0][0]['d'][8:10]))+'/'+R[0][0]['d'][5:7], R[0][0]['d'][5:7]+'/'+str(int(R[0][0]['d'][8:10])), str(int(R[0][0]['d'][8:10]))+'st '+MON3[R[0][0]['d'][5:7]], str(int(R[0][0]['d'][8:10]))+'nd '+MON3[R[0][0]['d'][5:7]], str(int(R[0][0]['d'][8:10]))+'rd '+MON3[R[0][0]['d'][5:7]], str(int(R[0][0]['d'][8:10]))+'th '+MON3[R[0][0]['d'][5:7]], MON3[R[0][0]['d'][5:7]]+' '+str(int(R[0][0]['d'][8:10]))+'st', MON3[R[0][0]['d'][5:7]]+' '+str(int(R[0][0]['d'][8:10]))+'nd', MON3[R[0][0]['d'][5:7]]+' '+str(int(R[0][0]['d'][8:10]))+'rd', MON3[R[0][0]['d'][5:7]]+' '+str(int(R[0][0]['d'][8:10]))+'th']], 'numbers': [[R[0][0]['n'], 0.005], [R[0][0]['users'], 0.005]]}",
+  "unique": "R[0][0]['n'] > 1.01 * R[0][1]['n']",
+  "datasets": [
+   "ops.error_rollup_hourly"
+  ]
+ },
+ {
+  "id": "FIN-T4-005",
+  "domain": "fintech",
+  "tier": 4,
+  "title": "Retrieval index outage hour",
+  "question": "The Coralogix Finance retrieval path depends on a vector index that sometimes has shards unavailable. In which single UTC hour {W} were the most index-shard-unavailable errors logged (count every ERROR log with that error type, across services), how many were logged in that hour, and how many vendor-quota-exceeded errors were logged across Coralogix Finance in that same hour?",
+  "ref": [
+   {
+    "kind": "logs",
+    "query": "source logs | filter $l.applicationname == 'coralogix-finance' && $m.severity == ERROR && $d.logRecord.attributes['error.type'] == 'IndexShardUnavailable' | groupby formatTimestamp(roundTime($m.timestamp, 1h), '%Y-%m-%dT%H') as h aggregate count() as n | orderby n desc | limit 5"
+   },
+   {
+    "kind": "logs",
+    "query": "source logs | filter $l.applicationname == 'coralogix-finance' && $d.logRecord.attributes['error.type'] == 'VendorQuotaExceeded' | groupby formatTimestamp(roundTime($m.timestamp, 1h), '%Y-%m-%dT%H') as h aggregate count() as n"
+   }
+  ],
+  "compute": "{'must': [[R[0][0]['h'][:10], R[0][0]['h'][:10][5:], str(int(R[0][0]['h'][:10][8:10]))+' '+MON3[R[0][0]['h'][:10][5:7]], MON3[R[0][0]['h'][:10][5:7]]+' '+str(int(R[0][0]['h'][:10][8:10])), MONF[R[0][0]['h'][:10][5:7]]+' '+str(int(R[0][0]['h'][:10][8:10])), str(int(R[0][0]['h'][:10][8:10]))+' '+MONF[R[0][0]['h'][:10][5:7]], MON3[R[0][0]['h'][:10][5:7]]+'-'+str(int(R[0][0]['h'][:10][8:10])), str(int(R[0][0]['h'][:10][8:10]))+'/'+R[0][0]['h'][:10][5:7], R[0][0]['h'][:10][5:7]+'/'+str(int(R[0][0]['h'][:10][8:10])), str(int(R[0][0]['h'][:10][8:10]))+'st '+MON3[R[0][0]['h'][:10][5:7]], str(int(R[0][0]['h'][:10][8:10]))+'nd '+MON3[R[0][0]['h'][:10][5:7]], str(int(R[0][0]['h'][:10][8:10]))+'rd '+MON3[R[0][0]['h'][:10][5:7]], str(int(R[0][0]['h'][:10][8:10]))+'th '+MON3[R[0][0]['h'][:10][5:7]], MON3[R[0][0]['h'][:10][5:7]]+' '+str(int(R[0][0]['h'][:10][8:10]))+'st', MON3[R[0][0]['h'][:10][5:7]]+' '+str(int(R[0][0]['h'][:10][8:10]))+'nd', MON3[R[0][0]['h'][:10][5:7]]+' '+str(int(R[0][0]['h'][:10][8:10]))+'rd', MON3[R[0][0]['h'][:10][5:7]]+' '+str(int(R[0][0]['h'][:10][8:10]))+'th'], [R[0][0]['h'][11:] + ':00', R[0][0]['h'][11:] + 'h', 'T' + R[0][0]['h'][11:], R[0][0]['h'][11:] + ' UTC', R[0][0]['h'][11:] + ':']], 'numbers': [[R[0][0]['n'], 0.005], [[x['n'] for x in R[1] if x['h'] == R[0][0]['h']][0], 0.005]]}",
+  "unique": "R[0][0]['n'] > 1.01 * R[0][1]['n']",
+  "datasets": [
+   "ops.error_rollup_hourly"
+  ]
+ },
+ {
+  "id": "GAM-T1-002",
+  "domain": "gaming",
+  "tier": 1,
+  "title": "Jackpot value paid",
+  "question": "What was the total value of jackpot wins paid out by GoldSpin Play {W}, in GBP?",
+  "ref": [
+   {
+    "kind": "logs",
+    "query": "source logs | filter $l.applicationname == 'goldspin-play' && $d.attributes['event.name'] == 'jackpot.won' | aggregate sum($d.attributes['money.amount_minor']:number) as v"
+   }
+  ],
+  "compute": "{'must': [], 'numbers': [[gbp(R[0][0]['v']), 0.005]]}",
+  "datasets": [
+   "gaming.wallet_events",
+   "gaming.player_daily"
+  ]
+ },
+ {
+  "id": "GAM-T1-003",
+  "domain": "gaming",
+  "tier": 1,
+  "title": "Deposits blocked by limits on a day",
+  "question": "How many deposit attempts did GoldSpin Play block because of responsible-gambling deposit limits on {DAY4} (UTC)?",
+  "ref": [
+   {
+    "kind": "logs",
+    "query": "source logs | filter $l.applicationname == 'goldspin-play' && $d.attributes['event.name'] == 'deposit.blocked' | aggregate count() as n",
+    "start": "{T4}",
+    "end": "{T5}"
+   }
+  ],
+  "compute": "{'must': [], 'numbers': [[R[0][0]['n'], 0.005]]}",
+  "datasets": [
+   "gaming.wallet_events",
+   "gaming.player_daily"
+  ]
+ },
+ {
+  "id": "GAM-T1-004",
+  "domain": "gaming",
+  "tier": 1,
+  "title": "Accepted stake",
+  "question": "What was the total stake on accepted bets at GoldSpin Play {W}, in GBP? Count only bets that were accepted.",
+  "ref": [
+   {
+    "kind": "logs",
+    "query": "source logs | filter $l.applicationname == 'goldspin-play' && $d.attributes['event.name'] == 'bet.accepted' | aggregate sum($d.attributes['money.amount_minor']:number) as v"
+   }
+  ],
+  "compute": "{'must': [], 'numbers': [[gbp(R[0][0]['v']), 0.005]]}",
+  "datasets": [
+   "gaming.wallet_events",
+   "gaming.player_daily"
+  ]
+ },
+ {
+  "id": "GAM-T1-007",
+  "domain": "gaming",
+  "tier": 1,
+  "title": "bet-service ERROR logs on a day",
+  "question": "How many ERROR-level log lines did GoldSpin Play's bet-service write on {DAY5} (UTC)?",
+  "ref": [
+   {
+    "kind": "logs",
+    "query": "source logs | filter $l.applicationname == 'goldspin-play' && $l.subsystemname == 'bet-service' && $m.severity == ERROR | aggregate count() as n",
+    "start": "{T5}",
+    "end": "{T6}"
+   }
+  ],
+  "compute": "{'must': [], 'numbers': [[R[0][0]['n'], 0.005]]}",
+  "datasets": [
+   "ops.error_rollup_hourly"
+  ]
+ },
+ {
+  "id": "GAM-T1-008",
+  "domain": "gaming",
+  "tier": 1,
+  "title": "Largest jackpot",
+  "question": "What was the largest single jackpot win at GoldSpin Play {W}, in GBP?",
+  "ref": [
+   {
+    "kind": "logs",
+    "query": "source logs | filter $l.applicationname == 'goldspin-play' && $d.attributes['event.name'] == 'jackpot.won' | aggregate max($d.attributes['money.amount_minor']:number) as v"
+   }
+  ],
+  "compute": "{'must': [], 'numbers': [[gbp(R[0][0]['v']), 0.005]]}",
+  "datasets": [
+   "gaming.wallet_events"
+  ]
+ },
+ {
+  "id": "GAM-T2-001",
+  "domain": "gaming",
+  "tier": 2,
+  "title": "Jackpot game paying most",
+  "question": "Which jackpot game paid out the most jackpot value at GoldSpin Play {W}, and how much did it pay in GBP?",
+  "ref": [
+   {
+    "kind": "logs",
+    "query": "source logs | filter $l.applicationname == 'goldspin-play' && $d.attributes['event.name'] == 'jackpot.won' | groupby $d.attributes['jackpot.game']:string as g aggregate sum($d.attributes['money.amount_minor']:number) as v"
+   }
+  ],
+  "compute": "{'must': [[top(R[0],'v')[0]['g']]], 'numbers': [[gbp(top(R[0],'v')[0]['v']), 0.005]]}",
+  "unique": "top(R[0],'v')[0]['v'] > 1.01 * top(R[0],'v')[1]['v']",
+  "datasets": [
+   "gaming.wallet_events"
+  ]
+ },
+ {
+  "id": "GAM-T2-002",
+  "domain": "gaming",
+  "tier": 2,
+  "title": "Market with most accepted stake",
+  "question": "Which betting market took the most accepted stake at GoldSpin Play {W}, and how much stake in GBP?",
+  "ref": [
+   {
+    "kind": "logs",
+    "query": "source logs | filter $l.applicationname == 'goldspin-play' && $d.attributes['event.name'] == 'bet.accepted' | groupby $d.attributes['bet.market']:string as m aggregate sum($d.attributes['money.amount_minor']:number) as v"
+   }
+  ],
+  "compute": "{'must': [[top(R[0],'v')[0]['m']]], 'numbers': [[gbp(top(R[0],'v')[0]['v']), 0.005]]}",
+  "unique": "top(R[0],'v')[0]['v'] > 1.01 * top(R[0],'v')[1]['v']",
+  "datasets": [
+   "gaming.wallet_events"
+  ]
+ },
+ {
+  "id": "GAM-T2-003",
+  "domain": "gaming",
+  "tier": 2,
+  "title": "Segment with most held withdrawals",
+  "question": "Which customer segment had the most withdrawals put on hold at GoldSpin Play {W}, and how many?",
+  "ref": [
+   {
+    "kind": "logs",
+    "query": "source logs | filter $l.applicationname == 'goldspin-play' && $d.attributes['event.name'] == 'withdrawal.held' | groupby $d.attributes['user.segment']:string as s aggregate count() as n"
+   }
+  ],
+  "compute": "{'must': [[top(R[0],'n')[0]['s']]], 'numbers': [[top(R[0],'n')[0]['n'], 0.005]]}",
+  "unique": "top(R[0],'n')[0]['n'] > 1.01 * top(R[0],'n')[1]['n']",
+  "datasets": [
+   "gaming.wallet_events",
+   "gaming.player_daily"
+  ]
+ },
+ {
+  "id": "GAM-T2-004",
+  "domain": "gaming",
+  "tier": 2,
+  "title": "Day with highest declined deposit value",
+  "question": "On which UTC day {W} was the most deposit value declined by card issuers at GoldSpin Play, and how much in GBP?",
+  "ref": [
+   {
+    "kind": "logs",
+    "query": "source logs | filter $l.applicationname == 'goldspin-play' && $d.attributes['event.name'] == 'deposit.declined' | groupby formatTimestamp(roundTime($m.timestamp, 1d), '%Y-%m-%d') as d aggregate sum($d.attributes['money.amount_minor']:number) as v"
+   }
+  ],
+  "compute": "{'must': [(lambda d: [d, d[8:10].lstrip('0')+' '+MON3[d[5:7]], MON3[d[5:7]]+' '+d[8:10].lstrip('0'), MONF[d[5:7]]+' '+d[8:10].lstrip('0'), d[8:10]+'/'+d[5:7], d[5:7]+'-'+d[8:10]])(top(R[0],'v')[0]['d'])], 'numbers': [[gbp(top(R[0],'v')[0]['v']), 0.005]]}",
+  "unique": "top(R[0],'v')[0]['v'] > 1.01 * top(R[0],'v')[1]['v']",
+  "datasets": [
+   "gaming.wallet_events"
+  ]
+ },
+ {
+  "id": "GAM-T2-006",
+  "domain": "gaming",
+  "tier": 2,
+  "title": "Route with most 5xx at the edge",
+  "question": "Which GoldSpin Play API route returned the most 5xx server errors at the edge gateway {W}, and how many 5xx responses did it return?",
+  "ref": [
+   {
+    "kind": "logs",
+    "query": "source logs | filter $l.subsystemname == 'edge-gateway' && ($d.attributes['http.status_code'] == 500 || $d.attributes['http.status_code'] == 502 || $d.attributes['http.status_code'] == 503 || $d.attributes['http.status_code'] == 504) | groupby $d.attributes['http.route']:string as r aggregate count() as n"
+   }
+  ],
+  "compute": "{'must': [[top(R[0],'n')[0]['r']]], 'numbers': [[top(R[0],'n')[0]['n'], 0.005]]}",
+  "unique": "top(R[0],'n')[0]['n'] > 1.01 * top(R[0],'n')[1]['n']",
+  "datasets": [
+   "platform.http_requests_hourly"
+  ]
+ },
+ {
+  "id": "GAM-T3-002",
+  "domain": "gaming",
+  "tier": 3,
+  "title": "Issuer decline rate",
+  "question": "Of the deposit attempts at GoldSpin Play that were sent to a card issuer {W} (settled or declined by the issuer; ignore attempts blocked by GoldSpin's own deposit limits), what percentage were declined?",
+  "ref": [
+   {
+    "kind": "logs",
+    "query": "source logs | filter $l.applicationname == 'goldspin-play' && ($d.attributes['event.name'] == 'deposit.settled' || $d.attributes['event.name'] == 'deposit.declined') | aggregate sum(if($d.attributes['event.name'] == 'deposit.declined', 1, 0)) as d, count() as n"
+   }
+  ],
+  "compute": "{'must': [], 'numbers': [[pct(R[0][0]['d'], R[0][0]['n']), 0.01]]}",
+  "datasets": [
+   "gaming.wallet_events"
+  ]
+ },
+ {
+  "id": "GAM-T3-003",
+  "domain": "gaming",
+  "tier": 3,
+  "title": "Segment with worst rejection rate",
+  "question": "Which customer segment had the highest bet rejection rate at GoldSpin Play {W}, measured as rejected bets divided by all bets attempted (accepted plus rejected), and what was that rate as a percentage?",
+  "ref": [
+   {
+    "kind": "logs",
+    "query": "source logs | filter $l.applicationname == 'goldspin-play' && ($d.attributes['event.name'] == 'bet.accepted' || $d.attributes['event.name'] == 'bet.rejected') | groupby $d.attributes['user.segment']:string as s aggregate sum(if($d.attributes['event.name'] == 'bet.rejected', 1, 0)) as rej, count() as n"
+   }
+  ],
+  "compute": "(lambda t: {'must': [[t['s']]], 'numbers': [[pct(t['rej'], t['n']), 0.01]]})(sorted(R[0], key=lambda r: -r['rej'] / r['n'])[0])",
+  "unique": "(lambda s: s[0]['rej'] / s[0]['n'] > 1.01 * s[1]['rej'] / s[1]['n'])(sorted(R[0], key=lambda r: -r['rej'] / r['n']))",
+  "datasets": [
+   "gaming.wallet_events",
+   "gaming.player_daily"
+  ]
+ },
+ {
+  "id": "GAM-T3-004",
+  "domain": "gaming",
+  "tier": 3,
+  "title": "VIP average stake",
+  "question": "What was the average stake per accepted bet placed by VIP customers at GoldSpin Play {W}, in GBP?",
+  "ref": [
+   {
+    "kind": "logs",
+    "query": "source logs | filter $l.applicationname == 'goldspin-play' && $d.attributes['event.name'] == 'bet.accepted' && $d.attributes['user.segment'] == 'vip' | aggregate avg($d.attributes['money.amount_minor']:number) as v"
+   }
+  ],
+  "compute": "{'must': [], 'numbers': [[gbp(R[0][0]['v']), 0.01]]}",
+  "datasets": [
+   "gaming.wallet_events"
+  ]
+ },
+ {
+  "id": "GAM-T3-005",
+  "domain": "gaming",
+  "tier": 3,
+  "title": "Casual customer win rate",
+  "question": "Of the settled bets (won or lost) placed by casual customers at GoldSpin Play {W}, what percentage did the customer win?",
+  "ref": [
+   {
+    "kind": "logs",
+    "query": "source logs | filter $l.applicationname == 'goldspin-play' && ($d.attributes['event.name'] == 'bet.won' || $d.attributes['event.name'] == 'bet.lost') && $d.attributes['user.segment'] == 'casual' | aggregate sum(if($d.attributes['event.name'] == 'bet.won', 1, 0)) as w, count() as n"
+   }
+  ],
+  "compute": "{'must': [], 'numbers': [[pct(R[0][0]['w'], R[0][0]['n']), 0.01]]}",
+  "datasets": [
+   "gaming.wallet_events"
+  ]
+ },
+ {
+  "id": "GAM-T3-006",
+  "domain": "gaming",
+  "tier": 3,
+  "title": "Withdrawal hold rate",
+  "question": "What percentage of withdrawal requests at GoldSpin Play {W} were put on hold rather than paid out (count held divided by held plus paid)?",
+  "ref": [
+   {
+    "kind": "logs",
+    "query": "source logs | filter $l.applicationname == 'goldspin-play' && ($d.attributes['event.name'] == 'withdrawal.held' || $d.attributes['event.name'] == 'withdrawal.paid') | aggregate sum(if($d.attributes['event.name'] == 'withdrawal.held', 1, 0)) as h, count() as n"
+   }
+  ],
+  "compute": "{'must': [], 'numbers': [[pct(R[0][0]['h'], R[0][0]['n']), 0.01]]}",
+  "datasets": [
+   "gaming.wallet_events",
+   "gaming.player_daily"
+  ]
+ },
+ {
+  "id": "GAM-T4-001",
+  "domain": "gaming",
+  "tier": 4,
+  "title": "Stale feed peak hour impact",
+  "question": "GoldSpin Play's price feed went stale repeatedly {W}. In which UTC hour (give the date and hour) did the odds-feed service log the most stale-price refusals (StaleMarketPriceError), which feed provider was stale, how many bets were refused for lack of a live price in that same hour, and how much stake (GBP) did those refused bets represent?",
+  "ref": [
+   {
+    "kind": "logs",
+    "query": "source logs | filter $l.applicationname == 'goldspin-play' && $l.subsystemname == 'odds-feed' && $d.attributes['error.type'] == 'StaleMarketPriceError' | groupby formatTimestamp(roundTime($m.timestamp, 1h), '%Y-%m-%dT%H') as h, $d.attributes['feed.provider']:string as p aggregate count() as n"
+   },
+   {
+    "kind": "logs",
+    "query": "source logs | filter $l.applicationname == 'goldspin-play' && $d.attributes['event.name'] == 'bet.rejected' && $d.attributes['reject.reason'] == 'market-unavailable' | groupby formatTimestamp(roundTime($m.timestamp, 1h), '%Y-%m-%dT%H') as h aggregate count() as n, sum($d.attributes['money.amount_minor']:number) as v"
+   }
+  ],
+  "compute": "(lambda t: (lambda b: {'must': [(lambda d: [d, d[8:10].lstrip('0')+' '+MON3[d[5:7]], MON3[d[5:7]]+' '+d[8:10].lstrip('0'), MONF[d[5:7]]+' '+d[8:10].lstrip('0'), d[8:10]+'/'+d[5:7], d[5:7]+'-'+d[8:10]])(t['h']), (lambda h: [h[11:13]+':00', 'T'+h[11:13], h[11:13]+'h', h[11:13]+'00 utc', {'00':'12am','01':'1am','02':'2am','03':'3am','04':'4am','05':'5am','06':'6am','07':'7am','08':'8am','09':'9am','10':'10am','11':'11am','12':'12pm','13':'1pm','14':'2pm','15':'3pm','16':'4pm','17':'5pm','18':'6pm','19':'7pm','20':'8pm','21':'9pm','22':'10pm','23':'11pm'}[h[11:13]], {'00':'12am','01':'1am','02':'2am','03':'3am','04':'4am','05':'5am','06':'6am','07':'7am','08':'8am','09':'9am','10':'10am','11':'11am','12':'12pm','13':'1pm','14':'2pm','15':'3pm','16':'4pm','17':'5pm','18':'6pm','19':'7pm','20':'8pm','21':'9pm','22':'10pm','23':'11pm'}[h[11:13]].replace('am',' am').replace('pm',' pm')])(t['h']), [t['p']]], 'numbers': [[t['n'], 0.005], [b['n'], 0.005], [gbp(b['v']), 0.005]]})([r for r in R[1] if r['h'] == t['h']][0]))(top(R[0],'n')[0])",
+  "unique": "top(R[0],'n')[0]['n'] > 1.01 * top(R[0],'n')[1]['n']",
+  "datasets": [
+   "gaming.odds_feed_hourly",
+   "gaming.wallet_events",
+   "ops.error_rollup_hourly"
+  ]
+ },
+ {
+  "id": "GAM-T4-003",
+  "domain": "gaming",
+  "tier": 4,
+  "title": "Suspended market root cause",
+  "question": "One GoldSpin Play sportsbook market was effectively suspended {W} because its price feed went quiet. Which feed provider and which feed subscription were involved, which market was it (name or id), and how much stake in GBP was refused on that market because it had no live price?",
+  "ref": [
+   {
+    "kind": "logs",
+    "query": "source logs | filter $l.applicationname == 'goldspin-play' && $l.subsystemname == 'odds-feed' && $d.attributes['error.type'] == 'StaleMarketPriceError' | groupby $d.attributes['feed.provider']:string as p, $d.attributes['feed.subscription.id']:string as sub aggregate count() as n"
+   },
+   {
+    "kind": "logs",
+    "query": "source logs | filter $l.applicationname == 'goldspin-play' && $d.attributes['event.name'] == 'bet.rejected' && $d.attributes['reject.reason'] == 'market-unavailable' | groupby $d.attributes['bet.market']:string as m aggregate sum($d.attributes['money.amount_minor']:number) as v"
+   }
+  ],
+  "compute": "(lambda t, b: {'must': [[t['p']], [t['sub']], [b['m'], b['m'].replace('mkt_','').split('_')[0]]], 'numbers': [[gbp(b['v']), 0.005]]})(top(R[0],'n')[0], top(R[1],'v')[0])",
+  "datasets": [
+   "gaming.odds_feed_hourly",
+   "gaming.wallet_events"
+  ]
+ },
+ {
+  "id": "GAM-T4-004",
+  "domain": "gaming",
+  "tier": 4,
+  "title": "Gambling-block issuer impact",
+  "question": "One card issuer refuses deposits to GoldSpin Play because it blocks gambling transactions. {W}, which issuer is it, how many distinct customers did it affect, what deposit value (GBP) did it decline for that reason, and what share (%) of all issuer-declined deposit value does that represent?",
+  "ref": [
+   {
+    "kind": "logs",
+    "query": "source logs | filter $l.applicationname == 'goldspin-play' && $d.attributes['event.name'] == 'deposit.declined' && $d.attributes['decline.reason'] == 'issuer-blocks-gambling' | groupby $d.attributes['decline.issuer']:string as i aggregate distinct_count($d.attributes['user.id']) as u, sum($d.attributes['money.amount_minor']:number) as v"
+   },
+   {
+    "kind": "logs",
+    "query": "source logs | filter $l.applicationname == 'goldspin-play' && $d.attributes['event.name'] == 'deposit.declined' | aggregate sum($d.attributes['money.amount_minor']:number) as v"
+   }
+  ],
+  "compute": "(lambda t: {'must': [[t['i']]], 'numbers': [[t['u'], 0.01], [gbp(t['v']), 0.005], [pct(t['v'], R[1][0]['v']), 0.01]]})(R[0][0])",
+  "datasets": [
+   "gaming.wallet_events"
+  ]
+ },
+ {
+  "id": "GAM-T4-005",
+  "domain": "gaming",
+  "tier": 4,
+  "title": "Slowest dependency inside PlaceBet",
+  "question": "GoldSpin Play's bet placement feels slow. Using spans {W}: what was the p95 latency in milliseconds of the server-side PlaceBet operation in bet-service, which downstream call made by bet-service (client span operation) had the highest p95 latency, and what was that call's p95 in milliseconds?",
+  "ref": [
+   {
+    "kind": "spans",
+    "query": "source spans | filter $l.serviceName == 'bet-service' && $l.operationName == 'PlaceBet' && $d.tags['span.kind'] == 'server' | aggregate percentile(0.95, $m.duration:number / 1000) as p"
+   },
+   {
+    "kind": "spans",
+    "query": "source spans | filter $l.serviceName == 'bet-service' && $d.tags['span.kind'] == 'client' | groupby $l.operationName as op aggregate percentile(0.95, $m.duration:number / 1000) as p"
+   }
+  ],
+  "compute": "(lambda t: {'must': [[t['op'], t['op'].split(' ')[-1]]], 'numbers': [[R[0][0]['p'], 0.03], [t['p'], 0.03]]})(top(R[1],'p')[0])",
+  "unique": "top(R[1],'p')[0]['p'] > 1.01 * top(R[1],'p')[1]['p']",
+  "datasets": [
+   "platform.service_latency_hourly"
+  ]
+ },
+ {
+  "id": "GAM-T4-006",
+  "domain": "gaming",
+  "tier": 4,
+  "title": "Most valuable player for the house",
+  "question": "Which single player generated the largest net sportsbook result for GoldSpin Play {W} (stakes kept on their losing bets minus net winnings paid on their winning bets, excluding jackpots), which customer segment are they in, and how much did the house make from them in GBP?",
+  "ref": [
+   {
+    "kind": "logs",
+    "query": "source logs | filter $l.applicationname == 'goldspin-play' && ($d.attributes['event.name'] == 'bet.won' || $d.attributes['event.name'] == 'bet.lost') | groupby $d.attributes['user.id']:string as u, $d.attributes['user.segment']:string as s aggregate sum($d.attributes['money.margin_minor']:number) as v | orderby v desc | limit 20"
+   }
+  ],
+  "compute": "{'must': [[top(R[0],'v')[0]['u']], [top(R[0],'v')[0]['s']]], 'numbers': [[gbp(top(R[0],'v')[0]['v']), 0.005]]}",
+  "unique": "top(R[0],'v')[0]['v'] > 1.01 * top(R[0],'v')[1]['v']",
+  "datasets": [
+   "gaming.player_daily",
+   "gaming.wallet_events"
+  ]
+ },
+ {
+  "id": "PLT-T1-001",
+  "domain": "platform",
+  "tier": 1,
+  "title": "store-postgres span volume",
+  "question": "How many database spans did store-postgres (Coralogix Store's Postgres) record {W}?",
+  "ref": [
+   {
+    "kind": "spans",
+    "query": "source spans | filter $l.serviceName == 'store-postgres' | aggregate count() as n"
+   }
+  ],
+  "compute": "{'must': [], 'numbers': [[R[0][0]['n'], 0.005]]}",
+  "datasets": [
+   "platform.service_latency_hourly"
+  ]
+ },
+ {
+  "id": "PLT-T1-002",
+  "domain": "platform",
+  "tier": 1,
+  "title": "Redis GET p95",
+  "question": "What was the p95 latency in milliseconds of Redis GET calls at GoldSpin Play (service `redis`) {W}?",
+  "ref": [
+   {
+    "kind": "spans",
+    "query": "source spans | filter $l.serviceName == 'redis' && $l.operationName == 'GET' | aggregate percentile(0.95, $m.duration:number / 1000) as p95"
+   }
+  ],
+  "compute": "{'must': [], 'numbers': [[R[0][0]['p95'], 0.02]]}",
+  "datasets": [
+   "platform.service_latency_hourly"
+  ]
+ },
+ {
+  "id": "PLT-T1-003",
+  "domain": "platform",
+  "tier": 1,
+  "title": "Spins 503s",
+  "question": "According to the GoldSpin edge gateway's access logs, how many requests to /api/spins returned HTTP 503 {W}?",
+  "ref": [
+   {
+    "kind": "logs",
+    "query": "source logs | filter $l.subsystemname == 'edge-gateway' && $d.attributes['http.route'] == '/api/spins' && $d.attributes['http.status_code']:string == '503' | aggregate count() as n"
+   }
+  ],
+  "compute": "{'must': [], 'numbers': [[R[0][0]['n'], 0.005]]}",
+  "datasets": [
+   "platform.http_requests_hourly"
+  ]
+ },
+ {
+  "id": "PLT-T1-004",
+  "domain": "platform",
+  "tier": 1,
+  "title": "Vendor quota errors",
+  "question": "How many ERROR logs with error type VendorQuotaExceeded did Coralogix Finance's market-data-gateway write {W}?",
+  "ref": [
+   {
+    "kind": "logs",
+    "query": "source logs | filter $l.subsystemname == 'market-data-gateway' && $m.severity == ERROR && firstNonNull($d.attributes['error.type'], $d.logRecord.attributes['error.type']) == 'VendorQuotaExceeded' | aggregate count() as n"
+   }
+  ],
+  "compute": "{'must': [], 'numbers': [[R[0][0]['n'], 0.005]]}",
+  "datasets": [
+   "ops.error_rollup_hourly"
+  ]
+ },
+ {
+  "id": "PLT-T1-008",
+  "domain": "platform",
+  "tier": 1,
+  "title": "Insight endpoint average latency",
+  "question": "What was the average server-side latency in milliseconds of POST /api/insight on Coralogix Finance's research-gateway {W}, according to traces?",
+  "ref": [
+   {
+    "kind": "spans",
+    "query": "source spans | filter $l.serviceName == 'research-gateway' && $l.operationName == 'POST /api/insight' && $d.tags['span.kind'] == 'server' | aggregate avg($m.duration:number / 1000) as a"
+   }
+  ],
+  "compute": "{'must': [], 'numbers': [[R[0][0]['a'], 0.01]]}",
+  "datasets": [
+   "platform.service_latency_hourly"
+  ]
+ },
+ {
+  "id": "PLT-T1-011",
+  "domain": "platform",
+  "tier": 1,
+  "title": "Slowest products query",
+  "question": "What was the single slowest `SELECT products` query against Coralogix Store's Postgres (store-postgres) {W}, in milliseconds?",
+  "ref": [
+   {
+    "kind": "spans",
+    "query": "source spans | filter $l.serviceName == 'store-postgres' && $l.operationName == 'SELECT products' | aggregate max($m.duration:number / 1000) as mx"
+   }
+  ],
+  "compute": "{'must': [], 'numbers': [[R[0][0]['mx'], 0.005]]}",
+  "datasets": [
+   "platform.service_latency_hourly"
+  ]
+ },
+ {
+  "id": "PLT-T2-001",
+  "domain": "platform",
+  "tier": 2,
+  "title": "Goldspin service with most error spans",
+  "question": "Which GoldSpin Play service produced the most error-status spans {W}, and how many?",
+  "ref": [
+   {
+    "kind": "spans",
+    "query": "source spans | filter $l.applicationName == 'goldspin-play' && $d.tags['otel.status_code'] == 'ERROR' | groupby $l.serviceName as svc aggregate count() as n"
+   }
+  ],
+  "compute": "{'must': [[str(top(R[0],'n')[0]['svc'])] + ([str(top(R[0],'n')[0]['svc']).split(' ')[-1]] if '/' in str(top(R[0],'n')[0]['svc']) else [])], 'numbers': [[top(R[0],'n')[0]['n'], 0.005]]}",
+  "unique": "top(R[0],'n')[0]['n'] > 1.01 * top(R[0],'n')[1]['n']",
+  "datasets": [
+   "platform.service_latency_hourly"
+  ]
+ },
+ {
+  "id": "PLT-T2-003",
+  "domain": "platform",
+  "tier": 2,
+  "title": "Research gateway worst p99 route",
+  "question": "Which route on Coralogix Finance's research-gateway has the worst p99 server latency {W}, and what is the p99 in milliseconds?",
+  "ref": [
+   {
+    "kind": "spans",
+    "query": "source spans | filter $l.serviceName == 'research-gateway' && $d.tags['span.kind'] == 'server' | groupby $l.operationName as op aggregate percentile(0.99, $m.duration:number / 1000) as p99"
+   }
+  ],
+  "compute": "{'must': [[str(top(R[0],'p99')[0]['op'])] + ([str(top(R[0],'p99')[0]['op']).split(' ')[-1]] if '/' in str(top(R[0],'p99')[0]['op']) else [])], 'numbers': [[top(R[0],'p99')[0]['p99'], 0.03]]}",
+  "unique": "top(R[0],'p99')[0]['p99'] > 1.1 * top(R[0],'p99')[1]['p99']",
+  "datasets": [
+   "platform.service_latency_hourly"
+  ],
+  "tolerance": 0.13
+ },
+ {
+  "id": "PLT-T2-006",
+  "domain": "platform",
+  "tier": 2,
+  "title": "Orders non-success status",
+  "question": "Excluding successful responses (2xx), which HTTP status code did Coralogix Store's gateway return most often for /api/orders {W}, and how many times?",
+  "ref": [
+   {
+    "kind": "logs",
+    "query": "source logs | filter $l.subsystemname == 'store-gateway' && $d.logRecord.attributes['http.route'] == '/api/orders' && !($d.logRecord.attributes['http.status_code']:string.startsWith('2')) | groupby $d.logRecord.attributes['http.status_code']:string as st aggregate count() as n"
+   }
+  ],
+  "compute": "{'must': [[str(top(R[0],'n')[0]['st'])] + ([str(top(R[0],'n')[0]['st']).split(' ')[-1]] if '/' in str(top(R[0],'n')[0]['st']) else [])], 'numbers': [[top(R[0],'n')[0]['n'], 0.005]]}",
+  "unique": "top(R[0],'n')[0]['n'] > 1.01 * top(R[0],'n')[1]['n']",
+  "datasets": [
+   "platform.http_requests_hourly"
+  ]
+ },
+ {
+  "id": "PLT-T2-008",
+  "domain": "platform",
+  "tier": 2,
+  "title": "Most degraded service",
+  "question": "Across GoldSpin Play, Coralogix Store and Coralogix Finance, which service wrote the most warnings saying an instance was degraded and shedding work {W}, and how many?",
+  "ref": [
+   {
+    "kind": "logs",
+    "query": "source logs | filter ($l.applicationname == 'goldspin-play' || $l.applicationname == 'coralogix-store' || $l.applicationname == 'coralogix-finance') && firstNonNull($d.body, $d.logRecord.body):string.contains('shedding work') | groupby $l.subsystemname as svc aggregate count() as n"
+   }
+  ],
+  "compute": "{'must': [[str(top(R[0],'n')[0]['svc'])] + ([str(top(R[0],'n')[0]['svc']).split(' ')[-1]] if '/' in str(top(R[0],'n')[0]['svc']) else [])], 'numbers': [[top(R[0],'n')[0]['n'], 0.005]]}",
+  "unique": "top(R[0],'n')[0]['n'] > 1.01 * top(R[0],'n')[1]['n']",
+  "datasets": [
+   "platform.resource_pressure_hourly"
+  ]
+ },
+ {
+  "id": "PLT-T2-009",
+  "domain": "platform",
+  "tier": 2,
+  "title": "Cache error rate",
+  "question": "Of the three Redis caches (GoldSpin's `redis`, Coralogix Store's `store-redis`, Coralogix Finance's `research-redis`), which had the highest error rate on its spans {W}, and what was that rate as a percentage (to three significant figures)?",
+  "ref": [
+   {
+    "kind": "spans",
+    "query": "source spans | filter $l.serviceName == 'redis' || $l.serviceName == 'store-redis' || $l.serviceName == 'research-redis' | groupby $l.serviceName as svc aggregate count() as n, sum(if($d.tags['otel.status_code'] == 'ERROR', 1, 0)) as e | create r from 100.0 * e / n"
+   }
+  ],
+  "compute": "{'must': [[str(top(R[0],'r')[0]['svc'])] + ([str(top(R[0],'r')[0]['svc']).split(' ')[-1]] if '/' in str(top(R[0],'r')[0]['svc']) else [])], 'numbers': [[top(R[0],'r')[0]['r'], 0.01]]}",
+  "unique": "top(R[0],'r')[0]['r'] > 1.02 * top(R[0],'r')[1]['r']",
+  "datasets": [
+   "platform.service_latency_hourly"
+  ]
+ },
+ {
+  "id": "PLT-T3-002",
+  "domain": "platform",
+  "tier": 3,
+  "title": "Deposit 402 share",
+  "question": "What share of all /api/payments/deposit requests at GoldSpin's edge gateway were rejected with HTTP 402 {W}, as a percentage, based on the gateway access logs?",
+  "ref": [
+   {
+    "kind": "logs",
+    "query": "source logs | filter $l.subsystemname == 'edge-gateway' && $d.attributes['http.route'] == '/api/payments/deposit' && $d.attributes['http.status_code'] != null | aggregate count() as n, sum(if($d.attributes['http.status_code']:string == '402', 1, 0)) as d"
+   }
+  ],
+  "compute": "{'must': [], 'numbers': [[pct(R[0][0]['d'], R[0][0]['n']), 0.01]]}",
+  "datasets": [
+   "platform.http_requests_hourly"
+  ]
+ },
+ {
+  "id": "PLT-T3-003",
+  "domain": "platform",
+  "tier": 3,
+  "title": "Orders tail ratio",
+  "question": "For POST /api/orders on Coralogix Store's gateway {W}, how many times larger is the p99 server latency than the median (p50)? Give the ratio.",
+  "ref": [
+   {
+    "kind": "spans",
+    "query": "source spans | filter $l.serviceName == 'store-gateway' && $l.operationName == 'POST /api/orders' && $d.tags['span.kind'] == 'server' | aggregate percentile(0.5, $m.duration:number / 1000) as p50, percentile(0.99, $m.duration:number / 1000) as p99"
+   }
+  ],
+  "compute": "{'must': [], 'numbers': [[R[0][0]['p99'] / R[0][0]['p50'], 0.04]]}",
+  "datasets": [
+   "platform.service_latency_hourly"
+  ]
+ },
+ {
+  "id": "PLT-T3-005",
+  "domain": "platform",
+  "tier": 3,
+  "title": "Postgres hours",
+  "question": "How many hours of cumulative database time did GoldSpin's services spend in Postgres calls (service `postgres`) {W}? Sum the durations of all Postgres spans.",
+  "ref": [
+   {
+    "kind": "spans",
+    "query": "source spans | filter $l.serviceName == 'postgres' | aggregate sum($m.duration:number) as us"
+   }
+  ],
+  "compute": "{'must': [], 'numbers': [[R[0][0]['us'] / 3600000000.0, 0.005]]}",
+  "datasets": [
+   "platform.service_latency_hourly"
+  ]
+ },
+ {
+  "id": "PLT-T3-006",
+  "domain": "platform",
+  "tier": 3,
+  "title": "Worst route error ratio",
+  "question": "Across all three gateways (edge-gateway, store-gateway, research-gateway), which route had the highest proportion of error-status server spans {W}, and what was the proportion as a percentage?",
+  "ref": [
+   {
+    "kind": "spans",
+    "query": "source spans | filter ($l.serviceName == 'edge-gateway' || $l.serviceName == 'store-gateway' || $l.serviceName == 'research-gateway') && $d.tags['span.kind'] == 'server' | groupby $l.serviceName as gw, $l.operationName as op aggregate count() as n, sum(if($d.tags['otel.status_code'] == 'ERROR', 1, 0)) as e | create r from 100.0 * e / n"
+   }
+  ],
+  "compute": "{'must': [[str(top(R[0],'r')[0]['op'])] + ([str(top(R[0],'r')[0]['op']).split(' ')[-1]] if '/' in str(top(R[0],'r')[0]['op']) else [])], 'numbers': [[top(R[0],'r')[0]['r'], 0.01]]}",
+  "unique": "top(R[0],'r')[0]['r'] > 1.05 * top(R[0],'r')[1]['r']",
+  "datasets": [
+   "platform.service_latency_hourly"
+  ]
+ },
+ {
+  "id": "PLT-T3-008",
+  "domain": "platform",
+  "tier": 3,
+  "title": "Postgres time hog",
+  "question": "Which GoldSpin Postgres operation consumed the most total database time {W}, and what share of all GoldSpin Postgres time (service `postgres`) did it account for, as a percentage?",
+  "ref": [
+   {
+    "kind": "spans",
+    "query": "source spans | filter $l.serviceName == 'postgres' | groupby $l.operationName as op aggregate sum($m.duration:number) as us"
+   },
+   {
+    "kind": "spans",
+    "query": "source spans | filter $l.serviceName == 'postgres' | aggregate sum($m.duration:number) as us"
+   }
+  ],
+  "compute": "{'must': [[top(R[0],'us')[0]['op']]], 'numbers': [[pct(top(R[0],'us')[0]['us'], R[1][0]['us']), 0.01]]}",
+  "unique": "top(R[0],'us')[0]['us'] > 1.05 * top(R[0],'us')[1]['us']",
+  "datasets": [
+   "platform.service_latency_hourly"
+  ]
+ },
+ {
+  "id": "PLT-T3-009",
+  "domain": "platform",
+  "tier": 3,
+  "title": "Replica lag max",
+  "question": "When Coralogix Store's inventory-service refused stock reservations because the stock ledger replica was lagging, what was the worst replica lag reported {W}, in seconds, and which replica was it?",
+  "ref": [
+   {
+    "kind": "logs",
+    "query": "source logs | filter $l.subsystemname == 'inventory-service' && $d.logRecord.attributes['stock.replica_lag_ms'] != null && firstNonNull($d.attributes['error.type'], $d.logRecord.attributes['error.type']) == 'StockLedgerUnavailable' | groupby $d.logRecord.attributes['stock.ledger.name']:string as rep aggregate max($d.logRecord.attributes['stock.replica_lag_ms']:number) as mx"
+   }
+  ],
+  "compute": "{'must': [[top(R[0],'mx')[0]['rep']]], 'numbers': [[top(R[0],'mx')[0]['mx'] / 1000.0, 0.01]]}",
+  "datasets": []
+ },
+ {
+  "id": "PLT-T4-001",
+  "domain": "platform",
+  "tier": 4,
+  "title": "Slowest bets hour investigation",
+  "question": "Find the UTC hour {W} when POST /api/bets at GoldSpin's edge gateway had its highest average server latency. Give (1) that hour, (2) the average latency in ms in that hour, and (3) how many POST /api/bets server spans ended in error in that hour.",
+  "ref": [
+   {
+    "kind": "spans",
+    "query": "source spans | filter $l.serviceName == 'edge-gateway' && $l.operationName == 'POST /api/bets' && $d.tags['span.kind'] == 'server' | groupby formatTimestamp(roundTime($m.timestamp, 1h), '%Y-%m-%dT%H') as hr aggregate avg($m.duration:number / 1000) as a, sum(if($d.tags['otel.status_code'] == 'ERROR', 1, 0)) as e"
+   }
+  ],
+  "compute": "{'must': [[top(R[0],'a')[0]['hr'][:10]], [top(R[0],'a')[0]['hr'][11:13]+':00', 'T'+top(R[0],'a')[0]['hr'][11:13], top(R[0],'a')[0]['hr'][11:13]+'h', top(R[0],'a')[0]['hr'][11:13]+' UTC', top(R[0],'a')[0]['hr'][11:13]+'00']], 'numbers': [[top(R[0],'a')[0]['a'], 0.01], [top(R[0],'a')[0]['e'], 0.005]]}",
+  "unique": "top(R[0],'a')[0]['a'] > 1.01 * top(R[0],'a')[1]['a']",
+  "datasets": [
+   "platform.service_latency_hourly"
+  ]
+ },
+ {
+  "id": "PLT-T4-002",
+  "domain": "platform",
+  "tier": 4,
+  "title": "bet-service downstream time",
+  "question": "GoldSpin's bet-service is slow. Looking at the calls bet-service makes to other services (its client spans) {W}, which downstream operation accounts for the most total time, what share of bet-service's total client-span time is that (percentage), and what is that operation's p95 latency in ms?",
+  "ref": [
+   {
+    "kind": "spans",
+    "query": "source spans | filter $l.serviceName == 'bet-service' && $d.tags['span.kind'] == 'client' | groupby $l.operationName as op aggregate sum($m.duration:number) as us, percentile(0.95, $m.duration:number / 1000) as p95"
+   },
+   {
+    "kind": "spans",
+    "query": "source spans | filter $l.serviceName == 'bet-service' && $d.tags['span.kind'] == 'client' | aggregate sum($m.duration:number) as us"
+   }
+  ],
+  "compute": "{'must': [[top(R[0],'us')[0]['op'], top(R[0],'us')[0]['op'].split(' ')[-1], top(R[0],'us')[0]['op'].split(' ')[0]]], 'numbers': [[pct(top(R[0],'us')[0]['us'], R[1][0]['us']), 0.01], [top(R[0],'us')[0]['p95'], 0.03]]}",
+  "unique": "top(R[0],'us')[0]['us'] > 1.1 * top(R[0],'us')[1]['us']",
+  "datasets": [
+   "platform.service_latency_hourly"
+  ]
+ },
+ {
+  "id": "PLT-T4-003",
+  "domain": "platform",
+  "tier": 4,
+  "title": "Edge dependency map",
+  "question": "Map GoldSpin edge-gateway's direct downstream dependencies {W} using its client spans (operation names look like '<service> <Operation>'). How many distinct downstream services does it call, and which downstream operation returned the most error-status client spans (name it and give the count)?",
+  "ref": [
+   {
+    "kind": "spans",
+    "query": "source spans | filter $l.serviceName == 'edge-gateway' && $d.tags['span.kind'] == 'client' | groupby $l.operationName as op aggregate count() as n, sum(if($d.tags['otel.status_code'] == 'ERROR', 1, 0)) as e"
+   }
+  ],
+  "compute": "{'must': [[top(R[0],'e')[0]['op'], top(R[0],'e')[0]['op'].split(' ')[0]]], 'numbers': [[len({r['op'].split(' ')[0] for r in R[0]}), 0.001], [top(R[0],'e')[0]['e'], 0.005]]}",
+  "unique": "top(R[0],'e')[0]['e'] > 1.5 * top(R[0],'e')[1]['e']",
+  "datasets": []
+ },
+ {
+  "id": "PLT-T4-004",
+  "domain": "platform",
+  "tier": 4,
+  "title": "Spins outage root cause",
+  "question": "GoldSpin players are getting HTTP 503s on /api/spins. Which internal service is the source, what error type does that service log, and in which UTC hour {W} did the edge gateway return the most 503s on /api/spins (give the hour and the count)?",
+  "ref": [
+   {
+    "kind": "logs",
+    "query": "source logs | filter $l.applicationname == 'goldspin-play' && $l.subsystemname != 'edge-gateway' && $m.severity == ERROR && firstNonNull($d.attributes['error.type'], $d.logRecord.attributes['error.type']) == 'RoundEngineUnavailable' | groupby $l.subsystemname as svc, firstNonNull($d.attributes['error.type'], $d.logRecord.attributes['error.type']):string as et aggregate count() as n"
+   },
+   {
+    "kind": "logs",
+    "query": "source logs | filter $l.subsystemname == 'edge-gateway' && $d.attributes['http.route'] == '/api/spins' && $d.attributes['http.status_code']:string == '503' | groupby formatTimestamp(roundTime($m.timestamp, 1h), '%Y-%m-%dT%H') as hr aggregate count() as n"
+   }
+  ],
+  "compute": "{'must': [['game-engine'], ['RoundEngineUnavailable'], [top(R[1],'n')[0]['hr'][:10]], [top(R[1],'n')[0]['hr'][11:13]+':00', 'T'+top(R[1],'n')[0]['hr'][11:13], top(R[1],'n')[0]['hr'][11:13]+'h', top(R[1],'n')[0]['hr'][11:13]+' UTC', top(R[1],'n')[0]['hr'][11:13]+'00']], 'numbers': [[top(R[1],'n')[0]['n'], 0.005]]}",
+  "unique": "top(R[1],'n')[0]['n'] > 1.01 * top(R[1],'n')[1]['n'] and top(R[0],'n')[0]['svc'] == 'game-engine'",
+  "datasets": [
+   "platform.http_requests_hourly",
+   "ops.error_rollup_hourly"
+  ]
+ },
+ {
+  "id": "PLT-T4-005",
+  "domain": "platform",
+  "tier": 4,
+  "title": "Stale odds feed",
+  "question": "GoldSpin's sportsbook is refusing bets because prices are stale. Which price-feed provider is the stale one, what was the worst last-tick age reported for it {W} (in seconds), and how many bets were rejected because the market had no live price?",
+  "ref": [
+   {
+    "kind": "logs",
+    "query": "source logs | filter $l.applicationname == 'goldspin-play' && $d.attributes['feed.status'] == 'stale' | groupby $d.attributes['feed.provider']:string as p aggregate count() as n, max($d.attributes['feed.last_tick_age_ms']:number) as mx"
+   },
+   {
+    "kind": "logs",
+    "query": "source logs | filter $l.applicationname == 'goldspin-play' && $d.attributes['event.name'] == 'bet.rejected' && $d.attributes['reject.reason'] == 'market-unavailable' | aggregate count() as n"
+   }
+  ],
+  "compute": "{'must': [[top(R[0],'n')[0]['p']]], 'numbers': [[top(R[0],'n')[0]['mx'] / 1000.0, 0.01], [R[1][0]['n'], 0.005]]}",
+  "unique": "top(R[0],'n')[0]['n'] > 10 * (top(R[0],'n')[1]['n'] if len(R[0]) > 1 else 0)",
+  "datasets": [
+   "gaming.odds_feed_hourly",
+   "gaming.wallet_events"
+  ]
+ },
+ {
+  "id": "XV-T1-001",
+  "domain": "cross",
+  "tier": 1,
+  "title": "Business with the most error logs",
+  "question": "Of GoldSpin Play, Coralogix Store and Coralogix Finance, which business logged the most ERROR-severity logs {W}, and how many?",
+  "ref": [
+   {
+    "kind": "logs",
+    "query": "source logs | filter ($l.applicationname == 'goldspin-play' || $l.applicationname == 'coralogix-store' || $l.applicationname == 'coralogix-finance') && $m.severity == ERROR | groupby $l.applicationname as app aggregate count() as n"
+   }
+  ],
+  "compute": "(B := {'goldspin-play': ['goldspin'], 'coralogix-store': ['store'], 'coralogix-finance': ['finance', 'research']}, {'must': [B[top(R[0], 'n')[0]['app']]], 'numbers': [[top(R[0], 'n')[0]['n'], 0.005]]})[-1]",
+  "unique": "top(R[0], 'n')[0]['n'] > 1.01 * top(R[0], 'n')[1]['n']",
+  "datasets": [
+   "ops.error_rollup_hourly"
+  ]
+ },
+ {
+  "id": "XV-T1-003",
+  "domain": "cross",
+  "tier": 1,
+  "title": "Failed requests at the three API gateways",
+  "question": "How many requests failed in total at the three businesses' public API gateways (GoldSpin edge-gateway, Store store-gateway, Finance research-gateway) {W}, judged by server spans with error status?",
+  "ref": [
+   {
+    "kind": "spans",
+    "query": "source spans | filter ($l.serviceName == 'edge-gateway' || $l.serviceName == 'store-gateway' || $l.serviceName == 'research-gateway') && $d.tags['span.kind'] == 'server' && $d.tags['otel.status_code'] == 'ERROR' | aggregate count() as n"
+   }
+  ],
+  "compute": "{'must': [], 'numbers': [[R[0][0]['n'], 0.005]]}",
+  "datasets": [
+   "platform.service_latency_hourly"
+  ]
+ },
+ {
+  "id": "XV-T2-001",
+  "domain": "cross",
+  "tier": 2,
+  "title": "Gateway route with the worst error rate",
+  "question": "Looking at all three public API gateways {W}, which route with at least 10,000 requests has the highest failure rate (share of requests that failed, whatever the status code), and what is that failure rate as a percentage?",
+  "ref": [
+   {
+    "kind": "spans",
+    "query": "source spans | filter ($l.serviceName == 'edge-gateway' || $l.serviceName == 'store-gateway' || $l.serviceName == 'research-gateway') && $d.tags['span.kind'] == 'server' | groupby $l.applicationName as app, $l.operationName as op aggregate count() as n, sum(if($d.tags['otel.status_code'] == 'ERROR', 1, 0)) as e"
+   }
+  ],
+  "compute": "(T := sorted([[r['e'] / r['n'], r['op']] for r in R[0] if r['n'] >= 10000]), {'must': [[T[-1][1].split(' ')[-1]]], 'numbers': [[100 * T[-1][0], 0.01]]})[-1]",
+  "unique": "(T := sorted([[r['e'] / r['n'], r['op']] for r in R[0] if r['n'] >= 10000]), T[-1][0] > 1.01 * T[-2][0])[-1]",
+  "datasets": [
+   "platform.service_latency_hourly"
+  ]
+ },
+ {
+  "id": "XV-T2-002",
+  "domain": "cross",
+  "tier": 2,
+  "title": "Business with the highest error-log share",
+  "question": "Which of the three businesses has the highest proportion of its logs at ERROR severity {W}, and what is that proportion as a percentage?",
+  "ref": [
+   {
+    "kind": "logs",
+    "query": "source logs | filter ($l.applicationname == 'goldspin-play' || $l.applicationname == 'coralogix-store' || $l.applicationname == 'coralogix-finance') | groupby $l.applicationname as app aggregate count() as n, sum(if($m.severity == ERROR, 1, 0)) as e"
+   }
+  ],
+  "compute": "(T := sorted([[r['e'] / r['n'], r['app']] for r in R[0]]), B := {'goldspin-play': ['goldspin'], 'coralogix-store': ['store'], 'coralogix-finance': ['finance', 'research']}, {'must': [B[T[-1][1]]], 'numbers': [[100 * T[-1][0], 0.01]]})[-1]",
+  "unique": "(T := sorted([[r['e'] / r['n'], r['app']] for r in R[0]]), T[-1][0] > 1.01 * T[-2][0])[-1]",
+  "datasets": []
+ },
+ {
+  "id": "XV-T2-003",
+  "domain": "cross",
+  "tier": 2,
+  "title": "Slowest gateway route",
+  "question": "Across the three public API gateways {W}, which route has the slowest 95th-percentile server latency, and what is that p95 in milliseconds?",
+  "ref": [
+   {
+    "kind": "spans",
+    "query": "source spans | filter ($l.serviceName == 'edge-gateway' || $l.serviceName == 'store-gateway' || $l.serviceName == 'research-gateway') && $d.tags['span.kind'] == 'server' | groupby $l.applicationName as app, $l.operationName as op aggregate percentile(0.95, $m.duration:number / 1000) as p"
+   }
+  ],
+  "compute": "{'must': [[top(R[0], 'p')[0]['op'].split(' ')[-1]]], 'numbers': [[top(R[0], 'p')[0]['p'], 0.02]]}",
+  "unique": "top(R[0], 'p')[0]['p'] > 1.05 * top(R[0], 'p')[1]['p']",
+  "datasets": [
+   "platform.service_latency_hourly"
+  ]
+ },
+ {
+  "id": "XV-T3-001",
+  "domain": "cross",
+  "tier": 3,
+  "title": "Revenue lost to infrastructure faults, gaming vs store",
+  "question": "Two infrastructure faults cost money {W}: GoldSpin Play refused bets because markets had no live price, and Coralogix Store told customers items were out of stock because its stock ledger was out of sync. Which business lost more (refused stake vs lost order value), and by how much in GBP?",
+  "ref": [
+   {
+    "kind": "logs",
+    "query": "source logs | filter $l.applicationname == 'goldspin-play' && $d.attributes['event.name'] == 'bet.rejected' && $d.attributes['reject.reason'] == 'market-unavailable' | aggregate sum($d.attributes['money.amount_minor']:number) as v"
+   },
+   {
+    "kind": "logs",
+    "query": "source logs | filter $l.applicationname == 'coralogix-store' && $d.logRecord.attributes['event.name'] == 'order.lost' && $d.logRecord.attributes['stock.cause'] == 'ledger-out-of-sync' | aggregate sum($d.logRecord.attributes['money.amount_minor']:number) as v"
+   }
+  ],
+  "compute": "(G := R[0][0]['v'], ST := R[1][0]['v'], {'must': [['store'] if ST > G else ['goldspin']], 'numbers': [[gbp(abs(ST - G)), 0.005]]})[-1]",
+  "unique": "abs(R[1][0]['v'] - R[0][0]['v']) > 0.01 * R[1][0]['v']",
+  "datasets": [
+   "gaming.wallet_events",
+   "ecommerce.order_events"
+  ]
+ },
+ {
+  "id": "XV-T3-002",
+  "domain": "cross",
+  "tier": 3,
+  "title": "Gateway error rate by business",
+  "question": "Which business's public API gateway failed the largest share of its requests {W} (server spans with error status divided by all server spans), and what was that share as a percentage?",
+  "ref": [
+   {
+    "kind": "spans",
+    "query": "source spans | filter ($l.serviceName == 'edge-gateway' || $l.serviceName == 'store-gateway' || $l.serviceName == 'research-gateway') && $d.tags['span.kind'] == 'server' | groupby $l.applicationName as app aggregate count() as n, sum(if($d.tags['otel.status_code'] == 'ERROR', 1, 0)) as e"
+   }
+  ],
+  "compute": "(T := sorted([[r['e'] / r['n'], r['app']] for r in R[0]]), B := {'goldspin-play': ['goldspin'], 'coralogix-store': ['store'], 'coralogix-finance': ['finance', 'research']}, {'must': [B[T[-1][1]]], 'numbers': [[100 * T[-1][0], 0.01]]})[-1]",
+  "unique": "(T := sorted([[r['e'] / r['n'], r['app']] for r in R[0]]), T[-1][0] > 1.01 * T[-2][0])[-1]",
+  "datasets": [
+   "platform.service_latency_hourly",
+   "platform.http_requests_hourly"
+  ]
+ },
+ {
+  "id": "XV-T4-002",
+  "domain": "cross",
+  "tier": 4,
+  "title": "Store order failures vs GoldSpin bet failures in the same hour",
+  "question": "Find the UTC hour {W} with the most failed order submissions at the Coralogix Store gateway (POST /api/orders server spans with error status). How many failed in that hour, and how many POST /api/bets requests failed at the GoldSpin edge gateway in that same hour?",
+  "ref": [
+   {
+    "kind": "spans",
+    "query": "source spans | filter ($l.serviceName == 'edge-gateway' || $l.serviceName == 'store-gateway' || $l.serviceName == 'research-gateway') && $d.tags['span.kind'] == 'server' && $d.tags['otel.status_code'] == 'ERROR' && ($l.operationName == 'POST /api/orders' || $l.operationName == 'POST /api/bets') | groupby formatTimestamp(roundTime($m.timestamp, 1h), '%Y-%m-%dT%H') as hr, $l.operationName as op aggregate count() as n"
+   }
+  ],
+  "compute": "(P := sorted([[r['n'], r['hr']] for r in R[0] if r['op'] == 'POST /api/orders']), H := P[-1][1], HH := H[11:13], D := H[8:10].lstrip('0'), M := MON3[H[5:7]], MF := MONF[H[5:7]], h12 := {'00': '12am', '01': '1am', '02': '2am', '03': '3am', '04': '4am', '05': '5am', '06': '6am', '07': '7am', '08': '8am', '09': '9am', '10': '10am', '11': '11am', '12': '12pm', '13': '1pm', '14': '2pm', '15': '3pm', '16': '4pm', '17': '5pm', '18': '6pm', '19': '7pm', '20': '8pm', '21': '9pm', '22': '10pm', '23': '11pm'}[HH], HG := [H, H[:10] + ' ' + HH, HH + ':00', HH + 'h', HH + '00 utc', h12, h12[:-2] + ' ' + h12[-2:], h12[:-2] + ':00' + h12[-2:], h12[:-2] + ':00 ' + h12[-2:]], DG := [H[:10], H[5:10], D + ' ' + M, M + ' ' + D, MF + ' ' + D, D + ' ' + MF, D + 'st ' + M, D + 'nd ' + M, D + 'rd ' + M, D + 'th ' + M, H[8:10] + '/' + H[5:7], H[8:10] + '.' + H[5:7]], {'must': [HG, DG], 'numbers': [[P[-1][0], 0.005], [sum([r['n'] for r in R[0] if r['op'] == 'POST /api/bets' and r['hr'] == H]), 0.005]]})[-1]",
+  "unique": "(P := sorted([[r['n'], r['hr']] for r in R[0] if r['op'] == 'POST /api/orders']), P[-1][0] > P[-2][0])[-1]",
+  "datasets": [
+   "platform.service_latency_hourly",
+   "platform.http_requests_hourly"
+  ]
+ },
+ {
+  "id": "XV-T4-003",
+  "domain": "cross",
+  "tier": 4,
+  "title": "Assistant cost efficiency league table",
+  "question": "Compare the three businesses' customer-facing assistants on cost efficiency {W}: LLM spend in US dollars per 1,000 successful LLM chat calls. Which assistant is cheapest and which is most expensive on that measure, and what are their two figures?",
+  "ref": [
+   {
+    "kind": "spans",
+    "query": "source spans | filter ($l.applicationName == 'goldspin-play' || $l.applicationName == 'coralogix-store' || $l.applicationName == 'coralogix-finance') && $d.tags['gen_ai.operation.name'] == 'chat' && $d.tags['otel.status_code'] != 'ERROR' | groupby $l.serviceName as s aggregate sum(($d.tags['gen_ai.prompt_price']:number + $d.tags['gen_ai.response_price']:number)) as c, count() as n"
+   }
+  ],
+  "compute": "(T := sorted([[1000 * r['c'] / r['n'], r['s']] for r in R[0]]), A := {'chat-assistant': ['chat-assistant', 'chat assistant', 'goldspin'], 'support-assistant': ['support-assistant', 'support assistant', 'store'], 'insight-assistant': ['insight-assistant', 'insight assistant', 'finance']}, {'must': [A[T[0][1]], A[T[-1][1]]], 'numbers': [[T[0][0], 0.01], [T[-1][0], 0.01]]})[-1]",
+  "unique": "(T := sorted([[1000 * r['c'] / r['n'], r['s']] for r in R[0]]), T[1][0] > 1.01 * T[0][0] and T[-1][0] > 1.01 * T[1][0])[-1]",
+  "datasets": [
+   "ai.assistant_calls"
+  ]
+ },
+ {
+  "id": "XV-T4-004",
+  "domain": "cross",
+  "tier": 4,
+  "title": "Worst day for combined infrastructure-fault losses",
+  "question": "Combine two infrastructure-fault losses per UTC day {W}: stake GoldSpin Play refused because a market had no live price, plus order value Coralogix Store lost to false out-of-stock errors caused by its stock ledger being out of sync. Which day had the highest combined loss, and how much was it in GBP?",
+  "ref": [
+   {
+    "kind": "logs",
+    "query": "source logs | filter ($l.applicationname == 'goldspin-play' && $d.attributes['event.name'] == 'bet.rejected' && $d.attributes['reject.reason'] == 'market-unavailable') || ($l.applicationname == 'coralogix-store' && $d.logRecord.attributes['event.name'] == 'order.lost' && $d.logRecord.attributes['stock.cause'] == 'ledger-out-of-sync') | groupby formatTimestamp(roundTime($m.timestamp, 1d), '%Y-%m-%d') as d aggregate sum(firstNonNull($d.attributes['money.amount_minor'], $d.logRecord.attributes['money.amount_minor']):number) as v"
+   }
+  ],
+  "compute": "(Y := top(R[0], 'v')[0]['d'], D := Y[8:10].lstrip('0'), M := MON3[Y[5:7]], MF := MONF[Y[5:7]], DG := [Y, Y[5:10], D + ' ' + M, M + ' ' + D, MF + ' ' + D, D + ' ' + MF, D + 'st ' + M, D + 'nd ' + M, D + 'rd ' + M, D + 'th ' + M, Y[8:10] + '/' + Y[5:7]], {'must': [DG], 'numbers': [[gbp(top(R[0], 'v')[0]['v']), 0.005]]})[-1]",
+  "unique": "top(R[0], 'v')[0]['v'] > 1.01 * top(R[0], 'v')[1]['v']",
+  "datasets": [
+   "gaming.wallet_events",
+   "ecommerce.order_events"
+  ]
+ }
+]
