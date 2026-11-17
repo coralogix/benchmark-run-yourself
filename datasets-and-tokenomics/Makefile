@@ -1,5 +1,8 @@
 # Thin wrappers over the folder's scripts. Copy .env.example to .env first.
 -include .env
+# The cx CLI the study used: the first build with `cx datasets list`, installed into .tools/ by `make setup`.
+CX_CLI_REV ?= db204aeadb8533dc84a71496bd39663fdabd19c2
+export PATH := $(CURDIR)/.tools/bin:$(PATH)
 export
 .PHONY: help setup replay datasets run score clean
 ARMS = none discover prompt
@@ -7,7 +10,8 @@ ARMS = none discover prompt
 help: ## list the targets
 	@grep -E '^[a-z]+:.*##' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  make %-9s %s\n", $$1, $$2}'
 
-setup: ## check the tools, then send one minute of replay now and print how to verify it arrived
+setup: ## install the pinned cx CLI, check the tools, then send one minute of replay and print how to verify it arrived
+	cargo install --git https://github.com/coralogix/cx-cli --rev $(CX_CLI_REV) --root .tools --locked coralogix-cli
 	@for t in python3 cx grpcurl opencode; do command -v $$t >/dev/null || { echo "missing: $$t"; exit 1; }; done
 	cx datasets list >/dev/null
 	python3 generator/generate.py check

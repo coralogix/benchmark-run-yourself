@@ -8,7 +8,7 @@ Results: https://benchmarks.coralogix.com/dataset-agents
 
 - A Coralogix account (EU1 matches the published study) with an API key that can run DataPrime queries, manage datasets and run Background Queries, and a Send-Your-Data key. The account needs room for 12 user-defined datasets.
 - Your own OpenAI-compatible endpoint that serves GLM 5.3, with a rate limit of at least 18 concurrent agents at the default `PARALLEL=6`.
-- Local tools: Python 3.11 or later (standard library only), the Coralogix cx CLI with the `cx datasets` command, grpcurl, and opencode 1.18.35.
+- Local tools: Python 3.11 or later (standard library only), Rust with cargo, grpcurl, and opencode 1.18.35. `make setup` builds the Coralogix cx CLI at commit `db204ae` (the first with `cx datasets list`) into `.tools/`. Set `CX_CLI_REV` to build another commit.
 - A machine that stays on for about 9 days: 7 days of live replay, a few hours of dataset fills, then about 2 days of agent sessions.
 - Cost of one run: inference plus Coralogix ingest. The 3,000 sessions use about 1.85 billion GLM 5.3 tokens in total (input plus output, almost all input, including repeated context). The replay sends about 40 million logs and 35 million spans, and the 12 datasets hold about 3 million rows.
 
@@ -31,7 +31,7 @@ make clean              # stop the agent servers and delete the 12 datasets
 1. Pick the Coralogix account and region. Create the API key and the Send-Your-Data key.
 2. Set up your OpenAI-compatible endpoint for GLM 5.3 and save its API key in a file.
 3. Copy `.env.example` to `.env` and fill it in. Set `RUN_START` to an hour in the near future, on the hour, in UTC. Every question names the week that starts there.
-4. Run `make setup`. It checks for `python3`, `cx`, `grpcurl` and `opencode`, checks that `cx datasets list` answers, and sends one minute of replay so you can confirm that logs and spans arrive for `goldspin-play`, `coralogix-store` and `coralogix-finance`.
+4. Run `make setup`. It builds the pinned cx CLI into `.tools/bin`, which every target puts first on `PATH`, checks for `python3`, `cx`, `grpcurl` and `opencode`, checks that `cx datasets list` answers, and sends one minute of replay so you can confirm that logs and spans arrive for `goldspin-play`, `coralogix-store` and `coralogix-finance`.
 
 ### 2. Replay the week
 
